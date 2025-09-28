@@ -4,20 +4,23 @@ from app import db
 from app.models.event import Event
 from app.forms import EventForm
 from app.utils.decorators import admin_required
+from flask_wtf import FlaskForm
 
 event = Blueprint('event', __name__)
 
 @event.route('/event')
 def list_event():
     """
-    Menampilkan daftar event budaya lokal dengan paginasi.
+    Menampilkan daftar event budaya lokal dengan paginasi dan formulir hapus aman.
 
-    Data diurutkan dari event terbaru ke terlama berdasarkan tanggal pelaksanaan.
-    Ditampilkan 5 event per halaman, dengan navigasi melalui parameter 'page'.
-    Dapat diakses oleh semua pengunjung sebagai bagian dari promosi kegiatan lokal.
+    Data diurutkan dari event terbaru ke terlama berdasarkan tanggal pelaksanaan,
+    dengan 5 entri per halaman. Setiap halaman menyertakan formulir kosong (FlaskForm)
+    untuk mendukung operasi penghapusan oleh admin melalui POST yang dilindungi CSRF.
+    Halaman ini bersifat publik dan menjadi agenda digital kegiatan budaya di Jawa Tengah.
 
     Returns:
-        Response: Render template 'event/list.html' dengan data paginasi event.
+        Response: Render template 'event/list.html' dengan data paginasi event
+                  dan formulir hapus untuk keamanan administrasi konten.
     """
     page = request.args.get('page', 1, type=int)
     pagination = Event.query.order_by(Event.tanggal.desc()).paginate(
@@ -25,9 +28,12 @@ def list_event():
     )
     daftar_event_halaman_ini = pagination.items
 
+    delete_form = FlaskForm()
+
     return render_template('event/list.html', 
                             daftar_event=daftar_event_halaman_ini, 
-                            pagination=pagination)
+                            pagination=pagination, 
+                            delete_form=delete_form)
 
 @event.route('/event/detail/<int:id>')
 def detail_event(id):
@@ -116,21 +122,28 @@ def edit_event(id):
 @admin_required
 def hapus_event(id):
     """
-    Menghapus event dari sistem berdasarkan ID.
+    Menghapus event dari sistem berdasarkan ID dengan validasi keamanan CSRF.
 
-    Hanya menerima metode POST untuk mencegah penghapusan tidak sengaja
-    melalui tautan langsung. Operasi ini bersifat permanen dan tidak dapat
-    dikembalikan.
+    Hanya dapat diakses oleh admin dan hanya menerima metode POST. Memerlukan
+    formulir valid (termasuk token CSRF) untuk mencegah penghapusan tidak sah
+    melalui tautan langsung atau serangan otomatis. Jika validasi gagal,
+    pengguna diberi pesan error tanpa mengubah data.
 
     Args:
         id (int): ID event yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar event dengan pesan konfirmasi.
+        Response: Redirect ke daftar event dengan pesan sukses jika permintaan valid,
+                  atau pesan error jika sesi kedaluwarsa atau token tidak sesuai.
     """
     event_item = Event.query.get_or_404(id)
-    db.session.delete(event_item)
-    db.session.commit()
 
-    flash('Event telah berhasil dihapus.', 'info')
+    form = FlaskForm()
+    if form.validate_on_submit():
+        db.session.delete(event_item)
+        db.session.commit()
+        flash('Event telah berhasil dihapus.', 'info')
+    else:
+        flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
+
     return redirect(url_for('event.list_event'))

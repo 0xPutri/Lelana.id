@@ -1,3 +1,4 @@
+import re
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileAllowed
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, DateField, IntegerField, FloatField, widgets, MultipleFileField, SelectField
@@ -33,6 +34,33 @@ class RegistrationForm(FlaskForm):
                                      validators=[DataRequired(message='Konfirmasi password wajib diisi.'), 
                                                  EqualTo('password', message='Password tidak cocok.')])
     submit = SubmitField('Daftar')
+
+    def validate_password(self, password):
+        """
+        Memvalidasi kekuatan password berdasarkan kebijakan keamanan Lelana.id.
+
+        Password harus memenuhi empat kriteria berikut:
+        - Minimal satu huruf kecil (a–z),
+        - Minimal satu huruf besar (A–Z),
+        - Minimal satu angka (0–9),
+        - Minimal satu karakter spesial dari himpunan @$!%*?&#.
+
+        Validasi ini dipanggil otomatis oleh WTForms selama proses registrasi.
+        Jika salah satu kriteria tidak terpenuhi, ValidationError akan dilemparkan
+        dengan pesan spesifik untuk membantu pengguna memperbaiki input.
+
+        Args:
+            password (wtforms.Field): Field password dari formulir registrasi.
+        """
+        p = password.data
+        if not re.search(r'[a-z]', p):
+            raise ValidationError('Password harus mengandung setidaknya satu huruf kecil.')
+        if not re.search(r'[A-Z]', p):
+            raise ValidationError('Password harus mengandung setidaknya satu huruf besar.')
+        if not re.search(r'\d', p):
+            raise ValidationError('Password harus mengandung setidaknya satu angka.')
+        if not re.search(r'[@$!%*?&#]', p):
+            raise ValidationError('Password harus mengandung setidaknya satu karakter spesial (@$!%*?&#).')
 
     def validate_username(self, username):
         """

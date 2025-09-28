@@ -7,3 +7,6 @@ Flask-Login
 python-dotenv
 Werkzeug
 WTForms-SQLAlchemy
+
+python-magic
+Flask-Limiter

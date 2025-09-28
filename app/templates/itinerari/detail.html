@@ -46,6 +46,7 @@
 <div style="margin-top: 20px;">
     <a href="{{ url_for('itinerari.edit_itinerari', id=itinerari.id) }}" style="text-decoration: none; padding: 8px 12px; background-color: #ffc107; color: black; border-radius: 5px;">Edit Itinerari</a>
     <form action="{{ url_for('itinerari.hapus_itinerari', id=itinerari.id) }}" method="POST" style="display:inline; margin-left: 10px;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus itinerari ini?');">
+        {{ delete_form.hidden_tag() }}
         <button type="submit" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Hapus Itinerari</button>
     </form>
 </div>

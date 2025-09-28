@@ -26,6 +26,7 @@
             <td>
                 <a href="{{ url_for('event.edit_event', id=event.id) }}">Edit</a> |
                 <form action="{{ url_for('event.hapus_event', id=event.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus event ini?');">
+                    {{ delete_form.hidden_tag() }}
                     <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
                 </form>
             </td>

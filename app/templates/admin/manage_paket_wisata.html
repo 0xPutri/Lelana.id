@@ -24,6 +24,7 @@
             <td>
                 <a href="{{ url_for('paket_wisata.edit_paket', id=paket.id) }}">Edit</a> |
                 <form action="{{ url_for('paket_wisata.hapus_paket', id=paket.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus paket ini?');">
+                    {{ delete_form.hidden_tag() }}
                     <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
                 </form>
             </td>

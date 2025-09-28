@@ -31,6 +31,7 @@
         {% if current_user.is_authenticated and current_user.role == 'admin' %}
         <a href="{{ url_for('event.edit_event', id=e.id) }}" class="btn-edit">Edit</a>
         <form action="{{ url_for('event.hapus_event', id=e.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus event ini?');">
+            {{ delete_form.hidden_tag() }}
             <button type="submit" class="btn-delete">Hapus</button>
         </form>
         {% endif %}

@@ -35,7 +35,7 @@ class Review(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     wisata_id = db.Column(db.Integer, db.ForeignKey('wisata.id'), nullable=False)
 
-    foto = db.relationship('FotoUlasan', backref='review', lazy='dynamic', cascade="all, delete-orphan")
+    foto = db.relationship('FotoUlasan', backref='review', cascade="all, delete-orphan")
 
     def __repr__(self):
         """

@@ -31,10 +31,10 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(10), default='user', nullable=False) # Bisa 'user' atau 'admin'
 
     # Relasi ke Review: Satu user bisa punya banyak review
-    reviews = db.relationship('Review', backref='author', lazy='dynamic')
+    reviews = db.relationship('Review', backref='author', lazy='dynamic', cascade="all, delete-orphan")
 
     # Relasi ke Itinerari: Satu user bisa membuat banyak itinerari
-    itinerari = db.relationship('Itinerari', backref='penulis', lazy='dynamic')
+    itinerari = db.relationship('Itinerari', backref='penulis', lazy='dynamic', cascade="all, delete-orphan")
 
     @property
     def password(self):

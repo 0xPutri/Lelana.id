@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
 from flask_login import login_user, logout_user, login_required
-from app import db
+from app import db, limiter
 from app.models.user import User
 from app.forms import LoginForm, RegistrationForm
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour") # Batasi pendaftaran 5 kali per jam per IP
 def register():
     """
     Menangani pendaftaran akun pengguna baru di Lelana.id.
@@ -36,6 +37,7 @@ def register():
     return render_template('auth/register.html', form=form)
 
 @auth.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute") # Batasi percobaan login 5 kali per menit per IP
 def login():
     """
     Menangani proses login pengguna yang telah terdaftar.

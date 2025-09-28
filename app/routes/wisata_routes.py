@@ -7,20 +7,28 @@ from app.models.foto_ulasan import FotoUlasan
 from app.forms import WisataForm, ReviewForm
 from app.utils.decorators import admin_required
 from app.services.file_handler import save_pictures
+from sqlalchemy.orm import joinedload, subqueryload
+from flask_wtf import FlaskForm
+import logging
 
 wisata = Blueprint('wisata', __name__)
+
+logging.basicConfig(level=logging.INFO)
 
 @wisata.route('/wisata')
 def list_wisata():
     """
-    Menampilkan daftar destinasi wisata dengan paginasi.
+    Menampilkan daftar destinasi wisata dengan paginasi dan formulir hapus aman.
 
-    Data diurutkan berdasarkan nama secara alfabetis dan ditampilkan
-    5 entri per halaman. Mendukung navigasi halaman melalui parameter 'page'
-    di URL query string. Dapat diakses oleh semua pengunjung.
+    Data diurutkan berdasarkan nama secara alfabetis dan ditampilkan 5 entri per halaman.
+    Setiap entri dapat dihapus oleh admin melalui formulir POST
+    yang dilindungi CSRF. Formulir kosong (FlaskForm) disertakan untuk mendukung
+    penghapusan aman tanpa eksposisi token di URL.
+
+    Dapat diakses oleh semua pengunjung sebagai bagian dari eksplorasi konten publik.
 
     Returns:
-        Response: Render template 'wisata/list.html' dengan data paginasi.
+        Response: Render template 'wisata/list.html' dengan data paginasi dan formulir hapus.
     """
     page = request.args.get('page', 1, type=int)
 
@@ -29,28 +37,17 @@ def list_wisata():
     )
     daftar_wisata_halaman_ini = pagination.items
 
+    delete_form = FlaskForm()
+
     return render_template('wisata/list.html', 
                             daftar_wisata=daftar_wisata_halaman_ini, 
-                            pagination=pagination)
+                            pagination=pagination, 
+                            delete_form=delete_form)
 
 @wisata.route('/wisata/detail/<int:id>', methods=['GET', 'POST'])
 def detail_wisata(id):
-    """
-    Menampilkan detail destinasi wisata dan menangani pengiriman ulasan.
-
-    Saat GET: menampilkan informasi wisata, daftar ulasan (diurutkan terbaru),
-    dan formulir ulasan (jika pengguna login).
-    Saat POST: memproses ulasan baru dari pengguna terautentikasi, termasuk
-    unggah foto opsional. Jika unggah gagal, transaksi dibatalkan dan
-    pengguna dialihkan kembali dengan pesan error.
-
-    Args:
-        id (int): ID destinasi wisata yang ditampilkan.
-
-    Returns:
-        Response: Render halaman detail atau redirect setelah submit ulasan.
-    """
-    w = Wisata.query.get_or_404(id) # Mengambi data wisata berdasarkan ID, jika tidak ada akan menampilkan error 404
+    
+    w = Wisata.query.get_or_404(id)
     form = ReviewForm()
 
     if form.validate_on_submit() and current_user.is_authenticated:
@@ -62,23 +59,29 @@ def detail_wisata(id):
         )
         db.session.add(review_baru)
 
-        if form.foto.data:
-            if form.foto.data[0].filename:
-                try:
-                    filenames = save_pictures(form.foto.data)
-                    for filename in filenames:
-                        foto_baru = FotoUlasan(nama_file=filename, review=review_baru)
-                        db.session.add(foto_baru)
-                except Exception as e:
-                    flash(f'Terjadi kesalahan saat mengunggah gambar: {e}', 'danger')
-                    db.session.rollback()
-                    return redirect(url_for('wisata.detail_wisata', id=w.id))
+        if form.foto.data and form.foto.data[0].filename:
+            try:
+                filenames = save_pictures(form.foto.data)
+                for filename in filenames:
+                    foto_baru = FotoUlasan(nama_file=filename, review=review_baru)
+                    db.session.add(foto_baru)
+            except ValueError as e:
+                flash(f'Gagal mengunggah: {e}', 'danger')
+                db.session.rollback()
+                return redirect(url_for('wisata.detail_wisata', id=w.id))
+            except Exception as e:
+                flash('Terjadi kesalahan internal saat memproses gambar. Silakan coba lagi.', 'danger')
+                db.session.rollback()
+                return redirect(url_for('wisata.detail_wisata', id=w.id))
 
         db.session.commit()
         flash('Terima kasih! Review Anda telah ditambahkan.', 'success')
         return redirect(url_for('wisata.detail_wisata', id=w.id))
     
-    semua_review = w.reviews.order_by(Review.tanggal_dibuat.desc()).all()
+    semua_review = w.reviews.options(
+        joinedload(Review.author),
+        subqueryload(Review.foto)
+    ).order_by(Review.tanggal_dibuat.desc()).all()
 
     return render_template('wisata/detail.html', wisata=w, reviews=semua_review, form=form)
 
@@ -155,46 +158,60 @@ def edit_wisata(id):
 @admin_required
 def hapus_wisata(id):
     """
-    Menghapus destinasi wisata dari sistem berdasarkan ID.
+    Menghapus destinasi wisata dari sistem berdasarkan ID dengan validasi CSRF.
 
-    Hanya menerima metode POST untuk mencegah penghapusan tidak sengaja
-    melalui tautan langsung. Operasi dilindungi oleh otorisasi admin.
+    Hanya menerima metode POST dan memerlukan formulir valid (termasuk token CSRF)
+    untuk mencegah serangan cross-site request forgery dan penghapusan tidak sengaja.
+    Operasi hanya dapat dilakukan oleh pengguna dengan role 'admin'.
 
     Args:
         id (int): ID destinasi wisata yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar wisata dengan pesan konfirmasi.
+        Response: Redirect ke daftar wisata dengan pesan sukses atau error.
     """
     wisata_item = Wisata.query.get_or_404(id)
-    db.session.delete(wisata_item)
-    db.session.commit()
+    
+    form = FlaskForm()
+    if form.validate_on_submit():
+        db.session.delete(wisata_item)
+        db.session.commit()
+        flash('Data wisata telah berhasil dihapus.', 'info')
+    else:
+        flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
-    flash('Data wisata telah berhasil dihapus.', 'info')
     return redirect(url_for('wisata.list_wisata'))
 
 @wisata.route('/api/wisata/lokasi')
 def api_lokasi_wisata():
     """
-    Menyediakan data lokasi destinasi wisata dalam format JSON untuk integrasi peta.
+    Menyediakan endpoint API publik berformat JSON untuk integrasi peta interaktif.
 
-    Hanya mengembalikan entri yang memiliki koordinat latitude dan longitude.
-    Setiap objek berisi nama, koordinat, dan URL absolut ke halaman detail.
-    Digunakan oleh frontend (misalnya pada halaman peta interaktif) untuk
-    menampilkan marker dinamis tanpa memuat seluruh konten HTML.
+    Mengembalikan hanya destinasi yang memiliki koordinat lengkap (latitude & longitude).
+    Setiap entri berisi nama, koordinat, dan URL absolut ke halaman detail.
+    Query dioptimalkan dengan seleksi kolom eksplisit untuk efisiensi bandwidth dan performa.
+
+    Digunakan oleh halaman peta Lelana.id untuk menampilkan marker dinamis tanpa
+    memuat seluruh struktur HTML atau data sensitif.
 
     Returns:
-        Response: JSON berisi daftar lokasi wisata yang siap dipetakan.
+        Response: JSON berisi daftar objek lokasi wisata yang siap digunakan di frontend.
     """
-    semua_wisata = Wisata.query.filter(Wisata.latitude.isnot(None), Wisata.longitude.isnot(None)).all()
+    query_result = db.session.query(
+        Wisata.id,
+        Wisata.nama,
+        Wisata.latitude,
+        Wisata.longitude
+    ).filter(Wisata.latitude.isnot(None), Wisata.longitude.isnot(None)).all()
 
-    daftar_lokasi = []
-    for w in semua_wisata:
-        daftar_lokasi.append({
-            'nama': w.nama,
-            'lat': w.latitude,
-            'lon': w.longitude,
-            'detail_url': url_for('wisata.detail_wisata', id=w.id, _external=True)
-        })
+    daftar_lokasi = [
+        {
+            'nama': nama,
+            'lat': lat,
+            'lon': lon,
+            'detail_url': url_for('wisata.detail_wisata', id=id, _external=True)
+        }
+        for id, nama, lat, lon in query_result
+    ]
     
     return jsonify(daftar_lokasi)

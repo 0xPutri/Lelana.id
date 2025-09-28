@@ -26,6 +26,7 @@
                 {% if user.id != current_user.id %}
                 |
                 <form action="{{ url_for('admin.hapus_user', id=user.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus pengguna ini?');">
+                    {{ delete_form.hidden_tag() }}
                     <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
                 </form>
                 {% endif %}

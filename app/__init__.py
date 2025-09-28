@@ -1,12 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from config import config
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
+login_manager.session_protection = 'strong'
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 def create_app(config_name):
     """
@@ -14,14 +21,21 @@ def create_app(config_name):
     menggunakan pola Application Factory.
 
     Fungsi ini bertanggung jawab atas inisialisasi inti aplikasi, termasuk:
-    - Pemuatan konfigurasi berdasarkan nama lingkungan (development/testing/production),
-    - Pemasangan ekstensi (database, autentikasi),
+    - Pemuatan konfigurasi berdasarkan lingkungan (development/testing/production),
+    - Pemasangan ekstensi: database (SQLAlchemy), autentikasi (Flask-Login),
+      dan pembatasan laju permintaan (Flask-Limiter),
     - Pendaftaran blueprint untuk modularisasi rute,
     - Penanganan muatan pengguna terautentikasi.
 
-    Pendekatan ini memungkinkan pengujian unit yang terisolasi dan deployment
-    fleksibel di berbagai lingkungan, sesuai prinsip pengembangan perangkat lunak
-    yang baik dalam mata kuliah Implementasi dan Pengujian Perangkat Lunak.
+    Fitur keamanan tambahan:
+    - Session protection diatur ke 'strong' untuk mencegah pencurian sesi.
+    - Rate limiting diterapkan secara global: maksimal 200 permintaan per hari
+      dan 50 permintaan per jam per alamat IP, guna mencegah penyalahgunaan
+      (misalnya brute-force pada rute login).
+
+    Pendekatan ini mendukung pengujian terisolasi, deployment fleksibel,
+    dan pemeliharaan kode yang bersih — sesuai prinsip mata kuliah
+    Implementasi dan Pengujian Perangkat Lunak.
 
     Args:
         config_name (str): Nama lingkungan konfigurasi ('development', 'testing',
@@ -36,11 +50,13 @@ def create_app(config_name):
     db.init_app(app)
     login_manager.init_app(app)
 
-    from . import models
+    # Menghubungkan limiter dengan instance aplikasi
+    limiter.init_app(app)
+
+    from .models.user import User
 
     @login_manager.user_loader
     def load_user(user_id):
-        from .models.user import User
         return User.query.get(int(user_id))
 
     from .routes.main_routes import main as main_blueprint

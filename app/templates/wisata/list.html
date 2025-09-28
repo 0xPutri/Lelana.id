@@ -31,6 +31,7 @@
         {% if current_user.is_authenticated and current_user.role == 'admin' %}
         <a href="{{ url_for('wisata.edit_wisata', id=w.id) }}" class="btn-edit">Edit</a>
         <form action="{{ url_for('wisata.hapus_wisata', id=w.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini?');">
+            {{ delete_form.hidden_tag() }}
             <button type="submit" class="btn-delete">Hapus</button>
         </form>
         {% endif %}
