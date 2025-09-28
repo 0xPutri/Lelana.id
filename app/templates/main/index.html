@@ -1,0 +1,13 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Selamat Datang di Lelana.id{% endblock %}
+
+{% block content %}
+<h1>Halo, Selamat Datang di Lelana.id!</h1>
+
+{% if current_user.is_authenticated %}
+<p>Anda login sebagai: <strong>{{ current_user.username }}</strong></p>
+{% else %}
+<p>Platform untuk menemukan pesona wisata Banyumas dan sekitarnya.</p>
+{% endif %}
+{% endblock %}

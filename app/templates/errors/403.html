@@ -1,0 +1,11 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Akses Ditolak{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; padding: 40px;">
+        <h1>Akses Ditolak (Error 403)</h1>
+        <p>Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+        <p><a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    </div>
+{% endblock %}

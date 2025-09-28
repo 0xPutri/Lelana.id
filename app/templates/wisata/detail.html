@@ -1,0 +1,80 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ wisata.nama }} - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .detail-image { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 20px; }
+    .review-section { margin-top: 30px; }
+    .review-item { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+    .review-gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .review-form { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+    .error { color: red; font-size: 0.9em; }
+</style>
+
+<div class="detail-container">
+    <h2>{{ wisata.nama }}</h2>
+    
+    {% if wisata.gambar_url %}
+    <img src="{{ wisata.gambar_url }}" alt="Gambar {{ wisata.nama }}" class="detail-image" onerror="this.style.display='none'">
+    {% endif %}
+
+    <p><strong>Kategori:</strong> {{ wisata.kategori }}</p>
+    <p><strong>Lokasi:</strong> {{ wisata.lokasi }}</p>
+    <hr>
+    <p>{{ wisata.deskripsi|safe }}</p>
+    <hr>
+    <small>Data dibuat pada: {{ wisata.tanggal_dibuat.strftime('%d %B %Y') }}</small>
+</div>
+
+<div class="review-section">
+    <h3>Ulasan Petualang</h3>
+
+    {% if current_user.is_authenticated %}
+    <form method="POST" novalidate enctype="multipart/form-data" class="review-form">
+        {{ form.hidden_tag() }}
+        <h4>Tulis Ulasan Anda</h4>
+        <div>
+            {{ form.rating.label }}<br>
+            {{ form.rating(type='number', min='1', max='5') }}
+            {% for error in form.rating.errors %}<span class="error">{{ error }}</span>{% endfor %}
+        </div>
+        <div style="margin-top: 10px;">
+            {{ form.komentar.label }}<br>
+            {{ form.komentar(rows=4, style="width: 100%;") }}
+            {% for error in form.komentar.errors %}<span class="error">{{ error }}</span>{% endfor %}
+        </div>
+        <div style="margin-top: 10px;">
+            {{ form.foto.label }}<br>
+            {{ form.foto() }}
+            {% for error in form.foto.errors %}<span class="error">{{ error }}</span>{% endfor %}
+        </div>
+        <div style="margin-top: 10px;">
+            {{ form.submit() }}
+        </div>
+    </form>
+    {% else %}
+    <p><a href="{{ url_for('auth.login') }}">Login</a> untuk menulis ulasan.</p>
+    {% endif %}
+
+    {% for review in reviews %}
+    <div class="review-item">
+        <p><strong>{{ review.author.username }}</strong> - Rating: {{ review.rating }}/5</p>
+        <p>{{ review.komentar }}</p>
+
+        <div class="review-gallery">
+            {% for foto in review.foto %}
+            <img src="{{ url_for('static', filename='uploads/' + foto.nama_file) }}" alt="Foto ulasan dari {{ review.author.username }}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 5px;">
+            {% endfor %}
+        </div>
+        
+        <small>Ditulis pada: {{ review.tanggal_dibuat.strftime('%d %B %Y') }}</small>
+    </div>
+    {% else %}
+    <p>Belum ada ulasan untuk destinasi ini.</p>
+    {% endfor %}
+</div>
+
+<p><a href="{{ url_for('wisata.list_wisata') }}">&laquo; Kembali ke Daftar Wisata</a></p>
+{% endblock %}

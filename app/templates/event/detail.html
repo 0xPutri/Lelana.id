@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ event.nama }} - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+</style>
+
+<div class="detail-container">
+    <h2>{{ event.nama }}</h2>
+    
+    <p><strong>Tanggal Pelaksanaan:</strong> {{ event.tanggal.strftime('%d %B %Y') }}</p>
+    <p><strong>Lokasi:</strong> {{ event.lokasi }}</p>
+    {% if event.penyelenggara %}
+    <p><strong>Penyelenggara:</strong> {{ event.penyelenggara }}</p>
+    {% endif %}
+    
+    <hr>
+    <p>{{ event.deskripsi|safe }}</p>
+    <hr>
+    
+    <small>Data dibuat pada: {{ event.tanggal_dibuat.strftime('%d %B %Y') }}</small>
+</div>
+
+<p><a href="{{ url_for('event.list_event') }}">&laquo; Kembali ke Daftar Event</a></p>
+{% endblock %}

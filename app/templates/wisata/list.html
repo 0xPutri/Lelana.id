@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Daftar Wisata - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .wisata-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+    .wisata-actions { margin-top: 10px; }
+    .wisata-actions a, .wisata-actions button { margin-right: 10px; text-decoration: none; padding: 5px 10px; border-radius: 3px; }
+    .btn-detail { background: #007bff; color: white; }
+    .btn-edit { background: #ffc107; color: black; }
+    .btn-delete { background: #dc3545; color: white; border: none; cursor: pointer; }
+    .pagination { margin-top: 20px; }
+</style>
+
+<h2>Daftar Destinasi Wisata</h2>
+
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+<p><a href="{{ url_for('wisata.tambah_wisata') }}" class="btn-detail">Tambah Wisata Baru</a></p>
+{% endif %}
+
+{% for w in daftar_wisata %}
+<article class="wisata-item">
+    <h3>{{ w.nama }}</h3>
+    <p><strong>Kategori:</strong> {{ w.kategori }} | <strong>Lokasi:</strong> {{ w.lokasi }}</p>
+    <p>{{ w.deskripsi[:150] }}...</p>
+    
+    <div class="wisata-actions">
+        <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="btn-detail">Lihat Detail</a>
+        
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <a href="{{ url_for('wisata.edit_wisata', id=w.id) }}" class="btn-edit">Edit</a>
+        <form action="{{ url_for('wisata.hapus_wisata', id=w.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini?');">
+            <button type="submit" class="btn-delete">Hapus</button>
+        </form>
+        {% endif %}
+    </div>
+</article>
+{% endfor %}
+
+{% if not daftar_wisata %}
+<p>Belum ada data wisata.</p>
+{% endif %}
+
+<div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('wisata.list_wisata', page=pagination.prev_num) }}">&laquo; Sebelumnya</a>
+    {% endif %}
+    
+    {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+            {% if page_num != pagination.page %}
+            <a href="{{ url_for('wisata.list_wisata', page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+            <strong>{{ page_num }}</strong>
+            {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('wisata.list_wisata', page=pagination.next_num) }}">Selanjutnya &raquo;</a>
+    {% endif %}
+</div>
+{% endblock %}

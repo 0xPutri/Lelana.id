@@ -1,0 +1,7 @@
+migrations/
+__pycache__/
+.venv
+*.db
+.env
+venv/
+uploads/

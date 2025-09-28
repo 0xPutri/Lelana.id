@@ -1,0 +1,33 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Edit Pengguna{% endblock %}
+{% block page_title %}Edit Pengguna: {{ user.username }}{% endblock %}
+
+{% block content %}
+<form method="POST" novalidate>
+    {{ form.hidden_tag() }}
+    
+    <p>
+        {{ form.username.label }}<br>
+        {{ form.username(size=32) }}<br>
+        {% for error in form.username.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+    </p>
+    
+    <p>
+        {{ form.email.label }}<br>
+        {{ form.email(size=32) }}<br>
+        {% for error in form.email.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+    </p>
+    
+    <p>
+        {{ form.role.label }}<br>
+        {{ form.role() }}<br>
+        {% for error in form.role.errors %}<span style="color: red;">[{{ error }}]</span>{% endfor %}
+    </p>
+    
+    <p>{{ form.submit() }}</p>
+</form>
+
+<hr>
+<a href="{{ url_for('admin.manage_users') }}">Kembali ke Daftar Pengguna</a>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manajemen Wisata{% endblock %}
+{% block page_title %}Manajemen Konten: Wisata{% endblock %}
+
+{% block content %}
+<p><a href="{{ url_for('wisata.tambah_wisata') }}">Tambah Data Wisata Baru</a></p>
+
+<table border="1" style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nama Wisata</th>
+            <th>Kategori</th>
+            <th>Lokasi</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for wisata in daftar_wisata %}
+        <tr>
+            <td>{{ wisata.id }}</td>
+            <td>{{ wisata.nama }}</td>
+            <td>{{ wisata.kategori }}</td>
+            <td>{{ wisata.lokasi }}</td>
+            <td>
+                <a href="{{ url_for('wisata.edit_wisata', id=wisata.id) }}">Edit</a> |
+                <form action="{{ url_for('wisata.hapus_wisata', id=wisata.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data wisata ini?');">
+                    <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">Belum ada data wisata.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

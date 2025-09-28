@@ -1,0 +1,36 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ paket.nama }} - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+    .destinasi-list { list-style: square; padding-left: 20px; }
+</style>
+
+<div class="detail-container">
+    <h2>{{ paket.nama }}</h2>
+    <p><strong>Harga:</strong> Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
+    
+    <hr>
+    <h4>Deskripsi Paket</h4>
+    <p>{{ paket.deskripsi|safe }}</p>
+    
+    <hr>
+    <h4>Destinasi yang Termasuk:</h4>
+    {% if paket.destinasi %}
+    <ul class="destinasi-list">
+        {% for destinasi in paket.destinasi %}
+        <li><a href="{{ url_for('wisata.detail_wisata', id=destinasi.id) }}">{{ destinasi.nama }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Tidak ada destinasi spesifik yang terdaftar.</p>
+    {% endif %}
+    
+    <hr>
+    <small>Data dibuat pada: {{ paket.tanggal_dibuat.strftime('%d %B %Y') }}</small>
+</div>
+
+<p><a href="{{ url_for('paket_wisata.list_paket') }}">&laquo; Kembali ke Daftar Paket</a></p>
+{% endblock %}

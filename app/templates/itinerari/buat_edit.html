@@ -1,0 +1,44 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .form-container { max-width: 700px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    .form-submit { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
+    .checkbox-list { list-style-type: none; padding: 0; max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+    .checkbox-list li { margin-bottom: 8px; }
+    .error-message { color: red; font-size: 0.9em; }
+</style>
+
+<div class="form-container">
+    <h2>{{ judul_halaman }}</h2>
+    <p>Bagikan rangkaian perjalanan dan inspirasi petualanganmu kepada komunitas!</p>
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.judul.label }}
+            {{ form.judul(size=32) }}
+            {% for error in form.judul.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.deskripsi.label }}
+            {{ form.deskripsi(rows=6, placeholder="Ceritakan tentang petualangan ini, berikan tips, atau bagikan momen berkesan...") }}
+            {% for error in form.deskripsi.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.wisata_termasuk.label }}
+            <ul class="checkbox-list">
+                {{ form.wisata_termasuk() }}
+            </ul>
+            {% for error in form.wisata_termasuk.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="form-submit") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

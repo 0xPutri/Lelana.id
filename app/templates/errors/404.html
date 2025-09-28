@@ -1,0 +1,11 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Halaman Tidak Ditemukan{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; padding: 40px;">
+        <h1>Oops! Halaman Tidak Ditemukan (Error 404)</h1>
+        <p>Maaf, halaman yang Anda cari tidak ada. Mungkin URL-nya salah atau halaman tersebut telah dihapus.</p>
+        <p><a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    </div>
+{% endblock %}

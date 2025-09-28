@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manajemen Event{% endblock %}
+{% block page_title %}Manajemen Konten: Event{% endblock %}
+
+{% block content %}
+<p><a href="{{ url_for('event.tambah_event') }}">Tambah Data Event Baru</a></p>
+
+<table border="1" style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nama Event</th>
+            <th>Tanggal</th>
+            <th>Lokasi</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in daftar_event %}
+        <tr>
+            <td>{{ event.id }}</td>
+            <td>{{ event.nama }}</td>
+            <td>{{ event.tanggal.strftime('%d %B %Y') }}</td>
+            <td>{{ event.lokasi }}</td>
+            <td>
+                <a href="{{ url_for('event.edit_event', id=event.id) }}">Edit</a> |
+                <form action="{{ url_for('event.hapus_event', id=event.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus event ini?');">
+                    <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">Belum ada data event.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

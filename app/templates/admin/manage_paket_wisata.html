@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manajemen Paket Wisata{% endblock %}
+{% block page_title %}Manajemen Konten: Paket Wisata{% endblock %}
+
+{% block content %}
+<p><a href="{{ url_for('paket_wisata.tambah_paket') }}">Tambah Data Paket Wisata Baru</a></p>
+
+<table border="1" style="width:100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nama Paket</th>
+            <th>Harga</th>
+            <th>Aksi</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for paket in daftar_paket %}
+        <tr>
+            <td>{{ paket.id }}</td>
+            <td>{{ paket.nama }}</td>
+            <td>Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</td>
+            <td>
+                <a href="{{ url_for('paket_wisata.edit_paket', id=paket.id) }}">Edit</a> |
+                <form action="{{ url_for('paket_wisata.hapus_paket', id=paket.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus paket ini?');">
+                    <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="4">Belum ada data paket wisata.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

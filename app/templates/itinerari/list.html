@@ -1,0 +1,32 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Itinerari Petualangan - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .itinerari-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; background-color: #f9f9f9; }
+    .itinerari-item h3 { margin-top: 0; }
+    .itinerari-item .author { font-size: 0.9em; color: #555; }
+    .itinerari-actions a { text-decoration: none; padding: 5px 10px; border-radius: 3px; background-color: #007bff; color: white; }
+</style>
+
+<h2>Itinerari Petualangan Komunitas</h2>
+<p>Temukan inspirasi perjalanan dari para petualang lain!</p>
+
+<p><a href="{{ url_for('itinerari.buat_itinerari') }}" style="text-decoration: none; padding: 10px 15px; background-color: #28a745; color: white; border-radius: 5px;">Buat Itinerari Versimu!</a></p>
+
+<div style="margin-top: 20px;">
+    {% for it in daftar_itinerari %}
+        <article class="itinerari-item">
+            <h3>{{ it.judul }}</h3>
+            <p class="author">dibuat oleh: <strong>{{ it.penulis.username }}</strong> pada {{ it.tanggal_dibuat.strftime('%d %B %Y') }}</p>
+            <p>{{ it.deskripsi[:200] }}...</p>
+            <div class="itinerari-actions">
+                <a href="{{ url_for('itinerari.detail_itinerari', id=it.id) }}">Lihat Detail Itinerari</a>
+            </div>
+        </article>
+    {% else %}
+        <p>Belum ada Itinerari Petualangan yang dibuat. Jadilah yang pertama!</p>
+    {% endfor %}
+</div>
+{% endblock %}

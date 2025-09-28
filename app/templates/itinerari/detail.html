@@ -1,0 +1,57 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ itinerari.judul }}{% endblock %}
+
+{% block content %}
+<style>
+    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+    .author-info { font-size: 1.1em; color: #333; }
+    .wisata-list { list-style-type: none; padding-left: 0; }
+    .wisata-list li { background-color: #f8f9fa; border: 1px solid #dee2e6; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
+    .wisata-list li a { text-decoration: none; font-weight: bold; color: #0056b3; }
+</style>
+
+<div class="detail-container">
+    <h2>{{ itinerari.judul }}</h2>
+    <p class="author-info">
+        Sebuah petualangan yang dibagikan oleh <strong>{{ itinerari.penulis.username }}</strong>
+    </p>
+    <small>Dibuat pada: {{ itinerari.tanggal_dibuat.strftime('%d %B %Y') }}</small>
+    
+    {% if itinerari.deskripsi %}
+        <hr>
+        <h4>Cerita Petualangan:</h4>
+        <p>{{ itinerari.deskripsi|safe }}</p>
+    {% endif %}
+
+    <hr>
+    <h4>Rute Perjalanan:</h4>
+    {% if itinerari.wisata_termasuk %}
+        <ul class="wisata-list">
+            {% for wisata in itinerari.wisata_termasuk %}
+                <li>
+                    <a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}">{{ wisata.nama }}</a>
+                    <br>
+                    <small>Lokasi: {{ wisata.lokasi }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Tidak ada tempat wisata yang ditambahkan ke itinerari ini.</p>
+    {% endif %}
+</div>
+
+<!-- Tombol Edit dan Hapus hanya untuk penulis -->
+{% if current_user.is_authenticated and current_user.id == itinerari.penulis.id %}
+<div style="margin-top: 20px;">
+    <a href="{{ url_for('itinerari.edit_itinerari', id=itinerari.id) }}" style="text-decoration: none; padding: 8px 12px; background-color: #ffc107; color: black; border-radius: 5px;">Edit Itinerari</a>
+    <form action="{{ url_for('itinerari.hapus_itinerari', id=itinerari.id) }}" method="POST" style="display:inline; margin-left: 10px;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus itinerari ini?');">
+        <button type="submit" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Hapus Itinerari</button>
+    </form>
+</div>
+{% endif %}
+
+<p style="margin-top: 20px;">
+    <a href="{{ url_for('itinerari.list_itinerari') }}">&laquo; Kembali ke Daftar Itinerari</a>
+</p>
+{% endblock %}

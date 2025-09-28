@@ -1,0 +1,55 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
+
+{% block content %}
+<h2>{{ judul_halaman }}</h2>
+<form method="POST" action="">
+    {{ form.hidden_tag() }}
+    
+    <div class="form-field">
+        {{ form.nama.label }}<br>
+        {{ form.nama(size=50) }}
+        {% for error in form.nama.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+    
+    <div class="form-field">
+        {{ form.kategori.label }}<br>
+        {{ form.kategori(size=50) }}
+        {% for error in form.kategori.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+
+    <div class="form-field">
+        {{ form.lokasi.label }}<br>
+        {{ form.lokasi(size=50) }}
+        {% for error in form.lokasi.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+
+    <div class="form-field">
+        {{ form.deskripsi.label }}<br>
+        {{ form.deskripsi(rows=10, cols=52) }}
+        {% for error in form.deskripsi.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+    
+    <div class="form-field">
+        {{ form.gambar_url.label }}<br>
+        {{ form.gambar_url(size=50) }}
+    </div>
+    
+    <div class="form-field">
+        {{ form.latitude.label }}<br>
+        {{ form.latitude(type='number', step='any') }}
+        {% for error in form.latitude.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+    
+    <div class="form-field">
+        {{ form.longitude.label }}<br>
+        {{ form.longitude(type='number', step='any') }}
+        {% for error in form.longitude.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+    </div>
+    
+    <div class="form-field">
+        {{ form.submit() }}
+    </div>
+</form>
+{% endblock %}

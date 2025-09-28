@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Daftar Event - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .event-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+    .event-actions { margin-top: 10px; }
+    .event-actions a, .event-actions button { margin-right: 10px; text-decoration: none; padding: 5px 10px; border-radius: 3px; }
+    .btn-detail { background: #17a2b8; color: white; }
+    .btn-edit { background: #ffc107; color: black; }
+    .btn-delete { background: #dc3545; color: white; border: none; cursor: pointer; }
+    .pagination { margin-top: 20px; }
+</style>
+
+<h2>Daftar Event Lokal</h2>
+
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+<p><a href="{{ url_for('event.tambah_event') }}" class="btn-detail">Tambah Event Baru</a></p>
+{% endif %}
+
+{% for e in daftar_event %}
+<article class="event-item">
+    <h3>{{ e.nama }}</h3>
+    <p><strong>Tanggal:</strong> {{ e.tanggal.strftime('%d %B %Y') }} | <strong>Lokasi:</strong> {{ e.lokasi }}</p>
+    <p>{{ e.deskripsi[:150] }}...</p>
+    
+    <div class="event-actions">
+        <a href="{{ url_for('event.detail_event', id=e.id) }}" class="btn-detail">Lihat Detail</a>
+        
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <a href="{{ url_for('event.edit_event', id=e.id) }}" class="btn-edit">Edit</a>
+        <form action="{{ url_for('event.hapus_event', id=e.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus event ini?');">
+            <button type="submit" class="btn-delete">Hapus</button>
+        </form>
+        {% endif %}
+    </div>
+</article>
+{% else %}
+<p>Belum ada data event.</p>
+{% endfor %}
+
+<div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('event.list_event', page=pagination.prev_num) }}">&laquo; Sebelumnya</a>
+    {% endif %}
+    
+    {% for page_num in pagination.iter_pages() %}
+        {% if page_num %}
+            {% if page_num != pagination.page %}
+            <a href="{{ url_for('event.list_event', page=page_num) }}">{{ page_num }}</a>
+            {% else %}
+            <strong>{{ page_num }}</strong>
+            {% endif %}
+        {% else %}
+        ...
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('event.list_event', page=pagination.next_num) }}">Selanjutnya &raquo;</a>
+    {% endif %}
+</div>
+{% endblock %}

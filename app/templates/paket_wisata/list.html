@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Paket Wisata - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .paket-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
+    .paket-actions { margin-top: 10px; }
+    .paket-actions a, .paket-actions button { margin-right: 10px; text-decoration: none; padding: 5px 10px; border-radius: 3px; }
+    .btn-detail { background: #28a745; color: white; }
+    .btn-edit { background: #ffc107; color: black; }
+    .btn-delete { background: #dc3545; color: white; border: none; cursor: pointer; }
+</style>
+
+<h2>Daftar Paket Wisata</h2>
+
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+<p><a href="{{ url_for('paket_wisata.tambah_paket') }}" class="btn-detail">Tambah Paket Baru</a></p>
+{% endif %}
+
+{% for paket in daftar_paket %}
+<article class="paket-item">
+    <h3>{{ paket.nama }}</h3>
+    <p><strong>Harga:</strong> Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
+    <p>{{ paket.deskripsi[:150] }}...</p>
+    
+    <div class="paket-actions">
+        <a href="{{ url_for('paket_wisata.detail_paket', id=paket.id) }}" class="btn-detail">Lihat Detail</a>
+        {% if current_user.is_authenticated and current_user.role == 'admin' %}
+        <a href="{{ url_for('paket_wisata.edit_paket', id=paket.id) }}" class="btn-edit">Edit</a>
+        <form action="{{ url_for('paket_wisata.hapus_paket', id=paket.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus paket ini?');">
+            <button type="submit" class="btn-delete">Hapus</button>
+        </form>
+        {% endif %}
+    </div>
+</article>
+{% endfor %}
+
+{% if not daftar_paket %}
+<p>Belum ada paket wisata.</p>
+{% endif %}
+{% endblock %}

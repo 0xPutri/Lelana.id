@@ -1,0 +1,65 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
+
+{% block content %}
+<style>
+    .form-container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; }
+    .form-group input, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+    .form-submit { padding: 10px 15px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .error-message { color: red; font-size: 0.9em; }
+</style>
+
+<div class="form-container">
+    <h2>{{ judul_halaman }}</h2>
+    <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+        
+        <div class="form-group">
+            {{ form.nama.label }}
+            {{ form.nama() }}
+            {% for error in form.nama.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.tanggal.label }}
+            {{ form.tanggal() }}
+            {% for error in form.tanggal.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.lokasi.label }}
+            {{ form.lokasi() }}
+            {% for error in form.lokasi.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.deskripsi.label }}
+            {{ form.deskripsi(rows=5) }}
+            {% for error in form.deskripsi.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.penyelenggara.label }}
+            {{ form.penyelenggara() }}
+            {% for error in form.penyelenggara.errors %}
+                <span class="error-message">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            {{ form.submit(class="form-submit") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

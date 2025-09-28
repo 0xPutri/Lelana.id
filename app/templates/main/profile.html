@@ -1,0 +1,10 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Profil Saya{% endblock %}
+
+{% block content %}
+<h2>Profil Saya</h2>
+<p><strong>Username:</strong> {{ user.username }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Role:</strong> {{ user.role }}</p>
+{% endblock %}
