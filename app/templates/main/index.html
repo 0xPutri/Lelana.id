@@ -3,11 +3,63 @@
 {% block title %}Selamat Datang di Lelana.id{% endblock %}
 
 {% block content %}
-<h1>Halo, Selamat Datang di Lelana.id!</h1>
+<div>
+    <h2>Selamat Datang di Lelana.id!</h2>
+    <p>Platform untuk menemukan, merencanakan, dan berbagi cerita petualanganmu di Banyumas dan sekitarnya.</p>
+</div>
 
-{% if current_user.is_authenticated %}
-<p>Anda login sebagai: <strong>{{ current_user.username }}</strong></p>
+<hr>
+
+<h3>Destinasi Unggulan Pilihan Komunitas</h3>
+{% if destinasi_list %}
+<div>
+    {% for wisata, review_count, avg_rating in destinasi_list %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+        <h4><a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}">{{ wisata.nama }}</a></h4>
+        <p>
+            {% if avg_rating %}
+            <strong>Rating: {{ "%.1f"|format(avg_rating) }}/5.0</strong> (dari {{ review_count }} ulasan)
+            {% else %}
+            Belum ada ulasan
+            {% endif %}
+        </p>
+        <p>{{ wisata.deskripsi[:150] }}...</p>
+    </div>
+    {% endfor %}
+</div>
 {% else %}
-<p>Platform untuk menemukan pesona wisata Banyumas dan sekitarnya.</p>
+<p>Belum ada destinasi wisata yang ditambahkan.</p>
+{% endif %}
+
+<hr>
+
+<h3>Event Mendatang</h3>
+{% if event_list %}
+<ul>
+    {% for event in event_list %}
+    <li>
+        <a href="{{ url_for('event.detail_event', id=event.id) }}">{{ event.nama }}</a>
+        - {{ event.tanggal.strftime('%d %B %Y') }}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Tidak ada event mendatang yang dijadwalkan.</p>
+{% endif %}
+
+<hr>
+
+<h3>Itinerari Terbaru dari Komunitas</h3>
+{% if itinerari_list %}
+<div>
+    {% for itinerari in itinerari_list %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+        <h4><a href="{{ url_for('itinerari.detail_itinerari', id=itinerari.id) }}">{{ itinerari.judul }}</a></h4>
+        <p>Oleh: {{ itinerari.penulis.username }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>Belum ada itinerari yang dibuat oleh komunitas.</p>
 {% endif %}
 {% endblock %}
