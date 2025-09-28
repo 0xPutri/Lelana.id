@@ -1,10 +1,48 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Profil Saya{% endblock %}
+{% block title %}Profil Saya - {{ user.username }}{% endblock %}
 
 {% block content %}
 <h2>Profil Saya</h2>
-<p><strong>Username:</strong> {{ user.username }}</p>
-<p><strong>Email:</strong> {{ user.email }}</p>
-<p><strong>Role:</strong> {{ user.role }}</p>
+
+<div>
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Peran:</strong> {{ user.role }}</p>
+</div>
+
+<hr>
+
+<h3>Riwayat Ulasan Petualang Saya</h3>
+{% if ulasan_list %}
+<ul>
+    {% for ulasan in ulasan_list %}
+    <li>
+        <p>
+            <strong>{{ ulasan.rating }}/5</strong> untuk 
+            <a href="{{ url_for('wisata.detail_wisata', id=ulasan.wisata_reviewed.id) }}">{{ ulasan.wisata_reviewed.nama }}</a>
+            <br>
+            <em>"{{ ulasan.komentar[:100] }}..."</em>
+        </p>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Anda belum menulis ulasan apapun.</p>
+{% endif %}
+
+<hr>
+
+<h3>Itinerari Petualangan Saya</h3>
+{% if itinerari_list %}
+<ul>
+    {% for itinerari in itinerari_list %}
+    <li>
+        <a href="{{ url_for('itinerari.detail_itinerari', id=itinerari.id) }}">{{ itinerari.judul }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Anda belum membuat Itinerari Petualangan. <a href="{{ url_for('itinerari.buat_itinerari') }}">Buat sekarang!</a></p>
+{% endif %}
 {% endblock %}

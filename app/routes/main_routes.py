@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
+from app.models.review import Review
+from app.models.itinerari import Itinerari
 
 main = Blueprint('main', __name__)
 
@@ -22,14 +24,25 @@ def profile():
     """
     Menampilkan halaman profil pribadi pengguna yang sedang login.
 
-    Hanya tersedia untuk pengguna terautentikasi. Menampilkan informasi akun
-    dasar seperti username, email, dan peran, serta akses ke riwayat ulasan
-    dan itinerari pribadi (jika dikembangkan lebih lanjut).
+    Menyertakan informasi akun dasar serta dua daftar konten yang dibuat pengguna:
+    - Ulasan destinasi wisata, diurutkan dari yang terbaru.
+    - Itinerari perjalanan, diurutkan dari yang terbaru.
+
+    Hanya dapat diakses oleh pengguna terautentikasi. Data disusun untuk
+    memberikan gambaran lengkap tentang kontribusi pengguna di platform Lelana.id.
 
     Returns:
-        Response: Render template 'main/profile.html' dengan objek current_user.
+        Response: Render template 'main/profile.html' dengan data pengguna,
+        daftar ulasan, dan daftar itinerari.
     """
-    return render_template('main/profile.html', user=current_user)
+    ulasan_pengguna = current_user.reviews.order_by(Review.tanggal_dibuat.desc()).all()
+
+    itinerari_pengguna = current_user.itinerari.order_by(Itinerari.tanggal_dibuat.desc()).all()
+
+    return render_template('main/profile.html', 
+                           user=current_user, 
+                           ulasan_list=ulasan_pengguna, 
+                           itinerari_list=itinerari_pengguna)
 
 @main.route('/peta-wisata')
 def peta_wisata():
