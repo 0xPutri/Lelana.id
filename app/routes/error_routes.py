@@ -52,6 +52,23 @@ def page_not_found(e):
     """
     return render_template('errors/404.html'), 404
 
+@errors.app_errorhandler(429)
+def too_many_requests(e):
+    """
+    Menangani respons HTTP 429 Too Many Requests.
+
+    Terjadi ketika pengguna melebihi batas permintaan yang diizinkan dalam
+    kurun waktu tertentu (rate limiting), misalnya mencoba login berulang kali
+    dalam waktu singkat.
+
+    Args:
+        e (Exception): Objek exception yang dilempar oleh Flask-Limiter.
+
+    Returns:
+        tuple: Template HTML 'errors/429.html' dan kode status HTTP 429.
+    """
+    return render_template('errors/429.html'), 429
+
 @errors.app_errorhandler(500)
 def internal_server_error(e):
     """

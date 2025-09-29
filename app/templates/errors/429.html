@@ -1,0 +1,11 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Terlalu Banyak Permintaan{% endblock %}
+
+{% block content %}
+    <div style="text-align: center; padding: 40px;">
+        <h1>Oops! Terlalu Banyak Permintaan (Error 429)</h1>
+        <p>Anda telah membuat terlalu banyak permintaan dalam waktu singkat. Silakan coba lagi nanti.</p>
+        <p><a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    </div>
+{% endblock %}
