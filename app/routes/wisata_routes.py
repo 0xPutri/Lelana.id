@@ -47,7 +47,9 @@ def list_wisata():
 @wisata.route('/wisata/detail/<int:id>', methods=['GET', 'POST'])
 def detail_wisata(id):
     
-    w = Wisata.query.get_or_404(id)
+    w = db.session.get(Wisata, id)
+    if w is None:
+        abort(404)
     form = ReviewForm()
 
     if form.validate_on_submit() and current_user.is_authenticated:
@@ -135,7 +137,9 @@ def edit_wisata(id):
     Returns:
         Response: Render formulir edit (GET) atau redirect ke detail (POST sukses).
     """
-    wisata_item = Wisata.query.get_or_404(id)
+    wisata_item = db.session.get(Wisata, id)
+    if wisata_item is None:
+        abort(404)
     form = WisataForm(obj=wisata_item)
 
     if form.validate_on_submit():
@@ -170,7 +174,8 @@ def hapus_wisata(id):
     Returns:
         Response: Redirect ke daftar wisata dengan pesan sukses atau error.
     """
-    wisata_item = Wisata.query.get_or_404(id)
+    wisata_item = db.session.get(Wisata, id)
+    if wisata_item is None: abort(404)
     
     form = FlaskForm()
     if form.validate_on_submit():

@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required
 from app import db
 from app.models.event import Event
@@ -50,7 +50,9 @@ def detail_event(id):
     Returns:
         Response: Render template 'event/detail.html' dengan objek event.
     """
-    event_item = Event.query.get_or_404(id)
+    event_item = db.session.get(Event, id)
+    if event_item is None:
+        abort(404)
 
     return render_template('event/detail.html', event=event_item)
 
@@ -102,7 +104,9 @@ def edit_event(id):
     Returns:
         Response: Render formulir edit (GET) atau redirect ke detail event (POST sukses).
     """
-    event_item = Event.query.get_or_404(id)
+    event_item = db.session.get(Event, id)
+    if event_item is None:
+        abort(404)
     form = EventForm(obj=event_item)
     if form.validate_on_submit():
         event_item.nama = form.nama.data
@@ -136,7 +140,9 @@ def hapus_event(id):
         Response: Redirect ke daftar event dengan pesan sukses jika permintaan valid,
                   atau pesan error jika sesi kedaluwarsa atau token tidak sesuai.
     """
-    event_item = Event.query.get_or_404(id)
+    event_item = db.session.get(Event, id)
+    if event_item is None:
+        abort(404)
 
     form = FlaskForm()
     if form.validate_on_submit():

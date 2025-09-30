@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required
 from app import db
 from app.models.paket_wisata import PaketWisata
@@ -101,7 +101,9 @@ def edit_paket(id):
     Returns:
         Response: Render formulir edit (GET) atau redirect ke detail paket (POST sukses).
     """
-    paket = PaketWisata.query.get_or_404(id)
+    paket = db.session.get(PaketWisata, id)
+    if paket is None:
+        abort(404)
     form = PaketWisataForm(obj=paket)
     if form.validate_on_submit():
         paket.nama = form.nama.data
@@ -135,7 +137,9 @@ def hapus_paket(id):
         Response: Redirect ke daftar paket dengan pesan sukses jika valid,
                   atau pesan error jika permintaan tidak memenuhi syarat keamanan.
     """
-    paket = PaketWisata.query.get_or_404(id)
+    paket = db.session.get(PaketWisata, id)
+    if paket is None:
+        abort(404)
     
     form = FlaskForm()
     if form.validate_on_submit():

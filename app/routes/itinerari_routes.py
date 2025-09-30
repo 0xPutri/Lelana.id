@@ -100,7 +100,9 @@ def edit_itinerari(id):
     Returns:
         Response: Render formulir edit (GET) atau redirect ke detail (POST sukses).
     """
-    it = Itinerari.query.get_or_404(id)
+    it = db.session.get(Itinerari, id)
+    if it is None:
+        abort(404)
     if it.penulis != current_user:
         abort(403)
 
@@ -133,7 +135,9 @@ def hapus_itinerari(id):
         Response: Redirect ke daftar itinerari dengan pesan sukses jika valid,
                   atau pesan error jika permintaan tidak memenuhi syarat keamanan.
     """
-    it = Itinerari.query.get_or_404(id)
+    it = db.session.get(Itinerari, id)
+    if it is None:
+        abort(404)
     if it.penulis != current_user:
         abort(403)
 

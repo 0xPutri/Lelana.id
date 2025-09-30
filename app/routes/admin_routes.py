@@ -108,7 +108,9 @@ def hapus_user(id):
     Returns:
         Response: Redirect ke daftar pengguna dengan pesan status (sukses/error).
     """
-    user_to_delete = User.query.get_or_404(id)
+    user_to_delete = db.session.get(User, id)
+    if user_to_delete is None:
+        abort(404)
     form = FlaskForm()
 
     if form.validate_on_submit():
