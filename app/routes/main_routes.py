@@ -4,6 +4,7 @@ from app.models.review import Review
 from app.models.itinerari import Itinerari
 from app.models.wisata import Wisata
 from app.models.event import Event
+from app.models.paket_wisata import PaketWisata
 from app import db
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -15,14 +16,16 @@ def index():
     """
     Menampilkan halaman utama (landing page) Lelana.id dengan konten dinamis unggulan.
 
-    Memuat tiga jenis konten utama:
+    Memuat empat jenis konten utama:
     - 3 destinasi wisata terpopuler berdasarkan jumlah ulasan dan rata-rata rating,
-    - 3 event budaya mendatang (berdasarkan tanggal ≥ hari ini), diurutkan kronologis,
-    - 3 itinerari perjalanan terbaru dari komunitas pengguna.
+    - 3 event budaya mendatang (tanggal ≥ hari ini), diurutkan dari yang paling dekat,
+    - 3 itinerari perjalanan terbaru dari komunitas pengguna,
+    - Semua paket wisata yang ditandai sebagai promosi (`is_promoted=True`).
 
-    Query destinasi dioptimalkan dengan agregasi (COUNT, AVG) dan outer join
-    untuk menampilkan peringkat berdasarkan partisipasi pengguna. Halaman ini
-    bersifat publik dan menjadi pintu masuk utama bagi pengunjung baru.
+    Query destinasi menggunakan agregasi (COUNT, AVG) dan outer join untuk
+    menampilkan peringkat berdasarkan partisipasi pengguna. Halaman ini bersifat
+    publik dan menjadi pintu masuk utama bagi pengunjung baru untuk menjelajahi
+    kekayaan wisata dan budaya Banyumas melalui Lelana.id.
 
     Returns:
         Response: Render template 'main/index.html' dengan data konten unggulan.
@@ -40,10 +43,13 @@ def index():
 
     itinerari_terbaru = Itinerari.query.order_by(Itinerari.tanggal_dibuat.desc()).limit(3).all()
 
+    paket_promosi = PaketWisata.query.filter_by(is_promoted=True).all()
+
     return render_template('main/index.html', 
                            destinasi_list=destinasi_unggulan, 
                            event_list=event_terbaru, 
-                           itinerari_list=itinerari_terbaru)
+                           itinerari_list=itinerari_terbaru, 
+                           paket_promosi_list=paket_promosi)
 
 @main.route('/profile')
 @login_required

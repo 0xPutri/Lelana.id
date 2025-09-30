@@ -10,18 +10,19 @@ paket_wisata_association = db.Table('paket_wisata_association',
 class PaketWisata(db.Model):
     """
     Model paket wisata gabungan yang dirancang oleh admin untuk memudahkan
-    perencanaan perjalanan pengguna di wilayah Jawa Tengah.
+    perencanaan perjalanan pengguna di wilayah Banyumas.
 
     Setiap paket terdiri dari nama, deskripsi, harga (dalam Rupiah), dan daftar
-    destinasi wisata yang dipilih dari katalog yang tersedia. Relasi many-to-many
-    memungkinkan satu paket mencakup banyak wisata, dan satu wisata bisa masuk
-    ke beberapa paket.
+    destinasi wisata yang dipilih dari katalog yang tersedia. Fitur tambahan
+    `is_promoted` memungkinkan admin menandai paket tertentu sebagai unggulan
+    untuk ditampilkan di halaman utama atau promosi khusus.
 
     Atribut:
         id (int): Primary key unik.
         nama (str): Nama paket wisata (diindeks untuk pencarian).
         deskripsi (str): Penjelasan isi dan manfaat paket (wajib).
         harga (int): Harga paket dalam satuan Rupiah (tanpa pemisah ribuan).
+        is_promoted (bool): Penanda apakah paket ditampilkan sebagai unggulan (default: False).
         tanggal_dibuat (datetime): Waktu paket dibuat (default: UTC saat ini).
 
     Relasi:
@@ -35,6 +36,9 @@ class PaketWisata(db.Model):
     nama = db.Column(db.String(150), nullable=False, index=True)
     deskripsi = db.Column(db.Text, nullable=False)
     harga = db.Column(db.Integer, nullable=False)
+
+    is_promoted = db.Column(db.Boolean, default=False, nullable=False)
+
     tanggal_dibuat = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Mendefinisikan relasi many-to-many ke model Wisata

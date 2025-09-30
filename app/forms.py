@@ -234,6 +234,9 @@ class PaketWisataForm(FlaskForm):
         widget=widgets.ListWidget(prefix_label=False),
         option_widget=widgets.CheckboxInput()
     )
+
+    is_promoted = BooleanField('Tandai sebagai Paket Promosi/Endorsment')
+
     submit = SubmitField('Simpan Paket Wisata')
 
 class ItinerariForm(FlaskForm):

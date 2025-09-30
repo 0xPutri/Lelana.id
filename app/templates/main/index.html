@@ -62,4 +62,21 @@
 {% else %}
 <p>Belum ada itinerari yang dibuat oleh komunitas.</p>
 {% endif %}
+
+<hr>
+
+<h3>⭐ Penawaran & Rekomendasi Pilihan ⭐</h3>
+{% if paket_promosi_list %}
+<div>
+    {% for paket in paket_promosi_list %}
+    <div style="border: 2px solid gold; padding: 10px; margin-bottom: 10px;">
+        <h4><a href="{{ url_for('paket_wisata.detail_paket', id=paket.id) }}">{{ paket.nama }}</a></h4>
+        <p>Harga: Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
+        <p>{{ paket.deskripsi[:150] }}...</p>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>Saat ini belum ada penawaran spesial.</p>
+{% endif %}
 {% endblock %}

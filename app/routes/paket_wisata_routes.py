@@ -55,14 +55,15 @@ def detail_paket(id):
 @admin_required
 def tambah_paket():
     """
-    Menangani pembuatan paket wisata baru oleh admin.
+    Menangani pembuatan paket wisata baru oleh admin, termasuk penandaan promosi.
 
-    Saat GET: menampilkan formulir dengan daftar destinasi yang dapat dipilih.
+    Saat GET: menampilkan formulir dengan daftar destinasi yang dapat dipilih
+    dan opsi untuk menandai paket sebagai unggulan (`is_promoted`).
     Saat POST dan valid: menyimpan paket ke database dengan relasi many-to-many
-    ke destinasi yang dipilih. Hanya dapat diakses oleh admin.
+    ke destinasi terpilih dan status promosi. Hanya dapat diakses oleh admin.
 
     Returns:
-        Response: Render formulir tambah (GET) atau redirect ke daftar (POST sukses).
+        Response: Render formulir tambah (GET) atau redirect ke daftar paket (POST sukses).
     """
     form = PaketWisataForm()
     if form.validate_on_submit():
@@ -70,7 +71,8 @@ def tambah_paket():
             nama=form.nama.data,
             deskripsi=form.deskripsi.data,
             harga=form.harga.data,
-            destinasi=form.destinasi.data
+            destinasi=form.destinasi.data,
+            is_promoted=form.is_promoted.data
         )
 
         db.session.add(paket_baru)
@@ -86,11 +88,12 @@ def tambah_paket():
 @admin_required
 def edit_paket(id):
     """
-    Menangani pembaruan data paket wisata yang sudah ada.
+    Menangani pembaruan data paket wisata yang sudah ada, termasuk status promosi.
 
     Memuat paket berdasarkan ID, lalu menampilkan formulir terisi saat GET.
-    Saat POST dan valid, memperbarui nama, deskripsi, harga, dan daftar destinasi.
-    Perubahan langsung disimpan ke database.
+    Saat POST dan valid, memperbarui nama, deskripsi, harga, daftar destinasi,
+    dan status `is_promoted`. Perubahan langsung disimpan ke database,
+    dan pengguna dialihkan ke halaman detail paket yang telah diperbarui.
 
     Args:
         id (int): ID paket wisata yang akan diedit.
@@ -105,6 +108,7 @@ def edit_paket(id):
         paket.deskripsi = form.deskripsi.data
         paket.harga = form.harga.data
         paket.destinasi = form.destinasi.data
+        paket.is_promoted = form.is_promoted.data
         db.session.commit()
 
         flash('Paket wisata berhasil diperbarui!', 'success')

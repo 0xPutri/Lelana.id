@@ -48,6 +48,10 @@
         </div>
 
         <div class="form-group">
+            {{ form.is_promoted() }} {{ form.is_promoted.label }}
+        </div>
+
+        <div class="form-group">
             {{ form.submit(class="form-submit") }}
         </div>
     </form>
