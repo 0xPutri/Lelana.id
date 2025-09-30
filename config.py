@@ -20,6 +20,12 @@ class Config:
         ALLOWED_EXTENSIONS (set): Ekstensi gambar yang diizinkan (png, jpg, jpeg, gif).
         MAX_CONTENT_LENGTH (int): Batas ukuran unggahan maksimal (10 MB).
     """
+    WTF_CSRF_ENABLED = True
+
+    @staticmethod
+    def init_app(app):
+        pass
+
     SECRET_KEY = os.environ.get('SECRET_KEY')
 
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
@@ -53,12 +59,15 @@ class TestingConfig(Config):
     dan integrasi dapat dijalankan secara lancar.
 
     Atribut:
+        RATELIMIT_ENABLED (bool): Nonaktifkan pembatasan request saat pengujian.
         TESTING (bool): Aktifkan mode pengujian Flask.
         SQLALCHEMY_DATABASE_URI (str): Database SQLite khusus untuk pengujian.
         WTF_CSRF_ENABLED (bool): Dinonaktifkan agar form dapat diuji tanpa token CSRF.
     """
+    RATELIMIT_ENABLED = False
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'test_lelana.db')
+
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'lelana_test.db')
     WTF_CSRF_ENABLED = False # Nonaktifkan CSRF saat menjalankan tes
 
 class ProductionConfig(Config):

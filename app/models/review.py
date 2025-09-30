@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Review(db.Model):
     """
@@ -30,7 +30,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False) # Rating dari 1 sampai 5
     komentar = db.Column(db.Text, nullable=False)
-    tanggal_dibuat = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     wisata_id = db.Column(db.Integer, db.ForeignKey('wisata.id'), nullable=False)

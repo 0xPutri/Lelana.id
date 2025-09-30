@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 itinerari_wisata_association = db.Table('itinerari_wisata_association',
     db.Column('itinerari_id', db.Integer, db.ForeignKey('itinerari.id'), primary_key=True),
@@ -34,7 +34,7 @@ class Itinerari(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     judul = db.Column(db.String(150), nullable=False)
     deskripsi = db.Column(db.Text, nullable=True)
-    tanggal_dibuat = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Foreign Key untuk relasi ke tabel User
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)

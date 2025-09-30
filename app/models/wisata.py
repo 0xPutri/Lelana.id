@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Wisata(db.Model):
     """
@@ -38,7 +38,7 @@ class Wisata(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
 
-    tanggal_dibuat = db.Column(db.DateTime, default=datetime.utcnow)
+    tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relasi ke Review: Satu wisata bisa punya banyak review
     reviews = db.relationship('Review', backref='wisata_reviewed', lazy='dynamic', cascade="all, delete-orphan")

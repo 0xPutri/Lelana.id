@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Association Table untuk relasi Many-to-Many antara PaketWisata dan Wisata
 paket_wisata_association = db.Table('paket_wisata_association',
@@ -39,7 +39,7 @@ class PaketWisata(db.Model):
 
     is_promoted = db.Column(db.Boolean, default=False, nullable=False)
 
-    tanggal_dibuat = db.Column(db.DateTime, default=datetime.utcnow)
+    tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Mendefinisikan relasi many-to-many ke model Wisata
     destinasi = db.relationship('Wisata', secondary=paket_wisata_association, 

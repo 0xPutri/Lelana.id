@@ -7,7 +7,7 @@ from app.models.event import Event
 from app.models.paket_wisata import PaketWisata
 from app import db
 from sqlalchemy.orm import joinedload
-from datetime import datetime
+from datetime import datetime, timezone
 
 main = Blueprint('main', __name__)
 
@@ -39,7 +39,7 @@ def index():
     .order_by(db.desc('jumlah_review'), db.desc('rata_rata_rating'))\
     .limit(3).all()
 
-    event_terbaru = Event.query.filter(Event.tanggal >= datetime.utcnow()).order_by(Event.tanggal.asc()).limit(3).all()
+    event_terbaru = Event.query.filter(Event.tanggal >= datetime.now(timezone.utc)).order_by(Event.tanggal.asc()).limit(3).all()
 
     itinerari_terbaru = Itinerari.query.order_by(Itinerari.tanggal_dibuat.desc()).limit(3).all()
 

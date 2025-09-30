@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 class Event(db.Model):
     """
@@ -27,7 +27,7 @@ class Event(db.Model):
     lokasi = db.Column(db.String(200), nullable=False)
     deskripsi = db.Column(db.Text, nullable=False)
     penyelenggara = db.Column(db.String(100))
-    tanggal_dibuat = db.Column(db.DateTime, default=datetime.utcnow)
+    tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
         """

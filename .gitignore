@@ -2,6 +2,8 @@ migrations/
 __pycache__/
 .venv
 *.db
+.pytest_cache
 .env
 venv/
 uploads/
+tests/
