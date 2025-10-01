@@ -65,7 +65,7 @@ def edit_user(id):
     Returns:
         Response: Render formulir edit (GET) atau redirect ke daftar pengguna (POST sukses).
     """
-    user_to_edit = User.query.get_or_404(id)
+    user_to_edit = User.query.filter_by(id=id).first_or_404()
     form = AdminEditUserForm(original_user=user_to_edit)
 
     if form.validate_on_submit():
