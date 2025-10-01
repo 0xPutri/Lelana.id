@@ -10,5 +10,3 @@ WTForms-SQLAlchemy
 
 python-magic
 Flask-Limiter
-
-pytest

@@ -57,7 +57,7 @@ def create_app(config_name):
 
     @login_manager.user_loader
     def load_user(user_id):
-        return User.query.get(int(user_id))
+        return db.session.get(User, int(user_id))
 
     from .routes.main_routes import main as main_blueprint
     app.register_blueprint(main_blueprint)

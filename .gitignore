@@ -7,3 +7,5 @@ __pycache__/
 venv/
 uploads/
 tests/
+*dev.txt
+*.ini

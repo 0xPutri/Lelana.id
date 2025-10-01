@@ -48,7 +48,7 @@ def detail_itinerari(id):
     it = Itinerari.query.options(
         joinedload(Itinerari.penulis), 
         joinedload(Itinerari.wisata_termasuk)
-    ).get_or_404(id)
+    ).filter_by(id=id).first_or_404()
 
     delete_form = FlaskForm()
 

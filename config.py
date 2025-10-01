@@ -67,7 +67,7 @@ class TestingConfig(Config):
     RATELIMIT_ENABLED = False
     TESTING = True
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'lelana_test.db')
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False # Nonaktifkan CSRF saat menjalankan tes
 
 class ProductionConfig(Config):
