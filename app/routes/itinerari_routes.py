@@ -10,18 +10,13 @@ itinerari = Blueprint('itinerari', __name__)
 
 @itinerari.route('/itinerari')
 def list_itinerari():
-    """
-    Menampilkan daftar semua itinerari perjalanan yang dibuat pengguna.
+    """Menampilkan daftar semua itinerari yang dibuat pengguna.
 
-    Data diurutkan dari yang terbaru berdasarkan waktu pembuatan.
-    Setiap entri menyertakan informasi pembuat (penulis) yang dimuat secara
-    eager menggunakan joinedload untuk menghindari query tambahan saat render.
-    Halaman ini bersifat publik dan berfungsi sebagai galeri inspirasi perjalanan
-    berbasis pengalaman nyata pengguna Lelana.id.
+    Data diurutkan berdasarkan waktu pembuatan (terbaru di atas) dan mencakup
+    informasi penulis menggunakan eager loading untuk menghindari N+1 query.
 
     Returns:
-        Response: Render template 'itinerari/list.html' dengan daftar itinerari
-                  dan data penulis yang telah dipra-muat.
+        Response: Render template daftar itinerari.
     """
     semua_itinerari = Itinerari.query.options(joinedload(Itinerari.penulis))\
         .order_by(Itinerari.tanggal_dibuat.desc()).all()
@@ -30,20 +25,19 @@ def list_itinerari():
 
 @itinerari.route('/itinerari/detail/<int:id>')
 def detail_itinerari(id):
-    """
-    Menampilkan detail lengkap satu itinerari termasuk pembuat dan destinasi terkait.
+    """Menampilkan detail lengkap suatu itinerari berdasarkan ID.
 
-    Menggunakan optimasi query dengan joinedload untuk memuat relasi ke penulis
-    dan daftar destinasi wisata dalam satu permintaan database, mencegah N+1 query.
-    Juga menyertakan formulir kosong (FlaskForm) untuk mendukung penghapusan aman
-    oleh pemilik melalui POST dengan CSRF protection.
+    Memuat data penulis dan daftar destinasi wisata yang termasuk dalam itinerari
+    menggunakan eager loading untuk efisiensi query.
 
     Args:
-        id (int): ID itinerari yang akan ditampilkan.
+        id (int): ID unik itinerari yang ingin dilihat.
 
     Returns:
-        Response: Render template 'itinerari/detail.html' dengan data itinerari,
-                  penulis, destinasi, dan formulir hapus.
+        Response: Render template detail itinerari jika ditemukan.
+
+    Raises:
+        HTTPException: 404 Not Found jika itinerari tidak ada.
     """
     it = Itinerari.query.options(
         joinedload(Itinerari.penulis), 
@@ -57,15 +51,13 @@ def detail_itinerari(id):
 @itinerari.route('/itinerari/buat', methods=['GET', 'POST'])
 @login_required
 def buat_itinerari():
-    """
-    Menangani pembuatan itinerari baru oleh pengguna terautentikasi.
+    """Menangani pembuatan itinerari baru oleh pengguna terautentikasi.
 
-    Saat GET: menampilkan formulir dengan daftar destinasi wisata yang dapat dipilih.
-    Saat POST dan valid: menyimpan itinerari ke database dengan relasi many-to-many
-    ke destinasi yang dipilih, serta mengaitkannya dengan pengguna saat ini.
+    Mengaitkan itinerari dengan pengguna saat ini dan menyimpan destinasi
+    yang dipilih melalui relasi many-to-many.
 
     Returns:
-        Response: Render formulir buat (GET) atau redirect ke detail itinerari (POST sukses).
+        Response: Render formulir buat jika GET, atau redirect ke detail itinerari jika sukses.
     """
     form = ItinerariForm()
     if form.validate_on_submit():
@@ -87,18 +79,20 @@ def buat_itinerari():
 @itinerari.route('/itinerari/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_itinerari(id):
-    """
-    Menangani pembaruan itinerari yang hanya dapat dilakukan oleh pembuatnya.
+    """Menangani pembaruan itinerari oleh pemiliknya.
 
-    Memverifikasi bahwa pengguna saat ini adalah pemilik itinerari.
-    Jika bukan, respons 403 Forbidden dikembalikan. Saat valid, memperbarui
-    judul, deskripsi, dan daftar destinasi.
+    Memastikan hanya pemilik itinerari yang dapat mengedit. Memperbarui judul,
+    deskripsi, dan daftar destinasi wisata.
 
     Args:
         id (int): ID itinerari yang akan diedit.
 
     Returns:
-        Response: Render formulir edit (GET) atau redirect ke detail (POST sukses).
+        Response: Render formulir edit jika GET, atau redirect ke detail itinerari jika sukses.
+
+    Raises:
+        HTTPException: 404 Not Found jika itinerari tidak ditemukan.
+        HTTPException: 403 Forbidden jika pengguna bukan pemilik.
     """
     it = db.session.get(Itinerari, id)
     if it is None:
@@ -121,19 +115,20 @@ def edit_itinerari(id):
 @itinerari.route('/itinerari/hapus/<int:id>', methods=['POST'])
 @login_required
 def hapus_itinerari(id):
-    """
-    Menghapus itinerari berdasarkan ID, hanya oleh pemiliknya, dengan validasi CSRF.
+    """Menghapus itinerari dari sistem berdasarkan ID.
 
-    Memastikan bahwa hanya pengguna yang membuat itinerari yang dapat menghapusnya.
-    Operasi hanya diizinkan via POST dan memerlukan formulir valid (termasuk token CSRF)
-    untuk mencegah eksekusi tidak sah. Jika validasi gagal, pengguna diberi pesan error.
+    Hanya pemilik itinerari yang diizinkan menghapus. Memerlukan validasi CSRF
+    melalui formulir kosong untuk keamanan.
 
     Args:
         id (int): ID itinerari yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar itinerari dengan pesan sukses jika valid,
-                  atau pesan error jika permintaan tidak memenuhi syarat keamanan.
+        Response: Redirect ke daftar itinerari dengan pesan status operasi.
+
+    Raises:
+        HTTPException: 404 Not Found jika itinerari tidak ditemukan.
+        HTTPException: 403 Forbidden jika pengguna bukan pemilik.
     """
     it = db.session.get(Itinerari, id)
     if it is None:

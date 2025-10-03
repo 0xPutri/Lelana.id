@@ -7,27 +7,19 @@ itinerari_wisata_association = db.Table('itinerari_wisata_association',
 )
 
 class Itinerari(db.Model):
-    """
-    Model rencana perjalanan (itinerari) yang dibuat oleh pengguna terautentikasi.
+    """Model untuk menyimpan rencana perjalanan (itinerari) yang dibuat pengguna.
 
-    Memungkinkan pengguna menyusun petualangan pribadi dengan memilih beberapa
-    destinasi wisata dari katalog Lelana.id, dilengkapi judul dan deskripsi
-    opsional. Setiap itinerari dikaitkan dengan satu pengguna dan dapat mencakup
-    banyak destinasi melalui relasi many-to-many.
+    Itinerari berisi judul, deskripsi opsional, dan daftar tempat wisata yang
+    dikaitkan melalui relasi many-to-many. Setiap itinerari dimiliki oleh satu
+    pengguna.
 
-    Atribut:
-        id (int): Primary key unik.
-        judul (str): Nama atau tema itinerari (wajib).
-        deskripsi (str, optional): Cerita, catatan, atau tips perjalanan.
-        tanggal_dibuat (datetime): Waktu pembuatan (diindeks untuk pengurutan).
-
-    Foreign Key:
-        user_id (int): ID pengguna pembuat itinerari (merujuk ke tabel 'users').
-
-    Relasi:
-        wisata_termasuk (relationship): Daftar objek Wisata yang dipilih dalam itinerari,
-            menggunakan tabel asosiasi 'itinerari_wisata_association'.
-            Akses balik tersedia di model Wisata melalui atribut 'termasuk_dalam_itinerari'.
+    Attributes:
+        id (int): Identifier unik itinerari (primary key).
+        judul (str): Judul itinerari; maksimal 150 karakter; wajib diisi.
+        deskripsi (str or None): Deskripsi detail itinerari; opsional.
+        tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
+        user_id (int): ID pengguna pemilik itinerari; merujuk ke tabel 'users'; wajib diisi.
+        wisata_termasuk (list[Wisata]): Daftar objek Wisata yang termasuk dalam itinerari ini.
     """
     __tablename__ = 'itinerari'
 
@@ -44,12 +36,9 @@ class Itinerari(db.Model):
                                       backref=db.backref('termasuk_dalam_itinerari', lazy=True))
 
     def __repr__(self):
-        """
-        Menyediakan representasi string informatif untuk debugging dan logging.
-
-        Format: <Itinerari judul_itinerari>
+        """Mengembalikan representasi string dari objek Itinerari untuk debugging.
 
         Returns:
-            str: Representasi objek Itinerari berdasarkan judul yang diberikan pengguna.
+            str: Representasi string berformat '<Itinerari {judul}>'.
         """
         return f'<Itinerari {self.judul}>'

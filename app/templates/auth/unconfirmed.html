@@ -1,0 +1,9 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Konfirmasi Akun{% endblock %}
+
+{% block content %}
+<h2>Konfirmasi Akun Anda</h2>
+<p>Sebelum dapat mengakses Lelana.id, Anda perlu mengkonfirmasi akun Anda. Sebuah email telah dikirimkan ke alamat email Anda dengan tautan konfirmasi.</p>
+<p>Belum menerima email? <a href="{{ url_for('auth.resend_confirmation') }}">Kirim ulang email konfirmasi</a>.</p>
+{% endblock %}

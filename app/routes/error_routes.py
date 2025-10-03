@@ -4,85 +4,73 @@ errors = Blueprint('errors', __name__)
 
 @errors.app_errorhandler(401)
 def unauthorized(e):
-    """
-    Menangani respons HTTP 401 Unauthorized.
+    """Menangani error HTTP 401 Unauthorized.
 
     Ditampilkan ketika pengguna mencoba mengakses sumber daya yang memerlukan
-    autentikasi tanpa login terlebih dahulu (misalnya mengakses dashboard
-    pengguna secara langsung tanpa sesi aktif).
+    autentikasi tanpa login.
 
     Args:
-        e (Exception): Objek exception yang dilempar oleh Flask.
+        e (Exception): Instance error yang ditangkap.
 
     Returns:
-        tuple: Template HTML 'errors/401.html' dan kode status HTTP 401.
+        tuple: Template error 401 dan kode status HTTP 401.
     """
     return render_template('errors/401.html'), 401
 
 @errors.app_errorhandler(403)
 def forbidden(e):
-    """
-    Menangani respons HTTP 403 Forbidden.
+    """Menangani error HTTP 403 Forbidden.
 
-    Muncul ketika pengguna terautentikasi mencoba mengakses fitur yang tidak
-    diizinkan berdasarkan perannya (misalnya pengguna biasa mengakses rute admin
-    yang dilindungi oleh dekorator @admin_required).
+    Ditampilkan ketika pengguna tidak memiliki izin untuk mengakses sumber daya,
+    meskipun sudah login (misalnya, pengguna biasa mengakses halaman admin).
 
     Args:
-        e (Exception): Objek exception yang dilempar oleh Flask.
+        e (Exception): Instance error yang ditangkap.
 
     Returns:
-        tuple: Template HTML 'errors/403.html' dan kode status HTTP 403.
+        tuple: Template error 403 dan kode status HTTP 403.
     """
     return render_template('errors/403.html'), 403
 
 @errors.app_errorhandler(404)
 def page_not_found(e):
-    """
-    Menangani respons HTTP 404 Not Found.
+    """Menangani error HTTP 404 Not Found.
 
-    Ditampilkan ketika pengguna mengakses URL yang tidak terdaftar di aplikasi,
-    baik karena salah ketik, tautan rusak, atau rute yang telah dihapus.
+    Ditampilkan ketika rute atau sumber daya yang diminta tidak ditemukan.
 
     Args:
-        e (Exception): Objek exception yang dilempar oleh Flask.
+        e (Exception): Instance error yang ditangkap.
 
     Returns:
-        tuple: Template HTML 'errors/404.html' dan kode status HTTP 404.
+        tuple: Template error 404 dan kode status HTTP 404.
     """
     return render_template('errors/404.html'), 404
 
 @errors.app_errorhandler(429)
 def too_many_requests(e):
-    """
-    Menangani respons HTTP 429 Too Many Requests.
+    """Menangani error HTTP 429 Too Many Requests.
 
-    Terjadi ketika pengguna melebihi batas permintaan yang diizinkan dalam
-    kurun waktu tertentu (rate limiting), misalnya mencoba login berulang kali
-    dalam waktu singkat.
+    Ditampilkan ketika pengguna melebihi batas permintaan yang diizinkan
+    (rate limiting), misalnya terlalu banyak percobaan login.
 
     Args:
-        e (Exception): Objek exception yang dilempar oleh Flask-Limiter.
+        e (Exception): Instance error yang ditangkap.
 
     Returns:
-        tuple: Template HTML 'errors/429.html' dan kode status HTTP 429.
+        tuple: Template error 429 dan kode status HTTP 429.
     """
     return render_template('errors/429.html'), 429
 
 @errors.app_errorhandler(500)
 def internal_server_error(e):
-    """
-    Menangani respons HTTP 500 Internal Server Error.
+    """Menangani error HTTP 500 Internal Server Error.
 
-    Digunakan untuk menangkap kesalahan tak terduga di sisi server (misalnya
-    exception tidak tertangani, kegagalan query database, atau kesalahan logika).
-    Template ini memberikan pengalaman pengguna yang lebih ramah daripada
-    menampilkan traceback mentah.
+    Ditampilkan ketika terjadi kesalahan tak terduga di sisi server.
 
     Args:
-        e (Exception): Objek exception internal yang terjadi selama permintaan.
+        e (Exception): Instance error yang ditangkap.
 
     Returns:
-        tuple: Template HTML 'errors/500.html' dan kode status HTTP 500.
+        tuple: Template error 500 dan kode status HTTP 500.
     """
     return render_template('errors/500.html'), 500

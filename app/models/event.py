@@ -2,22 +2,20 @@ from app import db
 from datetime import datetime, timezone
 
 class Event(db.Model):
-    """
-    Model acara atau event budaya lokal di wilayah Banyumas dan sekitarnya.
+    """Representasi model Event untuk menyimpan informasi acara dalam sistem.
 
-    Menyimpan informasi lengkap tentang kegiatan seperti festival, pertunjukan,
-    atau perayaan adat, termasuk tanggal pelaksanaan, lokasi, deskripsi, dan
-    pihak penyelenggara (opsional). Digunakan untuk mempromosikan kekayaan
-    budaya lokal melalui platform Lelana.id.
+    Model ini mencakup detail dasar suatu acara seperti nama, tanggal pelaksanaan,
+    lokasi, deskripsi, dan penyelenggara. Digunakan untuk manajemen dan
+    penjadwalan acara dalam aplikasi pariwisata.
 
-    Atribut:
-        id (int): Primary key unik.
-        nama (str): Nama event (diindeks untuk pencarian dan pengurutan).
-        tanggal (datetime): Waktu pelaksanaan event (wajib, dalam format lengkap).
-        lokasi (str): Tempat penyelenggaraan event (alamat atau nama tempat).
-        deskripsi (str): Informasi detail tentang acara, tujuan, dan aktivitas.
-        penyelenggara (str, optional): Nama komunitas, lembaga, atau individu penyelenggara.
-        tanggal_dibuat (datetime): Waktu entri dibuat di sistem (default: UTC saat ini).
+    Attributes:
+        id (int): Identifier unik acara (primary key).
+        nama (str): Nama acara; maksimal 150 karakter; wajib diisi.
+        tanggal (datetime): Tanggal dan waktu pelaksanaan acara; wajib diisi.
+        lokasi (str): Lokasi acara; maksimal 200 karakter; wajib diisi.
+        deskripsi (str): Deskripsi lengkap acara; wajib diisi.
+        penyelenggara (str or None): Nama penyelenggara acara; opsional; maksimal 100 karakter.
+        tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
     """
     __tablename__ = 'event'
 
@@ -30,12 +28,9 @@ class Event(db.Model):
     tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     def __repr__(self):
-        """
-        Menyediakan representasi string singkat untuk debugging dan logging.
-
-        Format: <Event nama_event>
+        """Mengembalikan representasi string dari objek Event untuk debugging.
 
         Returns:
-            str: Representasi objek Event yang mencerminkan identitas acara.
+            str: Representasi string berformat '<Event {nama}>'.
         """
         return f'<Event {self.nama}>'

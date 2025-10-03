@@ -1,0 +1,6 @@
+<p>Halo {{ user.username }},</p>
+<p>Selamat datang di Lelana.id!</p>
+<p>Untuk mengkonfirmasi akun Anda, silakan klik tautan berikut:</p>
+<p><a href="{{ url_for('auth.confirm', token=token, _external=True) }}">Konfirmasi Akun Saya</a></p>
+<p>Tautan ini akan valid selama satu jam.</p>
+<p>Salam,<br>Tim Lelana.id</p>

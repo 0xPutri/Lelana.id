@@ -8,27 +8,20 @@ paket_wisata_association = db.Table('paket_wisata_association',
 )
 
 class PaketWisata(db.Model):
-    """
-    Model paket wisata gabungan yang dirancang oleh admin untuk memudahkan
-    perencanaan perjalanan pengguna di wilayah Banyumas.
+    """Model untuk merepresentasikan paket wisata yang ditawarkan dalam sistem.
 
-    Setiap paket terdiri dari nama, deskripsi, harga (dalam Rupiah), dan daftar
-    destinasi wisata yang dipilih dari katalog yang tersedia. Fitur tambahan
-    `is_promoted` memungkinkan admin menandai paket tertentu sebagai unggulan
-    untuk ditampilkan di halaman utama atau promosi khusus.
+    Paket wisata mencakup nama, deskripsi, harga, serta daftar destinasi wisata
+    yang termasuk di dalamnya melalui relasi many-to-many. Dapat ditandai sebagai
+    dipromosikan untuk ditampilkan secara khusus di antarmuka pengguna.
 
-    Atribut:
-        id (int): Primary key unik.
-        nama (str): Nama paket wisata (diindeks untuk pencarian).
-        deskripsi (str): Penjelasan isi dan manfaat paket (wajib).
-        harga (int): Harga paket dalam satuan Rupiah (tanpa pemisah ribuan).
-        is_promoted (bool): Penanda apakah paket ditampilkan sebagai unggulan (default: False).
-        tanggal_dibuat (datetime): Waktu paket dibuat (default: UTC saat ini).
-
-    Relasi:
-        destinasi (relationship): Daftar objek Wisata yang termasuk dalam paket,
-            menggunakan tabel asosiasi 'paket_wisata_association'.
-            Akses balik tersedia melalui atribut 'paket_termasuk' pada model Wisata.
+    Attributes:
+        id (int): Identifier unik paket wisata (primary key).
+        nama (str): Nama paket wisata; maksimal 150 karakter; wajib diisi.
+        deskripsi (str): Deskripsi lengkap paket; wajib diisi.
+        harga (int): Harga paket dalam satuan rupiah; wajib diisi.
+        is_promoted (bool): Status promosi; jika True, paket ditampilkan sebagai unggulan.
+        tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
+        destinasi (list[Wisata]): Daftar objek Wisata yang termasuk dalam paket ini.
     """
     __tablename__ = 'paket_wisata'
 
@@ -47,12 +40,9 @@ class PaketWisata(db.Model):
                                 backref=db.backref('paket_termasuk', lazy=True))
 
     def __repr__(self):
-        """
-        Menyediakan representasi string singkat untuk debugging dan logging.
-
-        Format: <PaketWisata nama_paket>
+        """Mengembalikan representasi string dari objek PaketWisata untuk debugging.
 
         Returns:
-            str: Representasi objek PaketWisata yang mudah dibaca oleh developer.
+            str: Representasi string berformat '<PaketWisata {nama}>'.
         """
         return f'<PaketWisata {self.nama}>'

@@ -17,18 +17,13 @@ logging.basicConfig(level=logging.INFO)
 
 @wisata.route('/wisata')
 def list_wisata():
-    """
-    Menampilkan daftar destinasi wisata dengan paginasi dan formulir hapus aman.
+    """Menampilkan daftar tempat wisata dengan pagination.
 
-    Data diurutkan berdasarkan nama secara alfabetis dan ditampilkan 5 entri per halaman.
-    Setiap entri dapat dihapus oleh admin melalui formulir POST
-    yang dilindungi CSRF. Formulir kosong (FlaskForm) disertakan untuk mendukung
-    penghapusan aman tanpa eksposisi token di URL.
-
-    Dapat diakses oleh semua pengunjung sebagai bagian dari eksplorasi konten publik.
+    Data diurutkan berdasarkan nama secara alfabetis, dengan 5 item per halaman.
+    Menyertakan formulir hapus untuk keamanan CSRF.
 
     Returns:
-        Response: Render template 'wisata/list.html' dengan data paginasi dan formulir hapus.
+        Response: Render template daftar wisata dengan data pagination.
     """
     page = request.args.get('page', 1, type=int)
 
@@ -46,7 +41,21 @@ def list_wisata():
 
 @wisata.route('/wisata/detail/<int:id>', methods=['GET', 'POST'])
 def detail_wisata(id):
-    
+    """Menampilkan detail tempat wisata dan menangani pengiriman ulasan.
+
+    Memungkinkan pengguna terautentikasi memberikan ulasan teks dan mengunggah
+    foto. Validasi dan penyimpanan file dilakukan melalui layanan terpisah.
+    Data ulasan dimuat dengan relasi penulis dan foto menggunakan eager loading.
+
+    Args:
+        id (int): ID unik tempat wisata.
+
+    Returns:
+        Response: Render template detail wisata dengan formulir ulasan dan daftar ulasan.
+
+    Raises:
+        HTTPException: 404 Not Found jika tempat wisata tidak ditemukan.
+    """
     w = db.session.get(Wisata, id)
     if w is None:
         abort(404)
@@ -91,15 +100,13 @@ def detail_wisata(id):
 @login_required
 @admin_required
 def tambah_wisata():
-    """
-    Menangani penambahan destinasi wisata baru oleh admin.
+    """Menangani penambahan tempat wisata baru oleh admin.
 
-    Hanya dapat diakses oleh pengguna dengan role 'admin'. Saat GET,
-    menampilkan formulir kosong; saat POST dan valid, menyimpan data
-    ke database dan mengarahkan kembali ke daftar wisata.
+    Mengumpulkan data melalui WisataForm, termasuk koordinat geografis opsional,
+    lalu menyimpan ke database.
 
     Returns:
-        Response: Render formulir tambah (GET) atau redirect ke daftar (POST sukses).
+        Response: Render formulir tambah jika GET, atau redirect ke daftar wisata jika sukses.
     """
     form = WisataForm()
     if form.validate_on_submit():
@@ -124,18 +131,19 @@ def tambah_wisata():
 @login_required
 @admin_required
 def edit_wisata(id):
-    """
-    Menangani pembaruan data destinasi wisata yang sudah ada.
+    """Menangani pembaruan data tempat wisata oleh admin.
 
-    Memuat data wisata berdasarkan ID, lalu menampilkan formulir terisi
-    saat GET. Saat POST dan valid, memperbarui entri di database dan
-    mengarahkan ke halaman detail wisata yang telah diedit.
+    Memuat data wisata yang ada ke dalam formulir dan menyimpan perubahan,
+    termasuk pembaruan koordinat geografis.
 
     Args:
-        id (int): ID destinasi wisata yang akan diedit.
+        id (int): ID tempat wisata yang akan diedit.
 
     Returns:
-        Response: Render formulir edit (GET) atau redirect ke detail (POST sukses).
+        Response: Render formulir edit jika GET, atau redirect ke detail wisata jika sukses.
+
+    Raises:
+        HTTPException: 404 Not Found jika tempat wisata tidak ditemukan.
     """
     wisata_item = db.session.get(Wisata, id)
     if wisata_item is None:
@@ -161,18 +169,18 @@ def edit_wisata(id):
 @login_required
 @admin_required
 def hapus_wisata(id):
-    """
-    Menghapus destinasi wisata dari sistem berdasarkan ID dengan validasi CSRF.
+    """Menghapus tempat wisata dari sistem berdasarkan ID.
 
-    Hanya menerima metode POST dan memerlukan formulir valid (termasuk token CSRF)
-    untuk mencegah serangan cross-site request forgery dan penghapusan tidak sengaja.
-    Operasi hanya dapat dilakukan oleh pengguna dengan role 'admin'.
+    Memerlukan validasi CSRF melalui formulir kosong. Hanya dapat diakses oleh admin.
 
     Args:
-        id (int): ID destinasi wisata yang akan dihapus.
+        id (int): ID tempat wisata yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar wisata dengan pesan sukses atau error.
+        Response: Redirect ke daftar wisata dengan pesan status operasi.
+
+    Raises:
+        HTTPException: 404 Not Found jika tempat wisata tidak ditemukan.
     """
     wisata_item = db.session.get(Wisata, id)
     if wisata_item is None: abort(404)
@@ -189,18 +197,13 @@ def hapus_wisata(id):
 
 @wisata.route('/api/wisata/lokasi')
 def api_lokasi_wisata():
-    """
-    Menyediakan endpoint API publik berformat JSON untuk integrasi peta interaktif.
+    """Menyediakan endpoint API untuk mendapatkan lokasi wisata berkoordinat.
 
-    Mengembalikan hanya destinasi yang memiliki koordinat lengkap (latitude & longitude).
-    Setiap entri berisi nama, koordinat, dan URL absolut ke halaman detail.
-    Query dioptimalkan dengan seleksi kolom eksplisit untuk efisiensi bandwidth dan performa.
-
-    Digunakan oleh halaman peta Lelana.id untuk menampilkan marker dinamis tanpa
-    memuat seluruh struktur HTML atau data sensitif.
+    Mengembalikan daftar tempat wisata yang memiliki latitude dan longitude,
+    diformat sebagai JSON untuk integrasi dengan peta interaktif.
 
     Returns:
-        Response: JSON berisi daftar objek lokasi wisata yang siap digunakan di frontend.
+        Response: JSON berisi daftar lokasi wisata dengan nama, koordinat, dan URL detail.
     """
     query_result = db.session.query(
         Wisata.id,

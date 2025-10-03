@@ -11,17 +11,13 @@ paket_wisata = Blueprint('paket_wisata', __name__)
 
 @paket_wisata.route('/paket-wisata')
 def list_paket():
-    """
-    Menampilkan daftar semua paket wisata dengan formulir hapus aman berbasis CSRF.
+    """Menampilkan daftar semua paket wisata yang tersedia.
 
-    Data diurutkan berdasarkan nama secara alfabetis untuk konsistensi navigasi.
-    Setiap entri dapat dihapus oleh admin melalui formulir POST yang dilindungi
-    token CSRF (disertakan sebagai objek FlaskForm kosong). Halaman ini bersifat
-    publik dan menjadi titik awal eksplorasi paket bagi pengguna umum.
+    Data diurutkan berdasarkan nama secara alfabetis dan mencakup formulir hapus
+    untuk keamanan CSRF pada operasi penghapusan.
 
     Returns:
-        Response: Render template 'paket_wisata/list.html' dengan daftar paket
-                  dan formulir hapus untuk keamanan operasi administratif.
+        Response: Render template daftar paket wisata.
     """
     semua_paket = PaketWisata.query.order_by(PaketWisata.nama).all()
 
@@ -31,20 +27,19 @@ def list_paket():
 
 @paket_wisata.route('/paket-wisata/detail/<int:id>')
 def detail_paket(id):
-    """
-    Menampilkan detail lengkap satu paket wisata termasuk destinasi yang tercakup.
+    """Menampilkan detail lengkap suatu paket wisata berdasarkan ID.
 
-    Menggunakan optimasi query `joinedload` untuk memuat relasi many-to-many
-    ke destinasi wisata dalam satu permintaan database, menghindari N+1 query.
-    Menampilkan nama, deskripsi, harga, dan daftar destinasi sebagai informasi
-    inti bagi pengguna yang ingin memahami cakupan paket perjalanan.
+    Memuat daftar destinasi wisata yang termasuk dalam paket menggunakan
+    eager loading untuk menghindari query tambahan.
 
     Args:
-        id (int): ID paket wisata yang akan ditampilkan.
+        id (int): ID unik paket wisata yang ingin dilihat.
 
     Returns:
-        Response: Render template 'paket_wisata/detail.html' dengan data paket
-                  dan destinasi terkait yang telah dipra-muat (eager-loaded).
+        Response: Render template detail paket wisata jika ditemukan.
+
+    Raises:
+        HTTPException: 404 Not Found jika paket tidak ada.
     """
     paket = PaketWisata.query.options(joinedload(PaketWisata.destinasi)).get_or_404(id)
 
@@ -54,16 +49,13 @@ def detail_paket(id):
 @login_required
 @admin_required
 def tambah_paket():
-    """
-    Menangani pembuatan paket wisata baru oleh admin, termasuk penandaan promosi.
+    """Menangani penambahan paket wisata baru oleh admin.
 
-    Saat GET: menampilkan formulir dengan daftar destinasi yang dapat dipilih
-    dan opsi untuk menandai paket sebagai unggulan (`is_promoted`).
-    Saat POST dan valid: menyimpan paket ke database dengan relasi many-to-many
-    ke destinasi terpilih dan status promosi. Hanya dapat diakses oleh admin.
+    Mengumpulkan data melalui PaketWisataForm, termasuk destinasi yang dipilih
+    dan status promosi, lalu menyimpan ke database.
 
     Returns:
-        Response: Render formulir tambah (GET) atau redirect ke daftar paket (POST sukses).
+        Response: Render formulir tambah jika GET, atau redirect ke daftar paket jika sukses.
     """
     form = PaketWisataForm()
     if form.validate_on_submit():
@@ -87,19 +79,19 @@ def tambah_paket():
 @login_required
 @admin_required
 def edit_paket(id):
-    """
-    Menangani pembaruan data paket wisata yang sudah ada, termasuk status promosi.
+    """Menangani pembaruan data paket wisata oleh admin.
 
-    Memuat paket berdasarkan ID, lalu menampilkan formulir terisi saat GET.
-    Saat POST dan valid, memperbarui nama, deskripsi, harga, daftar destinasi,
-    dan status `is_promoted`. Perubahan langsung disimpan ke database,
-    dan pengguna dialihkan ke halaman detail paket yang telah diperbarui.
+    Memuat data paket yang ada ke dalam formulir dan menyimpan perubahan
+    setelah validasi berhasil.
 
     Args:
         id (int): ID paket wisata yang akan diedit.
 
     Returns:
-        Response: Render formulir edit (GET) atau redirect ke detail paket (POST sukses).
+        Response: Render formulir edit jika GET, atau redirect ke detail paket jika sukses.
+
+    Raises:
+        HTTPException: 404 Not Found jika paket tidak ditemukan.
     """
     paket = db.session.get(PaketWisata, id)
     if paket is None:
@@ -122,20 +114,18 @@ def edit_paket(id):
 @login_required
 @admin_required
 def hapus_paket(id):
-    """
-    Menghapus paket wisata dari sistem dengan validasi keamanan CSRF.
+    """Menghapus paket wisata dari sistem berdasarkan ID.
 
-    Hanya menerima metode POST dan memerlukan formulir valid (termasuk token CSRF)
-    untuk mencegah eksekusi tidak sah melalui tautan langsung atau skrip otomatis.
-    Operasi hanya dapat dilakukan oleh admin, dan relasi ke destinasi dihapus
-    secara otomatis berkat konfigurasi cascade di model.
+    Memerlukan validasi CSRF melalui formulir kosong. Hanya dapat diakses oleh admin.
 
     Args:
         id (int): ID paket wisata yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar paket dengan pesan sukses jika valid,
-                  atau pesan error jika permintaan tidak memenuhi syarat keamanan.
+        Response: Redirect ke daftar paket dengan pesan status operasi.
+
+    Raises:
+        HTTPException: 404 Not Found jika paket tidak ditemukan.
     """
     paket = db.session.get(PaketWisata, id)
     if paket is None:

@@ -4,6 +4,7 @@ from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import config
+from flask_mail import Mail
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -14,32 +15,19 @@ limiter = Limiter(
     key_func=get_remote_address,
     default_limits=["200 per day", "50 per hour"]
 )
+mail = Mail()
 
 def create_app(config_name):
-    """
-    Membuat dan mengonfigurasi instance aplikasi Flask untuk Lelana.id
-    menggunakan pola Application Factory.
+    """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
 
-    Fungsi ini bertanggung jawab atas inisialisasi inti aplikasi, termasuk:
-    - Pemuatan konfigurasi berdasarkan lingkungan (development/testing/production),
-    - Pemasangan ekstensi: database (SQLAlchemy), autentikasi (Flask-Login),
-      dan pembatasan laju permintaan (Flask-Limiter),
-    - Pendaftaran blueprint untuk modularisasi rute,
-    - Penanganan muatan pengguna terautentikasi.
-
-    Fitur keamanan tambahan:
-    - Session protection diatur ke 'strong' untuk mencegah pencurian sesi.
-    - Rate limiting diterapkan secara global: maksimal 200 permintaan per hari
-      dan 50 permintaan per jam per alamat IP, guna mencegah penyalahgunaan
-      (misalnya brute-force pada rute login).
-
-    Pendekatan ini mendukung pengujian terisolasi, deployment fleksibel,
-    dan pemeliharaan kode yang bersih — sesuai prinsip mata kuliah
-    Implementasi dan Pengujian Perangkat Lunak.
+    Fungsi ini menginisialisasi ekstensi inti (database, login, rate limiting, email),
+    mendaftarkan blueprint untuk rute, dan mengatur loader pengguna untuk Flask-Login.
+    Digunakan sebagai factory pattern untuk memungkinkan konfigurasi fleksibel
+    (misalnya development, testing, production).
 
     Args:
-        config_name (str): Nama lingkungan konfigurasi ('development', 'testing',
-                           'production', atau 'default').
+        config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`
+                           (misalnya 'default', 'development', 'production').
 
     Returns:
         Flask: Instance aplikasi Flask yang telah dikonfigurasi dan siap dijalankan.
@@ -52,6 +40,8 @@ def create_app(config_name):
 
     # Menghubungkan limiter dengan instance aplikasi
     limiter.init_app(app)
+
+    mail.init_app(app)
 
     from .models.user import User
 

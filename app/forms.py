@@ -8,18 +8,11 @@ from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models.wisata import Wisata
 
 class RegistrationForm(FlaskForm):
-    """
-    Formulir pendaftaran pengguna baru di Lelana.id.
+    """Formulir pendaftaran pengguna baru dengan validasi lengkap.
 
-    Memvalidasi keunikan username dan email terhadap database, serta memastikan
-    kekuatan password minimal. Digunakan pada halaman registrasi publik.
-
-    Field:
-        username (StringField): Nama pengguna unik (4–25 karakter).
-        email (StringField): Alamat email valid.
-        password (PasswordField): Kata sandi minimal 6 karakter.
-        confirm_password (PasswordField): Konfirmasi kata sandi harus cocok.
-        submit (SubmitField): Tombol kirim formulir.
+    Memastikan username dan email unik, serta menerapkan kebijakan keamanan
+    password yang ketat (minimal 6 karakter, kombinasi huruf besar/kecil,
+    angka, dan karakter spesial).
     """
     username = StringField('Username', 
                            validators=[DataRequired(message='Username wajib diisi.'), 
@@ -36,21 +29,19 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Daftar')
 
     def validate_password(self, password):
-        """
-        Memvalidasi kekuatan password berdasarkan kebijakan keamanan Lelana.id.
+        """Memvalidasi kekuatan password berdasarkan kebijakan keamanan.
 
-        Password harus memenuhi empat kriteria berikut:
-        - Minimal satu huruf kecil (a–z),
-        - Minimal satu huruf besar (A–Z),
-        - Minimal satu angka (0–9),
-        - Minimal satu karakter spesial dari himpunan @$!%*?&#.
-
-        Validasi ini dipanggil otomatis oleh WTForms selama proses registrasi.
-        Jika salah satu kriteria tidak terpenuhi, ValidationError akan dilemparkan
-        dengan pesan spesifik untuk membantu pengguna memperbaiki input.
+        Password harus mengandung setidaknya:
+        - Satu huruf kecil
+        - Satu huruf besar
+        - Satu angka
+        - Satu karakter spesial dari himpunan @$!%*?&#
 
         Args:
-            password (wtforms.Field): Field password dari formulir registrasi.
+            password (PasswordField): Field password dari formulir.
+
+        Raises:
+            ValidationError: Jika salah satu kriteria keamanan tidak terpenuhi.
         """
         p = password.data
         if not re.search(r'[a-z]', p):
@@ -63,45 +54,35 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Password harus mengandung setidaknya satu karakter spesial (@$!%*?&#).')
 
     def validate_username(self, username):
-        """
-        Memastikan username yang diinput belum digunakan oleh pengguna lain.
-
-        Dipanggil otomatis oleh WTForms saat validasi formulir. Jika username
-        sudah ada di database, akan memicu ValidationError.
+        """Memastikan username belum digunakan oleh pengguna lain.
 
         Args:
-            username (wtforms.Field): Field username dari formulir.
+            username (StringField): Field username dari formulir.
+
+        Raises:
+            ValidationError: Jika username sudah terdaftar di sistem.
         """
         user = User.query.filter_by(username=username.data).first()
         if user:
             raise ValidationError('Username tersebut sudah digunakan. Silakan pilih yang lain.')
     
     def validate_email(self, email):
-        """
-        Memastikan email yang diinput belum terdaftar di sistem.
-
-        Dipanggil otomatis selama validasi formulir pendaftaran. Mencegah duplikasi
-        akun berdasarkan alamat email.
+        """Memastikan alamat email belum terdaftar di sistem.
 
         Args:
-            email (wtforms.Field): Field email dari formulir.
+            email (StringField): Field email dari formulir.
+
+        Raises:
+            ValidationError: Jika email sudah digunakan oleh akun lain.
         """
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Email tersebut sudah terdaftar. Silakan gunakan email lain.')
 
 class LoginForm(FlaskForm):
-    """
-    Formulir login pengguna yang telah terdaftar.
+    """Formulir login pengguna dengan opsi mengingat sesi.
 
-    Mengizinkan pengguna masuk dengan email dan password, serta opsi "Ingat Saya"
-    untuk sesi berkepanjangan. Digunakan di rute /auth/login.
-
-    Field:
-        email (StringField): Email terdaftar.
-        password (PasswordField): Kata sandi akun.
-        remember (BooleanField): Opsi untuk mempertahankan sesi.
-        submit (SubmitField): Tombol login.
+    Memverifikasi keberadaan email dan kecocokan password saat autentikasi.
     """
     email = StringField('Email', 
                         validators=[DataRequired(message='Email wajib diisi.'), 
@@ -112,21 +93,10 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 class WisataForm(FlaskForm):
-    """
-    Formulir untuk menambahkan atau memperbarui data destinasi wisata.
+    """Formulir untuk menambahkan atau mengedit tempat wisata.
 
-    Digunakan oleh admin untuk mengelola konten wisata. Mendukung input opsional
-    koordinat GPS (latitude/longitude) untuk integrasi peta di frontend.
-
-    Field:
-        nama (StringField): Nama destinasi wisata.
-        kategori (StringField): Jenis wisata (alam, budaya, kuliner, dll).
-        lokasi (StringField): Alamat atau deskripsi lokasi.
-        deskripsi (TextAreaField): Informasi lengkap tentang wisata.
-        gambar_url (StringField): URL gambar utama (opsional).
-        latitude (FloatField): Koordinat lintang (opsional).
-        longitude (FloatField): Koordinat bujur (opsional).
-        submit (SubmitField): Simpan perubahan.
+    Mengumpulkan informasi dasar destinasi wisata, termasuk koordinat geografis
+    opsional dan URL gambar.
     """
     nama = StringField('Nama Wisata', 
                        validators=[DataRequired(message='Nama wisata wajib diisi.')])
@@ -146,19 +116,10 @@ class WisataForm(FlaskForm):
     submit = SubmitField('Simpan')
 
 class EventForm(FlaskForm):
-    """
-    Formulir untuk mengelola event budaya di wilayah Jawa Tengah.
+    """Formulir untuk membuat atau memperbarui acara (event).
 
-    Digunakan oleh admin untuk memasukkan event dengan tanggal pasti dan lokasi.
-    Penyelenggara bersifat opsional untuk fleksibilitas data.
-
-    Field:
-        nama (StringField): Nama event.
-        tanggal (DateField): Tanggal pelaksanaan (format YYYY-MM-DD).
-        lokasi (StringField): Tempat penyelenggaraan.
-        deskripsi (TextAreaField): Detail acara.
-        penyelenggara (StringField): Nama komunitas/lembaga (opsional).
-        submit (SubmitField): Simpan event.
+    Mengelola detail acara seperti nama, tanggal, lokasi, deskripsi,
+    dan penyelenggara (opsional).
     """
     nama = StringField('Nama Event', 
                        validators=[DataRequired(message='Nama event wajib diisi.')])
@@ -172,17 +133,10 @@ class EventForm(FlaskForm):
     submit = SubmitField('Simpan Event')
 
 class ReviewForm(FlaskForm):
-    """
-    Formulir pengiriman ulasan pengalaman wisata oleh pengguna terautentikasi.
+    """Formulir untuk memberikan ulasan terhadap tempat wisata.
 
-    Memungkinkan pengguna memberikan rating (1–5), komentar wajib, dan unggah
-    hingga beberapa foto pendukung. Validasi file hanya menerima format gambar.
-
-    Field:
-        rating (IntegerField): Nilai ulasan antara 1 hingga 5.
-        komentar (TextAreaField): Ulasan teks wajib.
-        foto (MultipleFileField): Unggahan foto opsional (jpg/png/jpeg).
-        submit (SubmitField): Kirim ulasan.
+    Memungkinkan pengguna memberikan rating (1–5), komentar teks,
+    dan mengunggah beberapa foto ulasan.
     """
     rating = IntegerField('Rating (1-5)', 
                           validators=[DataRequired(), NumberRange(min=1, max=5, message='Rating harus antara 1 dan 5.')])
@@ -193,32 +147,21 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Kirim Review')
 
 def get_all_wisata():
-    """
-    Mengambil semua entitas wisata dari database, diurutkan berdasarkan nama.
+    """Mengambil semua tempat wisata yang tersedia, diurutkan berdasarkan nama.
 
-    Digunakan sebagai query factory untuk field seleksi ganda (misalnya pada
-    PaketWisataForm dan ItinerariForm) agar daftar destinasi selalu terurut
-    dan konsisten di antarmuka pengguna.
+    Digunakan sebagai query factory untuk field seleksi wisata di formulir
+    paket wisata dan itinerari.
 
     Returns:
-        list[Wisata]: Daftar objek Wisata yang telah diurutkan secara alfabetis.
+        list[Wisata]: Daftar objek Wisata yang diurutkan secara alfabetis.
     """
     return Wisata.query.order_by(Wisata.nama).all()
 
 class PaketWisataForm(FlaskForm):
-    """
-    Formulir untuk membuat paket wisata gabungan dari beberapa destinasi.
+    """Formulir untuk membuat atau mengelola paket wisata.
 
-    Admin dapat memilih beberapa wisata dari daftar yang tersedia dan menetapkan
-    harga paket. Menggunakan QuerySelectMultipleField untuk integrasi dinamis
-    dengan data Wisata yang ada di database.
-
-    Field:
-        nama (StringField): Nama paket wisata.
-        deskripsi (TextAreaField): Penjelasan isi paket.
-        harga (IntegerField): Harga dalam Rupiah.
-        destinasi (QuerySelectMultipleField): Daftar wisata yang dipilih.
-        submit (SubmitField): Simpan paket.
+    Memungkinkan admin menentukan nama, deskripsi, harga, destinasi yang
+    termasuk dalam paket, serta status promosi.
     """
     nama = StringField('Nama Paket Wisata', 
                        validators=[DataRequired(message='Nama paket wajib diisi.')])
@@ -240,17 +183,10 @@ class PaketWisataForm(FlaskForm):
     submit = SubmitField('Simpan Paket Wisata')
 
 class ItinerariForm(FlaskForm):
-    """
-    Formulir untuk menyusun itinerari perjalanan berbasis destinasi yang ada.
+    """Formulir untuk membuat rencana perjalanan (itinerari) pengguna.
 
-    Memungkinkan pengguna (atau admin) membuat rencana perjalanan dengan memilih
-    beberapa tempat wisata dari database. Judul wajib, deskripsi opsional.
-
-    Field:
-        judul (StringField): Nama itinerari.
-        deskripsi (TextAreaField): Cerita atau catatan perjalanan (opsional).
-        wisata_termasuk (QuerySelectMultipleField): Pilihan destinasi wisata.
-        submit (SubmitField): Simpan itinerari.
+    Memungkinkan pemilihan beberapa tempat wisata dari daftar yang tersedia
+    dan penambahan deskripsi opsional.
     """
     judul = StringField('Judul Itinerari', 
                         validators=[DataRequired(message='Judul wajib diisi.')])
@@ -266,22 +202,10 @@ class ItinerariForm(FlaskForm):
     submit = SubmitField('Simpan Itinerari')
 
 class AdminEditUserForm(FlaskForm):
-    """
-    Formulir khusus admin untuk mengelola data pengguna (termasuk peran).
+    """Formulir untuk admin mengedit profil pengguna lain.
 
-    Memvalidasi keunikan username dan email hanya jika nilai tersebut diubah,
-    sehingga admin dapat menyimpan tanpa mengganti data yang sama. Mendukung
-    perubahan role antara 'user' dan 'admin'.
-
-    Field:
-        username (StringField): Nama pengguna (4–25 karakter).
-        email (StringField): Email valid.
-        role (SelectField): Peran pengguna ('user' atau 'admin').
-        submit (SubmitField): Simpan perubahan.
-
-    Catatan:
-        Validasi custom pada username dan email hanya dijalankan jika nilai
-        baru berbeda dari data asli, untuk menghindari false positive saat edit.
+    Memungkinkan perubahan username, email, dan peran (role) dengan validasi
+    untuk memastikan keunikan username dan email.
     """
     username = StringField('Username', 
                            validators=[DataRequired(message='Username wajib diisi.'),
@@ -299,15 +223,13 @@ class AdminEditUserForm(FlaskForm):
         self.original_user = original_user
 
     def validate_username(self, username):
-        """
-        Memvalidasi keunikan username hanya jika nilainya diubah dari data asli.
-
-        Menghindari kesalahan validasi saat admin menyimpan formulir tanpa
-        mengganti username. Jika username baru sudah dipakai pengguna lain,
-        lemparkan ValidationError.
+        """Memvalidasi keunikan username hanya jika diubah.
 
         Args:
-            username (wtforms.Field): Field username dari formulir edit.
+            username (StringField): Field username dari formulir.
+
+        Raises:
+            ValidationError: Jika username baru sudah digunakan oleh pengguna lain.
         """
         if username.data != self.original_user.username:
             user = User.query.filter_by(username=username.data).first()
@@ -315,14 +237,13 @@ class AdminEditUserForm(FlaskForm):
                 raise ValidationError('Username tersebut sudah digunakan.')
 
     def validate_email(self, email):
-        """
-        Memvalidasi keunikan email hanya jika nilainya diubah.
-
-        Sama seperti validasi username, ini mencegah false positive saat admin
-        hanya mengubah role tanpa menyentuh email.
+        """Memvalidasi keunikan email hanya jika diubah.
 
         Args:
-            email (wtforms.Field): Field email dari formulir edit.
+            email (StringField): Field email dari formulir.
+
+        Raises:
+            ValidationError: Jika email baru sudah terdaftar oleh akun lain.
         """
         if email.data != self.original_user.email:
             user = User.query.filter_by(email=email.data).first()

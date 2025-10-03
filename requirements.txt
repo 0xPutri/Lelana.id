@@ -10,3 +10,5 @@ WTForms-SQLAlchemy
 
 python-magic
 Flask-Limiter
+
+Flask-Mail

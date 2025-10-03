@@ -15,14 +15,12 @@ admin = Blueprint('admin', __name__)
 @login_required
 @admin_required
 def dashboard():
-    """
-    Menampilkan halaman dashboard utama admin Lelana.id.
+    """Menampilkan dashboard admin yang hanya dapat diakses oleh pengguna dengan peran 'admin'.
 
-    Hanya dapat diakses oleh pengguna terautentikasi dengan role 'admin'.
-    Berisi ringkasan aktivitas sistem dan navigasi ke fitur manajemen konten.
+    Memerlukan autentikasi dan otorisasi khusus admin.
 
     Returns:
-        Response: Render template 'admin/dashboard.html'.
+        Response: Render template dashboard admin.
     """
     return render_template('admin/dashboard.html')
 
@@ -30,17 +28,10 @@ def dashboard():
 @login_required
 @admin_required
 def manage_users():
-    """
-    Menampilkan daftar lengkap pengguna sistem untuk keperluan administrasi.
-
-    Data diurutkan berdasarkan ID secara ascending. Setiap entri dapat dihapus
-    atau diedit oleh admin melalui antarmuka yang dilindungi CSRF (formulir kosong
-    disertakan untuk operasi hapus aman). Halaman ini menjadi pusat manajemen akun
-    di Lelana.id, termasuk verifikasi peran pengguna.
+    """Menampilkan daftar semua pengguna sistem untuk dikelola oleh admin.
 
     Returns:
-        Response: Render template 'admin/manage_users.html' dengan daftar pengguna
-                  dan formulir hapus untuk keamanan operasi administratif.
+        Response: Render halaman manajemen pengguna dengan daftar pengguna dan formulir hapus.
     """
     users = User.query.order_by(User.id).all()
 
@@ -51,19 +42,16 @@ def manage_users():
 @login_required
 @admin_required
 def edit_user(id):
-    """
-    Mengizinkan admin mengedit data pengguna (username, email, role) dengan proteksi logika bisnis.
+    """Mengizinkan admin mengedit profil pengguna lain, termasuk username, email, dan peran.
 
-    Mencegah admin mengubah perannya sendiri menjadi 'user' (untuk menjaga akses).
-    Menggunakan formulir khusus dengan validasi keunikan username/email hanya
-    jika nilai diubah. Saat GET, formulir diisi dengan data asli; saat POST valid,
-    perubahan disimpan ke database.
+    Mencegah perubahan peran admin pada akun sendiri dan memastikan validasi unik pada
+    username dan email.
 
     Args:
         id (int): ID pengguna yang akan diedit.
 
     Returns:
-        Response: Render formulir edit (GET) atau redirect ke daftar pengguna (POST sukses).
+        Response: Render formulir edit jika GET, atau redirect ke daftar pengguna jika sukses.
     """
     user_to_edit = User.query.filter_by(id=id).first_or_404()
     form = AdminEditUserForm(original_user=user_to_edit)
@@ -91,22 +79,16 @@ def edit_user(id):
 @login_required
 @admin_required
 def hapus_user(id):
-    """
-    Menghapus akun pengguna dengan validasi keamanan dan aturan bisnis ketat.
+    """Menghapus pengguna dari sistem dengan validasi keamanan.
 
-    Memastikan tiga kondisi:
-    1. Admin tidak dapat menghapus akunnya sendiri,
-    2. Tidak boleh menghapus admin terakhir (minimal satu admin harus tersedia),
-    3. Permintaan harus valid (termasuk token CSRF).
-
-    Jika salah satu kondisi dilanggar, operasi dibatalkan dengan pesan error.
-    Hanya dapat diakses oleh admin melalui metode POST.
+    Mencegah penghapusan akun sendiri dan memastikan setidaknya satu admin tetap ada.
+    Menggunakan formulir CSRF untuk keamanan POST request.
 
     Args:
         id (int): ID pengguna yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar pengguna dengan pesan status (sukses/error).
+        Response: Redirect ke daftar pengguna dengan pesan status operasi.
     """
     user_to_delete = db.session.get(User, id)
     if user_to_delete is None:
@@ -137,16 +119,12 @@ def hapus_user(id):
 @login_required
 @admin_required
 def manage_wisata():
-    """
-    Menampilkan daftar semua destinasi wisata untuk manajemen konten admin.
+    """Menampilkan daftar semua tempat wisata untuk dikelola oleh admin.
 
-    Data diurutkan secara alfabetis berdasarkan nama. Setiap entri dapat dihapus
-    atau diedit melalui antarmuka yang dilindungi CSRF (formulir kosong disertakan).
-    Halaman ini menjadi titik masuk utama untuk pemeliharaan konten wisata di Banyumas.
+    Data diurutkan berdasarkan nama secara alfabetis.
 
     Returns:
-        Response: Render template 'admin/manage_wisata.html' dengan daftar wisata
-                  dan formulir hapus untuk keamanan operasi administratif.
+        Response: Render halaman manajemen tempat wisata dengan daftar dan formulir hapus.
     """
     semua_wisata = Wisata.query.order_by(Wisata.nama).all()
 
@@ -158,17 +136,12 @@ def manage_wisata():
 @login_required
 @admin_required
 def manage_event():
-    """
-    Menampilkan daftar event budaya untuk pengelolaan agenda lokal oleh admin.
+    """Menampilkan daftar semua acara (event) untuk dikelola oleh admin.
 
-    Data diurutkan dari event terbaru ke terlama berdasarkan tanggal pelaksanaan.
-    Setiap entri dilengkapi formulir hapus aman (CSRF-protected) untuk mencegah
-    penghapusan tidak sah. Digunakan untuk memastikan akurasi dan kelengkapan
-    informasi kegiatan budaya di Jawa Tengah.
+    Data diurutkan berdasarkan tanggal pelaksanaan secara menurun (terbaru di atas).
 
     Returns:
-        Response: Render template 'admin/manage_event.html' dengan daftar event
-                  dan formulir hapus untuk keamanan operasi administratif.
+        Response: Render halaman manajemen acara dengan daftar dan formulir hapus.
     """
     semua_event = Event.query.order_by(Event.tanggal.desc()).all()
 
@@ -180,17 +153,12 @@ def manage_event():
 @login_required
 @admin_required
 def manage_paket_wisata():
-    """
-    Menampilkan daftar paket wisata gabungan untuk verifikasi dan pemeliharaan konten.
+    """Menampilkan daftar semua paket wisata untuk dikelola oleh admin.
 
-    Data diurutkan berdasarkan nama secara alfabetis. Setiap paket dapat dihapus
-    atau diedit melalui antarmuka yang dilindungi CSRF (formulir kosong disertakan).
-    Halaman ini memastikan konsistensi dan kualitas paket perjalanan yang ditawarkan
-    kepada pengguna Lelana.id.
+    Data diurutkan berdasarkan nama secara alfabetis.
 
     Returns:
-        Response: Render template 'admin/manage_paket_wisata.html' dengan daftar paket
-                  dan formulir hapus untuk keamanan operasi administratif.
+        Response: Render halaman manajemen paket wisata dengan daftar dan formulir hapus.
     """
     semua_paket = PaketWisata.query.order_by(PaketWisata.nama).all()
     

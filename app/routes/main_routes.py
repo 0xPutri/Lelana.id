@@ -13,22 +13,16 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    """
-    Menampilkan halaman utama (landing page) Lelana.id dengan konten dinamis unggulan.
+    """Menampilkan halaman utama situs dengan konten unggulan.
 
-    Memuat empat jenis konten utama:
-    - 3 destinasi wisata terpopuler berdasarkan jumlah ulasan dan rata-rata rating,
-    - 3 event budaya mendatang (tanggal ≥ hari ini), diurutkan dari yang paling dekat,
-    - 3 itinerari perjalanan terbaru dari komunitas pengguna,
-    - Semua paket wisata yang ditandai sebagai promosi (`is_promoted=True`).
-
-    Query destinasi menggunakan agregasi (COUNT, AVG) dan outer join untuk
-    menampilkan peringkat berdasarkan partisipasi pengguna. Halaman ini bersifat
-    publik dan menjadi pintu masuk utama bagi pengunjung baru untuk menjelajahi
-    kekayaan wisata dan budaya Banyumas melalui Lelana.id.
+    Menyajikan:
+    - 3 destinasi wisata terpopuler berdasarkan jumlah ulasan dan rating rata-rata,
+    - 3 acara mendatang yang diurutkan berdasarkan tanggal terdekat,
+    - 3 itinerari terbaru yang dibuat pengguna,
+    - Semua paket wisata yang ditandai sebagai promosi.
 
     Returns:
-        Response: Render template 'main/index.html' dengan data konten unggulan.
+        Response: Render template halaman utama dengan data konten unggulan.
     """
     destinasi_unggulan = db.session.query(
         Wisata,
@@ -54,19 +48,14 @@ def index():
 @main.route('/profile')
 @login_required
 def profile():
-    """
-    Menampilkan halaman profil pribadi pengguna yang sedang login.
+    """Menampilkan halaman profil pengguna yang sedang login.
 
-    Memuat data aktivitas pengguna secara lengkap, meliputi:
-    - Daftar ulasan yang pernah dibuat, dilengkapi informasi destinasi terkait
-      (dimuat secara eager menggunakan joinedload untuk efisiensi query),
-    - Daftar itinerari perjalanan yang dibuat, diurutkan dari yang terbaru.
-
-    Hanya dapat diakses oleh pengguna terautentikasi. Halaman ini menjadi pusat
-    manajemen identitas dan kontribusi pengguna di ekosistem Lelana.id.
+    Memuat daftar ulasan dan itinerari yang dibuat oleh pengguna saat ini,
+    diurutkan berdasarkan waktu pembuatan (terbaru di atas). Ulasan mencakup
+    informasi tempat wisata yang diulas melalui eager loading.
 
     Returns:
-        Response: Render template 'main/profile.html' dengan data pengguna dan aktivitasnya.
+        Response: Render template profil pengguna dengan data ulasan dan itinerari.
     """
     ulasan_pengguna = Review.query.filter_by(user_id=current_user.id)\
         .options(joinedload(Review.wisata_reviewed))\
@@ -84,14 +73,11 @@ def profile():
 
 @main.route('/peta-wisata')
 def peta_wisata():
-    """
-    Menampilkan halaman peta interaktif destinasi wisata di Banyumas.
+    """Menampilkan halaman peta interaktif tempat wisata.
 
-    Mengintegrasikan data lokasi (latitude/longitude) dari model Wisata untuk
-    menampilkan marker pada peta berbasis web (misalnya Leaflet atau Google Maps).
-    Dapat diakses secara publik sebagai fitur eksplorasi destinasi.
+    Template ini diharapkan menampilkan lokasi wisata berbasis koordinat geografis.
 
     Returns:
-        Response: Render template 'main/peta.html'.
+        Response: Render template peta wisata.
     """
     return render_template('main/peta.html')

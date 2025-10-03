@@ -10,17 +10,13 @@ event = Blueprint('event', __name__)
 
 @event.route('/event')
 def list_event():
-    """
-    Menampilkan daftar event budaya lokal dengan paginasi dan formulir hapus aman.
+    """Menampilkan daftar event dengan pagination.
 
-    Data diurutkan dari event terbaru ke terlama berdasarkan tanggal pelaksanaan,
-    dengan 5 entri per halaman. Setiap halaman menyertakan formulir kosong (FlaskForm)
-    untuk mendukung operasi penghapusan oleh admin melalui POST yang dilindungi CSRF.
-    Halaman ini bersifat publik dan menjadi agenda digital kegiatan budaya di Jawa Tengah.
+    Menyajikan event yang diurutkan berdasarkan tanggal pelaksanaan (terbaru di atas),
+    dengan 5 item per halaman. Menyertakan formulir hapus untuk keamanan CSRF.
 
     Returns:
-        Response: Render template 'event/list.html' dengan data paginasi event
-                  dan formulir hapus untuk keamanan administrasi konten.
+        Response: Render template daftar event dengan data pagination.
     """
     page = request.args.get('page', 1, type=int)
     pagination = Event.query.order_by(Event.tanggal.desc()).paginate(
@@ -37,18 +33,16 @@ def list_event():
 
 @event.route('/event/detail/<int:id>')
 def detail_event(id):
-    """
-    Menampilkan informasi lengkap dari satu event berdasarkan ID.
-
-    Berisi nama, tanggal, lokasi, deskripsi, dan penyelenggara (jika ada).
-    Halaman ini menjadi sumber utama informasi bagi pengguna yang ingin
-    menghadiri atau memahami konteks acara budaya di Jawa Tengah.
+    """Menampilkan detail lengkap suatu event berdasarkan ID.
 
     Args:
-        id (int): ID event yang akan ditampilkan.
+        id (int): ID unik event yang ingin dilihat.
 
     Returns:
-        Response: Render template 'event/detail.html' dengan objek event.
+        Response: Render template detail event jika ditemukan.
+
+    Raises:
+        HTTPException: 404 Not Found jika event tidak ada.
     """
     event_item = db.session.get(Event, id)
     if event_item is None:
@@ -60,15 +54,13 @@ def detail_event(id):
 @login_required
 @admin_required
 def tambah_event():
-    """
-    Menangani penambahan event budaya baru oleh admin.
+    """Menangani penambahan event baru oleh admin.
 
-    Saat GET: menampilkan formulir input data event.
-    Saat POST dan valid: menyimpan event ke database dengan tanggal pelaksanaan
-    dan informasi pendukung. Hanya dapat diakses oleh pengguna berperan 'admin'.
+    Hanya dapat diakses oleh pengguna terautentikasi dengan peran admin.
+    Menggunakan formulir EventForm untuk validasi input.
 
     Returns:
-        Response: Render formulir tambah (GET) atau redirect ke daftar event (POST sukses).
+        Response: Render formulir tambah jika GET, atau redirect ke daftar event jika sukses.
     """
     form = EventForm()
     if form.validate_on_submit():
@@ -91,18 +83,19 @@ def tambah_event():
 @login_required
 @admin_required
 def edit_event(id):
-    """
-    Menangani pembaruan data event yang sudah terdaftar.
+    """Menangani pembaruan data event oleh admin.
 
-    Memuat event berdasarkan ID, lalu menampilkan formulir terisi saat GET.
-    Saat POST dan valid, memperbarui semua field termasuk tanggal dan lokasi.
-    Perubahan langsung disimpan ke database dan pengguna dialihkan ke halaman detail.
+    Memuat data event yang ada ke dalam formulir dan menyimpan perubahan
+    setelah validasi berhasil.
 
     Args:
         id (int): ID event yang akan diedit.
 
     Returns:
-        Response: Render formulir edit (GET) atau redirect ke detail event (POST sukses).
+        Response: Render formulir edit jika GET, atau redirect ke detail event jika sukses.
+
+    Raises:
+        HTTPException: 404 Not Found jika event tidak ditemukan.
     """
     event_item = db.session.get(Event, id)
     if event_item is None:
@@ -125,20 +118,19 @@ def edit_event(id):
 @login_required
 @admin_required
 def hapus_event(id):
-    """
-    Menghapus event dari sistem berdasarkan ID dengan validasi keamanan CSRF.
+    """Menghapus event dari sistem berdasarkan ID.
 
-    Hanya dapat diakses oleh admin dan hanya menerima metode POST. Memerlukan
-    formulir valid (termasuk token CSRF) untuk mencegah penghapusan tidak sah
-    melalui tautan langsung atau serangan otomatis. Jika validasi gagal,
-    pengguna diberi pesan error tanpa mengubah data.
+    Memerlukan validasi formulir CSRF untuk mencegah serangan cross-site request forgery.
+    Hanya dapat diakses oleh admin.
 
     Args:
         id (int): ID event yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar event dengan pesan sukses jika permintaan valid,
-                  atau pesan error jika sesi kedaluwarsa atau token tidak sesuai.
+        Response: Redirect ke daftar event dengan pesan status operasi.
+
+    Raises:
+        HTTPException: 404 Not Found jika event tidak ditemukan.
     """
     event_item = db.session.get(Event, id)
     if event_item is None:

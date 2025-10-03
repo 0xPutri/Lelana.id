@@ -20,26 +20,16 @@ migrate = Migrate(app, db)
 
 @app.shell_context_processor
 def make_shell_context():
-    """
-    Menyediakan konteks shell interaktif Flask dengan objek-objek inti aplikasi
-    untuk keperluan debugging, pengujian manual, dan eksplorasi data selama
-    pengembangan.
+    """Menyediakan konteks variabel yang tersedia saat menggunakan Flask shell.
 
     Fungsi ini secara otomatis memuat instance database dan model-model utama
-    Lelana.id ke dalam lingkungan Flask shell, sehingga developer dapat
-    langsung berinteraksi dengan model seperti User, Wisata, Review, dll.
-    tanpa perlu mengimpor ulang secara manual.
-
-    Digunakan terutama selama fase implementasi dan pengujian perangkat lunak
-    untuk memverifikasi struktur data, operasi CRUD, serta relasi antar entitas
-    dalam database SQLite.
+    ke dalam lingkungan shell Flask, sehingga pengembang dapat mengaksesnya
+    secara langsung tanpa perlu mengimpor ulang.
 
     Returns:
-        dict: Kamus berisi pasangan nama-objek yang akan tersedia di Flask shell,
-              mencakup:
-              - 'db': instance SQLAlchemy untuk operasi database,
-              - Model-model domain: User, Wisata, Event, PaketWisata,
-                Itinerari, Review, dan FotoUlasan.
+        dict: Dictionary berisi objek-objek yang akan tersedia di Flask shell,
+              termasuk `db`, `User`, `Wisata`, `Event`, `PaketWisata`,
+              `Itinerari`, `Review`, dan `FotoUlasan`.
     """
     return dict(
         db=db, User=User, Wisata=Wisata, Event=Event, PaketWisata=PaketWisata,

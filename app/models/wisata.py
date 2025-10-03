@@ -2,29 +2,23 @@ from app import db
 from datetime import datetime, timezone
 
 class Wisata(db.Model):
-    """
-    Model destinasi wisata yang menjadi inti konten Lelana.id.
+    """Model untuk merepresentasikan tempat wisata dalam sistem.
 
-    Menyimpan informasi lengkap tentang tempat wisata di wilayah Banyumas dan
-    sekitarnya, termasuk deskripsi, lokasi, kategori, serta koordinat GPS
-    opsional untuk integrasi peta. Setiap entri otomatis dicatat waktu
-    pembuatannya.
+    Menyimpan informasi lengkap tentang destinasi wisata, termasuk lokasi geografis,
+    kategori, deskripsi, dan tautan gambar. Tempat wisata dapat dikaitkan dengan
+    banyak ulasan dari pengguna.
 
-    Atribut:
-        id (int): Primary key unik.
-        nama (str): Nama destinasi wisata (diindeks untuk pencarian cepat).
-        kategori (str): Jenis wisata (misal: alam, budaya, religi, kuliner).
-        lokasi (str): Alamat atau deskripsi lokasi lengkap.
-        deskripsi (str): Informasi naratif tentang wisata (wajib).
-        gambar_url (str, optional): URL gambar utama dari sumber eksternal.
-        latitude (float, optional): Koordinat lintang untuk peta interaktif.
-        longitude (float, optional): Koordinat bujur untuk peta interaktif.
-        tanggal_dibuat (datetime): Waktu entri dibuat (default: UTC).
-
-    Relasi:
-        reviews (dynamic relationship): Daftar ulasan pengguna untuk destinasi ini.
-            Menggunakan cascade "delete-orphan" agar ulasan otomatis terhapus
-            jika destinasi dihapus.
+    Attributes:
+        id (int): Identifier unik tempat wisata (primary key).
+        nama (str): Nama tempat wisata; maksimal 100 karakter; wajib diisi.
+        kategori (str): Kategori wisata (misalnya alam, budaya, kuliner); maksimal 50 karakter; wajib diisi.
+        lokasi (str): Alamat atau deskripsi lokasi; maksimal 200 karakter; wajib diisi.
+        deskripsi (str): Deskripsi lengkap tempat wisata; wajib diisi.
+        gambar_url (str or None): URL gambar utama tempat wisata; opsional; maksimal 255 karakter.
+        latitude (float or None): Koordinat lintang lokasi; opsional.
+        longitude (float or None): Koordinat bujur lokasi; opsional.
+        tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
+        reviews (list[Review]): Daftar ulasan yang diberikan untuk tempat wisata ini.
     """
     __tablename__ = 'wisata'
 
@@ -44,12 +38,9 @@ class Wisata(db.Model):
     reviews = db.relationship('Review', backref='wisata_reviewed', lazy='dynamic', cascade="all, delete-orphan")
 
     def __repr__(self):
-        """
-        Menyediakan representasi string singkat untuk debugging dan logging.
-
-        Format: <Wisata nama_wisata>
+        """Mengembalikan representasi string dari objek Wisata untuk debugging.
 
         Returns:
-            str: Representasi objek Wisata yang mudah dibaca oleh developer.
+            str: Representasi string berformat '<Wisata {nama}>'.
         """
         return f'<Wisata {self.nama}>'

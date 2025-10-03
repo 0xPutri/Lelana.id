@@ -4,30 +4,21 @@ import magic
 from flask import current_app
 
 def save_pictures(form_pictures):
-    """
-    Menyimpan file gambar yang diunggah ke direktori upload dengan validasi keamanan ganda.
+    """Menyimpan satu atau beberapa file gambar yang diunggah ke direktori upload.
 
-    Setiap file diverifikasi berdasarkan tipe MIME aktual (bukan hanya ekstensi)
-    menggunakan library python-magic untuk mencegah unggahan berbahaya.
-    Setelah lolos validasi, file diberi nama unik (UUID4 + ekstensi asli) dan
-    disimpan di folder UPLOAD_FOLDER. Nama file tidak disanitasi ulang karena
-    ekstensi berasal dari MIME yang telah diverifikasi.
-
-    Digunakan saat pengguna mengirim ulasan dengan foto atau admin mengelola konten.
+    Fungsi ini melakukan validasi keamanan berbasis MIME type (bukan hanya ekstensi),
+    menghasilkan nama file unik menggunakan UUID, dan menyimpan file ke lokasi
+    yang dikonfigurasi di `UPLOAD_FOLDER`.
 
     Args:
-        form_pictures (list[FileStorage]): Daftar file dari MultipleFileField WTForms.
+        form_pictures (list[FileStorage]): Daftar objek file dari formulir Flask-WTF.
 
     Returns:
-        list[str]: Daftar nama file yang berhasil disimpan (tanpa path), siap disimpan ke database.
+        list[str]: Daftar nama file yang berhasil disimpan (tanpa path lengkap).
 
     Raises:
-        ValueError: Jika salah satu file memiliki tipe MIME yang tidak diizinkan
-                    (hanya 'image/jpeg', 'image/png', dan 'image/gif' yang diterima).
-
-    Catatan:
-        Fungsi ini membaca 2048 byte pertama dari stream untuk deteksi MIME,
-        lalu mengembalikan posisi stream ke awal agar file dapat disimpan utuh.
+        ValueError: Jika salah satu file bukan gambar dengan MIME type yang diizinkan
+                    (hanya 'image/jpeg', 'image/png', 'image/gif').
     """
     saved_filenames = []
 

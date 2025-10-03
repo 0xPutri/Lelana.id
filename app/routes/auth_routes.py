@@ -1,24 +1,22 @@
-from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask_login import login_user, logout_user, login_required, current_user
 from app import db, limiter
 from app.models.user import User
 from app.forms import LoginForm, RegistrationForm
+from app.services.email_handler import send_email
 
 auth = Blueprint('auth', __name__)
 
 @auth.route('/register', methods=['GET', 'POST'])
 @limiter.limit("5 per hour") # Batasi pendaftaran 5 kali per jam per IP
 def register():
-    """
-    Menangani pendaftaran akun pengguna baru di Lelana.id.
+    """Menangani pendaftaran pengguna baru dengan pembatasan laju dan konfirmasi email.
 
-    Saat metode GET: menampilkan formulir registrasi.
-    Saat metode POST dan data valid: membuat akun pengguna baru, menyimpan ke
-    database dengan password dalam bentuk hash, lalu mengarahkan ke halaman login.
-    Validasi keunikan username dan email dilakukan secara otomatis oleh formulir.
+    Pengguna yang mendaftar akan dibuat, diautentikasi secara otomatis, dan menerima
+    email konfirmasi. Akses dibatasi maksimal 5 pendaftaran per jam per alamat IP.
 
     Returns:
-        Response: Render template registrasi (GET) atau redirect ke login (POST sukses).
+        Response: Redirect ke halaman utama jika sukses, atau render formulir registrasi.
     """
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -31,24 +29,96 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash('Selamat! Akun Anda berhasil dibuat. Silakan login.', 'success')
-        return redirect(url_for('auth.login'))
+        token = user.generate_confirmation_token()
+        send_email(user.email, 'Konfirmasi Akun Lelana.id Anda', 
+                   'auth/email/confirm', user=user, token=token)
+        
+        login_user(user)
+        flash('Registrasi berhasil! Email konfirmasi telah dikirim. Silakan periksa email Anda.', 'success')
+        return redirect(url_for('main.index'))
     
     return render_template('auth/register.html', form=form)
+
+@auth.route('/confirm/<token>')
+def confirm(token):
+    """Memverifikasi token konfirmasi email dan mengaktifkan akun pengguna.
+
+    Jika token valid dan belum kedaluwarsa, status `is_confirmed` pengguna diubah
+    menjadi True. Pengguna otomatis login jika belum terautentikasi.
+
+    Args:
+        token (str): Token konfirmasi unik yang dikirim melalui email.
+
+    Returns:
+        Response: Redirect ke halaman utama dengan pesan sukses atau error.
+    """
+    if current_user.is_authenticated and current_user.is_confirmed:
+        return redirect(url_for('main.index'))
+    
+    user = User.confirm(token)
+    if user:
+        db.session.commit()
+        if not current_user.is_authenticated:
+            login_user(user)
+        flash('Anda telah berhasil mengkonfirmasi akun Anda. Terima kasih!', 'success')
+    else:
+        flash('Tautan konfirmasi tidak valid atau telah kedaluwarsa.', 'danger')
+    return redirect(url_for('main.index'))
+
+@auth.before_app_request
+def before_request():
+    """Memaksa pengguna yang belum mengonfirmasi email untuk mengakses halaman konfirmasi.
+
+    Middleware ini mencegah akses ke seluruh rute (kecuali blueprint 'auth' dan static)
+    jika pengguna sudah login tetapi belum mengonfirmasi alamat emailnya.
+    """
+    if current_user.is_authenticated \
+            and not current_user.is_confirmed \
+            and request.blueprint != 'auth' \
+            and request.endpoint != 'static':
+        return redirect(url_for('auth.unconfirmed'))
+
+@auth.route('/unconfirmed')
+def unconfirmed():
+    """Menampilkan halaman pemberitahuan untuk pengguna yang belum mengonfirmasi email.
+
+    Hanya tersedia untuk pengguna terautentikasi yang status konfirmasinya masih False.
+
+    Returns:
+        Response: Render halaman unconfirmed.html atau redirect ke index jika tidak relevan.
+    """
+    if current_user.is_anonymous or current_user.is_confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('auth/unconfirmed.html')
+
+@auth.route('/confirm')
+@login_required
+@limiter.limit("3 per 24 hours")
+def resend_confirmation():
+    """Mengirim ulang email konfirmasi akun kepada pengguna yang sudah login.
+
+    Dibatasi maksimal 3 permintaan dalam 24 jam per pengguna untuk mencegah penyalahgunaan.
+
+    Returns:
+        Response: Redirect ke halaman utama dengan notifikasi pengiriman email.
+    """
+    token = current_user.generate_confirmation_token()
+    send_email(current_user.email, 'Konfirmasi Akun Lelana.id Anda', 
+               'auth/email/confirm', user=current_user, token=token)
+    
+    flash('Email konfirmasi baru telah dikirimkan.', 'success')
+    return redirect(url_for('main.index'))
 
 @auth.route('/login', methods=['GET', 'POST'])
 @limiter.limit("5 per minute") # Batasi percobaan login 5 kali per menit per IP
 def login():
-    """
-    Menangani proses login pengguna yang telah terdaftar.
+    """Menangani proses login pengguna dengan validasi kredensial dan rate limiting.
 
-    Saat metode GET: menampilkan formulir login.
-    Saat metode POST: memverifikasi kredensial (email + password). Jika valid,
-    pengguna diautentikasi melalui Flask-Login dan sesi dimulai. Opsi "Ingat Saya"
-    mempertahankan sesi antar kunjungan. Jika gagal, ditampilkan pesan error.
+    Memverifikasi email dan password, lalu mengautentikasi pengguna jika valid.
+    Dibatasi maksimal 5 percobaan login per menit per alamat IP.
 
     Returns:
-        Response: Render template login (GET atau gagal) atau redirect ke beranda (sukses).
+        Response: Redirect ke halaman utama jika login sukses, atau render formulir login.
     """
     form = LoginForm()
     if form.validate_on_submit():
@@ -65,15 +135,12 @@ def login():
 @auth.route('/logout')
 @login_required
 def logout():
-    """
-    Mengakhiri sesi pengguna yang sedang aktif.
+    """Melakukan logout pengguna yang sedang login.
 
-    Hanya dapat diakses oleh pengguna terautentikasi (dilindungi oleh @login_required).
-    Memanggil logout_user() dari Flask-Login untuk membersihkan sesi, lalu
-    mengarahkan kembali ke halaman utama dengan pesan konfirmasi.
+    Menghapus sesi pengguna dan menampilkan pesan konfirmasi.
 
     Returns:
-        Response: Redirect ke halaman utama (main.index) setelah logout.
+        Response: Redirect ke halaman utama setelah logout.
     """
     logout_user() # Fungsi ini dari Flask-Login, akan menghapus user dari session
     flash('Anda telah berhasil logout.', 'info')

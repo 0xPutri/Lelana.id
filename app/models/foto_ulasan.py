@@ -1,24 +1,16 @@
 from app import db
 
 class FotoUlasan(db.Model):
-    """
-    Model penyimpanan metadata foto yang diunggah sebagai lampiran ulasan.
+    """Model untuk menyimpan metadata file foto yang terkait dengan ulasan pengguna.
 
-    Menyimpan nama file unik dari foto yang diunggah pengguna saat memberikan
-    ulasan destinasi wisata. File fisik disimpan di direktori upload, sedangkan
-    entri ini hanya mencatat referensi nama file dan kaitannya dengan ulasan
-    terkait. Memungkinkan satu ulasan memiliki banyak foto.
+    Setiap entri merepresentasikan satu file gambar yang diunggah sebagai bagian
+    dari ulasan wisata atau acara. Foto ini selalu dikaitkan dengan satu ulasan
+    melalui relasi foreign key.
 
-    Atribut:
-        id (int): Primary key unik.
-        nama_file (str): Nama file unik (misal: a1b2c3d4.jpg) yang disimpan di server.
-
-    Foreign Key:
-        review_id (int): ID ulasan yang memiliki foto ini (merujuk ke tabel 'reviews').
-
-    Catatan:
-        File asli disimpan di folder `app/static/uploads/`, sehingga path lengkap
-        dapat dibentuk dengan menggabungkan konfigurasi UPLOAD_FOLDER dan nama_file.
+    Attributes:
+        id (int): Identifier unik foto ulasan (primary key).
+        nama_file (str): Nama file foto; maksimal 100 karakter; wajib diisi.
+        review_id (int): ID ulasan terkait; merujuk ke tabel 'reviews'; wajib diisi.
     """
     __tablename__ = 'foto_ulasan'
 
@@ -28,12 +20,9 @@ class FotoUlasan(db.Model):
     review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
 
     def __repr__(self):
-        """
-        Menyediakan representasi string informatif untuk debugging dan logging.
-
-        Format: <FotoUlasan nama_file>
+        """Mengembalikan representasi string dari objek FotoUlasan untuk debugging.
 
         Returns:
-            str: Representasi objek FotoUlasan berdasarkan nama file yang disimpan.
+            str: Representasi string berformat '<FotoUlasan {nama_file}>'.
         """
         return f'<FotoUlasan {self.nama_file}>'
