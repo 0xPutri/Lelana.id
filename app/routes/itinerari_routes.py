@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
-from app import db
+from app import db, limiter
 from app.models.itinerari import Itinerari
 from app.forms import ItinerariForm
 from sqlalchemy.orm import joinedload
@@ -50,6 +50,7 @@ def detail_itinerari(id):
 
 @itinerari.route('/itinerari/buat', methods=['GET', 'POST'])
 @login_required
+@limiter.limit("20 per hour", methods=["POST"], key_func=lambda: current_user.id)
 def buat_itinerari():
     """Menangani pembuatan itinerari baru oleh pengguna terautentikasi.
 
@@ -78,6 +79,7 @@ def buat_itinerari():
 
 @itinerari.route('/itinerari/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
+@limiter.limit("20 per hour", methods=["POST"], key_func=lambda: current_user.id)
 def edit_itinerari(id):
     """Menangani pembaruan itinerari oleh pemiliknya.
 
@@ -114,6 +116,7 @@ def edit_itinerari(id):
 
 @itinerari.route('/itinerari/hapus/<int:id>', methods=['POST'])
 @login_required
+@limiter.limit("20 per hour", key_func=lambda: current_user.id)
 def hapus_itinerari(id):
     """Menghapus itinerari dari sistem berdasarkan ID.
 

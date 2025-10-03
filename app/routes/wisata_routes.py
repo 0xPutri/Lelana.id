@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request, jsonify
 from flask_login import login_required, current_user
-from app import db
+from app import db, limiter
 from app.models.wisata import Wisata
 from app.models.review import Review
 from app.models.foto_ulasan import FotoUlasan
@@ -40,6 +40,7 @@ def list_wisata():
                             delete_form=delete_form)
 
 @wisata.route('/wisata/detail/<int:id>', methods=['GET', 'POST'])
+@limiter.limit("10 per hour", methods=["POST"], key_func=lambda: current_user.id)
 def detail_wisata(id):
     """Menampilkan detail tempat wisata dan menangani pengiriman ulasan.
 
@@ -99,6 +100,7 @@ def detail_wisata(id):
 @wisata.route('/wisata/tambah', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def tambah_wisata():
     """Menangani penambahan tempat wisata baru oleh admin.
 
@@ -130,6 +132,7 @@ def tambah_wisata():
 @wisata.route('/wisata/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def edit_wisata(id):
     """Menangani pembaruan data tempat wisata oleh admin.
 
@@ -168,6 +171,7 @@ def edit_wisata(id):
 @wisata.route('/wisata/hapus/<int:id>', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def hapus_wisata(id):
     """Menghapus tempat wisata dari sistem berdasarkan ID.
 
@@ -196,6 +200,7 @@ def hapus_wisata(id):
     return redirect(url_for('wisata.list_wisata'))
 
 @wisata.route('/api/wisata/lokasi')
+@limiter.limit("60 per minute")
 def api_lokasi_wisata():
     """Menyediakan endpoint API untuk mendapatkan lokasi wisata berkoordinat.
 

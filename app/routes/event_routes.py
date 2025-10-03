@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required
-from app import db
+from app import db, limiter
 from app.models.event import Event
 from app.forms import EventForm
 from app.utils.decorators import admin_required
@@ -53,6 +53,7 @@ def detail_event(id):
 @event.route('/event/tambah', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute", methods=["POST"])
 def tambah_event():
     """Menangani penambahan event baru oleh admin.
 
@@ -82,6 +83,7 @@ def tambah_event():
 @event.route('/event/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute", methods=["POST"])
 def edit_event(id):
     """Menangani pembaruan data event oleh admin.
 
@@ -117,6 +119,7 @@ def edit_event(id):
 @event.route('/event/hapus/<int:id>', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def hapus_event(id):
     """Menghapus event dari sistem berdasarkan ID.
 

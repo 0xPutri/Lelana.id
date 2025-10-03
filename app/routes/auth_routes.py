@@ -110,7 +110,7 @@ def resend_confirmation():
     return redirect(url_for('main.index'))
 
 @auth.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute") # Batasi percobaan login 5 kali per menit per IP
+@limiter.limit("100 per day; 20 per hour; 5 per minute")
 def login():
     """Menangani proses login pengguna dengan validasi kredensial dan rate limiting.
 

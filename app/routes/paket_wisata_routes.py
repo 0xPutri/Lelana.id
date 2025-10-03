@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import login_required
-from app import db
+from app import db, limiter
 from app.models.paket_wisata import PaketWisata
 from app.forms import PaketWisataForm
 from app.utils.decorators import admin_required
@@ -48,6 +48,7 @@ def detail_paket(id):
 @paket_wisata.route('/paket-wisata/tambah', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute", methods=["POST"])
 def tambah_paket():
     """Menangani penambahan paket wisata baru oleh admin.
 
@@ -78,6 +79,7 @@ def tambah_paket():
 @paket_wisata.route('/paket-wisata/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute", methods=["POST"])
 def edit_paket(id):
     """Menangani pembaruan data paket wisata oleh admin.
 
@@ -113,6 +115,7 @@ def edit_paket(id):
 @paket_wisata.route('/paket-wisata/hapus/<int:id>', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def hapus_paket(id):
     """Menghapus paket wisata dari sistem berdasarkan ID.
 

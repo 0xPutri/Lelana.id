@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, abort, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.utils.decorators import admin_required
-from app import db
+from app import db, limiter
 from app.models.wisata import Wisata
 from app.models.user import User
 from app.models.event import Event
@@ -41,6 +41,7 @@ def manage_users():
 @admin.route('/admin/users/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute", methods=["POST"])
 def edit_user(id):
     """Mengizinkan admin mengedit profil pengguna lain, termasuk username, email, dan peran.
 
@@ -78,6 +79,7 @@ def edit_user(id):
 @admin.route('/admin/users/hapus/<int:id>', methods=['POST'])
 @login_required
 @admin_required
+@limiter.limit("30 per minute")
 def hapus_user(id):
     """Menghapus pengguna dari sistem dengan validasi keamanan.
 
