@@ -90,10 +90,21 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
 
+class SecurityTestingConfig(DevelopmentConfig):
+    """Konfigurasi untuk pengujian keamanan (misal: SQLMap).
+    
+    Menggunakan database pengembangan tetapi menonaktifkan rate limiting, proteksi CSRF,
+    dan mengurangi proteksi sesi.
+    """
+    RATELIMIT_ENABLED = False
+    WTF_CSRF_ENABLED = False
+    SESSION_PROTECTION = 'basic'
+
 # Dictionary untuk mengakses kelas konfigurasi berdasarkan nama
 config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'production': ProductionConfig,
+    'security': SecurityTestingConfig,
     'default': DevelopmentConfig
 }
