@@ -5,6 +5,7 @@ from app.models.itinerari import Itinerari
 from app.forms import ItinerariForm
 from sqlalchemy.orm import joinedload
 from flask_wtf import FlaskForm
+from app.utils.text_filters import censor_text
 
 itinerari = Blueprint('itinerari', __name__)
 
@@ -54,8 +55,9 @@ def detail_itinerari(id):
 def buat_itinerari():
     """Menangani pembuatan itinerari baru oleh pengguna terautentikasi.
 
-    Mengaitkan itinerari dengan pengguna saat ini dan menyimpan destinasi
-    yang dipilih melalui relasi many-to-many.
+    Judul dan deskripsi melewati penyaringan konten (censorship) untuk mencegah
+    penggunaan kata tidak pantas. Itinerari dikaitkan dengan pengguna saat ini
+    dan destinasi wisata yang dipilih melalui relasi many-to-many.
 
     Returns:
         Response: Render formulir buat jika GET, atau redirect ke detail itinerari jika sukses.
@@ -63,8 +65,8 @@ def buat_itinerari():
     form = ItinerariForm()
     if form.validate_on_submit():
         it_baru = Itinerari(
-            judul=form.judul.data,
-            deskripsi=form.deskripsi.data,
+            judul=censor_text(form.judul.data),
+            deskripsi=censor_text(form.deskripsi.data),
             penulis=current_user,
             wisata_termasuk=form.wisata_termasuk.data
         )
@@ -83,8 +85,9 @@ def buat_itinerari():
 def edit_itinerari(id):
     """Menangani pembaruan itinerari oleh pemiliknya.
 
-    Memastikan hanya pemilik itinerari yang dapat mengedit. Memperbarui judul,
-    deskripsi, dan daftar destinasi wisata.
+    Memastikan hanya pemilik itinerari yang dapat mengedit. Judul dan deskripsi
+    melewati penyaringan konten (censorship) sebelum disimpan. Memperbarui juga
+    daftar destinasi wisata yang termasuk dalam itinerari.
 
     Args:
         id (int): ID itinerari yang akan diedit.
@@ -104,8 +107,8 @@ def edit_itinerari(id):
 
     form = ItinerariForm(obj=it)
     if form.validate_on_submit():
-        it.judul = form.judul.data
-        it.deskripsi = form.deskripsi.data
+        it.judul = censor_text(form.judul.data)
+        it.deskripsi = censor_text(form.deskripsi.data)
         it.wisata_termasuk = form.wisata_termasuk.data
         db.session.commit()
 

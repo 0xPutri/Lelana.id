@@ -21,9 +21,9 @@ def create_app(config_name):
     """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
 
     Fungsi ini menginisialisasi ekstensi inti (database, login, rate limiting, email),
-    mendaftarkan blueprint untuk rute, dan mengatur loader pengguna untuk Flask-Login.
-    Digunakan sebagai factory pattern untuk memungkinkan konfigurasi fleksibel
-    (misalnya development, testing, production).
+    memuat filter teks (seperti penyaring kata kasar), mendaftarkan blueprint rute,
+    dan mengatur loader pengguna untuk Flask-Login. Menggunakan factory pattern
+    untuk mendukung berbagai lingkungan (development, testing, production).
 
     Args:
         config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`
@@ -35,10 +35,12 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
+    from .utils.text_filters import init_profanity_filter
+    init_profanity_filter(app)
+
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Menghubungkan limiter dengan instance aplikasi
     limiter.init_app(app)
 
     mail.init_app(app)

@@ -153,7 +153,7 @@ def password_reset_request():
             send_email(user.email, 'Reset Password Akun Lelana.id Anda',
                        'auth/email/reset_password',
                        user=user, token=token)
-        flash('Email berisi instruksi untuk reset password telah dikirimkan.', 'info')
+            flash('Jika email terdaftar di sistem kami, instruksi reset password telah dikirim.', 'info')
         return redirect(url_for('auth.login'))
     
     return render_template('auth/reset_password_request.html', form=form)

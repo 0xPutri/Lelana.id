@@ -9,6 +9,7 @@ from app.utils.decorators import admin_required
 from app.services.file_handler import save_pictures
 from sqlalchemy.orm import joinedload, subqueryload
 from flask_wtf import FlaskForm
+from app.utils.text_filters import censor_text
 import logging
 
 wisata = Blueprint('wisata', __name__)
@@ -44,9 +45,10 @@ def list_wisata():
 def detail_wisata(id):
     """Menampilkan detail tempat wisata dan menangani pengiriman ulasan.
 
-    Memungkinkan pengguna terautentikasi memberikan ulasan teks dan mengunggah
-    foto. Validasi dan penyimpanan file dilakukan melalui layanan terpisah.
-    Data ulasan dimuat dengan relasi penulis dan foto menggunakan eager loading.
+    Memungkinkan pengguna terautentikasi memberikan ulasan dengan komentar yang
+    telah melalui penyaringan konten (censorship). Mendukung unggah foto ulasan
+    dengan validasi tipe file dan penanganan error yang aman. Data ulasan dimuat
+    bersama penulis dan foto menggunakan eager loading untuk efisiensi query.
 
     Args:
         id (int): ID unik tempat wisata.
@@ -65,7 +67,7 @@ def detail_wisata(id):
     if form.validate_on_submit() and current_user.is_authenticated:
         review_baru = Review(
             rating=form.rating.data,
-            komentar=form.komentar.data,
+            komentar=censor_text(form.komentar.data),
             author=current_user,
             wisata_reviewed=w
         )

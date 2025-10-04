@@ -25,6 +25,7 @@ class Config:
         MAIL_USERNAME (str): Username autentikasi email.
         MAIL_PASSWORD (str): Password autentikasi email.
         MAIL_SENDER (tuple): Identitas pengirim email default.
+        BAD_WORDS_ID (list): Daftar kata terlarang untuk filtering konten.
     """
     WTF_CSRF_ENABLED = True
 
@@ -58,6 +59,9 @@ class Config:
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_SENDER = ('Tim Lelana.id', os.environ.get('MAIL_USERNAME'))
+
+    _bad_words_str = os.environ.get('BAD_WORDS_ID', '')
+    BAD_WORDS_ID = [word.strip() for word in _bad_words_str.split(',') if word.strip()]
 
 class DevelopmentConfig(Config):
     """Konfigurasi untuk lingkungan pengembangan.
