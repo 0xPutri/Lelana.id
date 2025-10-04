@@ -1,0 +1,100 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Chat dengan Putri{% endblock %}
+
+{% block content %}
+
+<h2>Tanya Putri, Asisten Wisata Lelana.id!</h2>
+<p>Punya pertanyaan seputar destinasi, kuliner, atau tips perjalanan? Tanyakan pada Putri!</p>
+
+<div class="chat-container">
+    <div class="chat-history" id="chat-history">
+        <div class="chat-message bot-message">
+            <div class="message-bubble">
+                Hai! Aku Putri, asisten wisatamu. Ada yang bisa kubantu?
+            </div>
+        </div>
+    </div>
+    <div class="chat-input">
+        <input type="text" id="user-input" placeholder="Ketik pertanyaanmu di sini..." autocomplete="off">
+        <button id="send-btn">Kirim</button>
+    </div>
+</div>
+
+<script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const csrfToken = '{{ csrf_token() }}';
+
+    function addMessage(sender, text) {
+        const messageContainer = document.createElement('div');
+        messageContainer.classList.add('chat-message', `${sender}-message`);
+        
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.classList.add('message-bubble');
+
+        const formattedText = text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/^\* /gm, '&bull; ')
+            .replace(/\n/g, '<br>');
+
+        bubbleDiv.innerHTML = formattedText;
+        
+        messageContainer.appendChild(bubbleDiv);
+        chatHistory.appendChild(messageContainer);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    async function askBot() {
+        const query = userInput.value.trim();
+        if (query === "") return;
+
+        addMessage('user', query);
+        userInput.value = "";
+        sendBtn.disabled = true;
+        
+        const thinkingMessage = document.createElement('div');
+        thinkingMessage.classList.add('chat-message', 'bot-message', 'thinking');
+        thinkingMessage.innerHTML = `<div class="message-bubble">Putri lagi mikir nih...</div>`;
+        chatHistory.appendChild(thinkingMessage);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+            const response = await fetch('{{ url_for("chatbot.ask_putri") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ query: query }),
+            });
+
+            chatHistory.removeChild(thinkingMessage);
+
+            if (!response.ok) {
+                addMessage('bot', "Maaf, terjadi error saat menghubungi Putri.");
+                return;
+            }
+
+            const data = await response.json();
+            addMessage('bot', data.response);
+
+        } catch (error) {
+            chatHistory.removeChild(thinkingMessage);
+            addMessage('bot', "Koneksi ke Putri gagal. Coba periksa jaringan internetmu.");
+            console.error("Fetch error:", error);
+        } finally {
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+    }
+
+    sendBtn.addEventListener('click', askBot);
+    userInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            askBot();
+        }
+    });
+</script>
+{% endblock %}

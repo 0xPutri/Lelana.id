@@ -27,6 +27,8 @@ class Config:
         MAIL_SENDER (tuple): Identitas pengirim email default.
         BAD_WORDS_ID (list): Daftar kata terlarang untuk filtering konten.
         ALLOWED_EMAIL_DOMAINS (list): Domain email yang diizinkan. 
+        GEMINI_API_KEY (str): Kunci API untuk mengakses layanan Gemini (Google Generative AI).
+        SERPER_API_KEY (str): Kunci API untuk mengakses layanan Serper (Search API).
     """
     WTF_CSRF_ENABLED = True
 
@@ -66,6 +68,9 @@ class Config:
 
     _allowed_domains_str = os.environ.get('ALLOWED_EMAIL_DOMAINS', 'gmail.com,hotmail.com,outlook.com,yahoo.com,ymail.com,live.com,icloud.com,me.com,mac.com,aol.com,protonmail.com,tutanota.com,zoho.com,gmx.com,mail.com,yandex.com,fastmail.com,hey.com,duck.com,inbox.com,hushmail.com,msn.com,qq.com,163.com,126.com,pm.me,proton.me,lelana.my.id')
     ALLOWED_EMAIL_DOMAINS = [domain.strip() for domain in _allowed_domains_str.split(',') if domain.strip()]
+
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+    SERPER_API_KEY = os.environ.get('SERPER_API_KEY')
 
 class DevelopmentConfig(Config):
     """Konfigurasi untuk lingkungan pengembangan.

@@ -5,6 +5,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from config import config
 from flask_mail import Mail
+from flask_wtf.csrf import CSRFProtect
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -16,6 +17,7 @@ limiter = Limiter(
     default_limits=["200 per day", "50 per hour"]
 )
 mail = Mail()
+csrf = CSRFProtect()
 
 def create_app(config_name):
     """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
@@ -44,6 +46,7 @@ def create_app(config_name):
     limiter.init_app(app)
 
     mail.init_app(app)
+    csrf.init_app(app)
 
     from .models.user import User
 
@@ -74,5 +77,8 @@ def create_app(config_name):
 
     from .routes.error_routes import errors as errors_blueprint
     app.register_blueprint(errors_blueprint)
+
+    from .routes.chatbot_routes import chatbot as chatbot_blueprint
+    app.register_blueprint(chatbot_blueprint)
 
     return app
