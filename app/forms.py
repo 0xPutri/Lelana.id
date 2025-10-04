@@ -249,3 +249,29 @@ class AdminEditUserForm(FlaskForm):
             user = User.query.filter_by(email=email.data).first()
             if user:
                 raise ValidationError('Email tersebut sudah terdaftar.')
+
+class PasswordResetRequestForm(FlaskForm):
+    """Formulir untuk meminta tautan reset password melalui email.
+
+    Memvalidasi bahwa email yang dimasukkan sesuai format dan wajib diisi.
+    Digunakan pada halaman permintaan pemulihan akun.
+    """
+    email = StringField('Email', 
+                        validators=[DataRequired(message='Email wajib diisi.'), 
+                                    Email(message='Format email tidak valid.')])
+    submit = SubmitField('Kirim Tautan Reset Password')
+
+class PasswordResetForm(FlaskForm):
+    """Formulir untuk menetapkan password baru setelah verifikasi token.
+
+    Memastikan password baru memenuhi panjang minimum dan cocok dengan
+    konfirmasi password. Digunakan setelah pengguna mengklik tautan reset
+    yang dikirim melalui email.
+    """
+    password = PasswordField('Password Baru', 
+                             validators=[DataRequired(message='Password wajib diisi.'), 
+                                         Length(min=6, message='Password minimal 6 karakter.')])
+    confirm_password = PasswordField('Konfirmasi Password Baru', 
+                                     validators=[DataRequired(message='Konfirmasi password wajib diisi.'), 
+                                                EqualTo('password', message='Password tidak cocok.')])
+    submit = SubmitField('Reset Password')

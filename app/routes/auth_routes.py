@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, limiter
 from app.models.user import User
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, PasswordResetForm, PasswordResetRequestForm
 from app.services.email_handler import send_email
 
 auth = Blueprint('auth', __name__)
@@ -131,6 +131,62 @@ def login():
         else:
             flash('Login gagal. Periksa kembali email dan password Anda.', 'danger')
     return render_template('auth/login.html', form=form)
+
+@auth.route('/reset-password', methods=['GET', 'POST'])
+@limiter.limit("3 per 24 hours")
+def password_reset_request():
+    """Menangani permintaan pengguna untuk mereset password yang lupa.
+
+    Jika email ditemukan, sistem mengirim tautan reset ke alamat tersebut.
+    Pengguna yang sudah login diarahkan ke halaman utama.
+
+    Returns:
+        Response: Render formulir permintaan reset jika GET, atau redirect ke login setelah pengiriman email.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    form = PasswordResetRequestForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user:
+            token = user.generate_reset_token()
+            send_email(user.email, 'Reset Password Akun Lelana.id Anda',
+                       'auth/email/reset_password',
+                       user=user, token=token)
+        flash('Email berisi instruksi untuk reset password telah dikirimkan.', 'info')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('auth/reset_password_request.html', form=form)
+
+@auth.route('/reset-password/<token>', methods=['GET', 'POST'])
+def password_reset(token):
+    """Menangani reset password berdasarkan token yang dikirim melalui email.
+
+    Memverifikasi token, lalu memungkinkan pengguna menetapkan password baru.
+    Token yang tidak valid atau kedaluwarsa akan mengarahkan ke halaman login.
+
+    Args:
+        token (str): Token reset password unik dari email.
+
+    Returns:
+        Response: Render formulir reset password jika token valid, atau redirect ke login jika tidak.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    user = User.verify_reset_token(token)
+    if not user:
+        flash('Tautan reset password tidak valid atau telah kedaluwarsa.', 'warning')
+        return redirect(url_for('auth.login'))
+    
+    form = PasswordResetForm()
+    if form.validate_on_submit():
+        user.password = form.password.data
+        db.session.commit()
+
+        flash('Password Anda telah berhasil direset. Silakan login.', 'success')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('auth/reset_password.html', form=form)
 
 @auth.route('/logout')
 @login_required

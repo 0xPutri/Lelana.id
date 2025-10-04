@@ -32,5 +32,6 @@
     </div>
 </form>
 
+<p>Lupa password? <a href="{{ url_for('auth.password_reset_request') }}">Reset di sini</a>.</p>
 <p>Belum punya akun? <a href="{{ url_for('auth.register') }}">Daftar di sini</a></p>
 {% endblock %}

@@ -73,6 +73,40 @@ class User(UserMixin, db.Model):
             user.is_confirmed = True
             db.session.add(user)
         return user
+    
+    def generate_reset_token(self):
+        """Membuat token reset password berbasis waktu untuk pengguna ini.
+
+        Token berisi ID pengguna dan ditandatangani menggunakan SECRET_KEY aplikasi.
+        Digunakan dalam proses pemulihan akun saat pengguna lupa password.
+
+        Returns:
+            str: Token reset password yang aman dan dapat dikirim melalui email.
+        """
+        s = Serializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'reset': self.id})
+    
+    @staticmethod
+    def verify_reset_token(token, expiration=3600):
+        """Memverifikasi dan memuat pengguna berdasarkan token reset password.
+
+        Token yang kedaluwarsa, rusak, atau tidak valid akan menghasilkan None.
+        Jika valid, fungsi mengembalikan objek pengguna yang sesuai.
+
+        Args:
+            token (str): Token reset password yang diterima dari pengguna.
+            expiration (int): Masa berlaku token dalam detik (default: 3600 = 1 jam).
+
+        Returns:
+            User or None: Objek pengguna jika token valid; None jika tidak.
+        """
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            data = s.loads(token, max_age=expiration)
+            user_id = data.get('reset')
+            return db.session.get(User, user_id)
+        except:
+            return None
 
     @property
     def password(self):
