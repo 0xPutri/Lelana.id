@@ -6,6 +6,7 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationE
 from .models.user import User
 from wtforms_sqlalchemy.fields import QuerySelectMultipleField
 from .models.wisata import Wisata
+from flask import current_app
 
 class RegistrationForm(FlaskForm):
     """Formulir pendaftaran pengguna baru dengan validasi lengkap.
@@ -67,14 +68,19 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Username tersebut sudah digunakan. Silakan pilih yang lain.')
     
     def validate_email(self, email):
-        """Memastikan alamat email belum terdaftar di sistem.
+        """Memastikan alamat email valid, unik, dan berasal dari domain populer.
 
         Args:
             email (StringField): Field email dari formulir.
 
         Raises:
-            ValidationError: Jika email sudah digunakan oleh akun lain.
+            ValidationError: Jika email sudah digunakan, atau domain tidak diizinkan.
         """
+        allowed_domains = current_app.config['ALLOWED_EMAIL_DOMAINS']
+        domain = email.data.split('@')[-1].lower()
+        if domain not in allowed_domains:
+            raise ValidationError('Pendaftaran hanya diizinkan untuk domain email populer (Gmail, Outlook, Yahoo, dll.).')
+
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('Email tersebut sudah terdaftar. Silakan gunakan email lain.')

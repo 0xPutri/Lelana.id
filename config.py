@@ -26,6 +26,7 @@ class Config:
         MAIL_PASSWORD (str): Password autentikasi email.
         MAIL_SENDER (tuple): Identitas pengirim email default.
         BAD_WORDS_ID (list): Daftar kata terlarang untuk filtering konten.
+        ALLOWED_EMAIL_DOMAINS (list): Domain email yang diizinkan. 
     """
     WTF_CSRF_ENABLED = True
 
@@ -62,6 +63,9 @@ class Config:
 
     _bad_words_str = os.environ.get('BAD_WORDS_ID', '')
     BAD_WORDS_ID = [word.strip() for word in _bad_words_str.split(',') if word.strip()]
+
+    _allowed_domains_str = os.environ.get('ALLOWED_EMAIL_DOMAINS', 'gmail.com,hotmail.com,outlook.com,yahoo.com,ymail.com,live.com,icloud.com,me.com,mac.com,aol.com,protonmail.com,tutanota.com,zoho.com,gmx.com,mail.com,yandex.com,fastmail.com,hey.com,duck.com,inbox.com,hushmail.com,msn.com,qq.com,163.com,126.com,pm.me,proton.me,lelana.my.id')
+    ALLOWED_EMAIL_DOMAINS = [domain.strip() for domain in _allowed_domains_str.split(',') if domain.strip()]
 
 class DevelopmentConfig(Config):
     """Konfigurasi untuk lingkungan pengembangan.
