@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
+from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.event import Event
 from app.forms import EventForm
@@ -74,6 +74,10 @@ def tambah_event():
         )
         db.session.add(event_baru)
         db.session.commit()
+
+        current_app.logger.info('Admin %s menambahkan Event baru "%s" (ID: %d).', 
+            current_user.username, event_baru.nama, event_baru.id
+        )
             
         flash('Event baru berhasil ditambahkan!', 'success')
         return redirect(url_for('event.list_event'))
@@ -111,6 +115,10 @@ def edit_event(id):
         event_item.penyelenggara = form.penyelenggara.data
         db.session.commit()
 
+        current_app.logger.info('Admin %s memperbarui Event "%s" (ID: %d).', 
+            current_user.username, event_item.nama, event_item.id
+        )
+
         flash('Data event berhasil diperbarui!', 'success')
         return redirect(url_for('event.detail_event', id=event_item.id))
     
@@ -141,6 +149,10 @@ def hapus_event(id):
 
     form = FlaskForm()
     if form.validate_on_submit():
+        current_app.logger.info('Admin %s menghapus Event "%s" (ID: %d).', 
+            current_user.username, event_item.nama, event_item.id
+        )
+
         db.session.delete(event_item)
         db.session.commit()
         flash('Event telah berhasil dihapus.', 'info')

@@ -62,7 +62,7 @@ def call_gemini(prompt: str):
 
         return j["candidates"][0]["content"]["parts"][0]["text"]
     except (requests.exceptions.RequestException, KeyError, IndexError) as e:
-        current_app.logger.error(f'Error saat memanggil Gemini: {e}')
+        current_app.logger.error('Error saat memanggil Gemini: %s', str(e), exc_info=True)
         return None
     
 def get_bot_response(user_query: str):

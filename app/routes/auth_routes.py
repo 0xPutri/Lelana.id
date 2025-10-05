@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db, limiter
 from app.models.user import User
@@ -28,6 +28,7 @@ def register():
 
         db.session.add(user)
         db.session.commit()
+        current_app.logger.info('User baru "%s" (%s) telah terdaftar.', user.username, user.email)
 
         token = user.generate_confirmation_token()
         send_email(user.email, 'Konfirmasi Akun Lelana.id Anda', 
@@ -125,10 +126,16 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.verify_password(form.password.data):
             login_user(user, remember=form.remember.data)
+            current_app.logger.info('Login berhasil untuk user "%s" dari IP %s.', 
+                user.username, request.remote_addr
+            )
 
             flash('Login berhasil!', 'success')
             return redirect(url_for('main.index'))
         else:
+            current_app.logger.warning('Login GAGAL untuk email "%s" dari IP %s.', 
+                form.email.data, request.remote_addr
+            )
             flash('Login gagal. Periksa kembali email dan password Anda.', 'danger')
     return render_template('auth/login.html', form=form)
 
@@ -153,6 +160,8 @@ def password_reset_request():
             send_email(user.email, 'Reset Password Akun Lelana.id Anda',
                        'auth/email/reset_password',
                        user=user, token=token)
+            
+            current_app.logger.info('Email reset password dikirim ke %s.', user.email)
             flash('Jika email terdaftar di sistem kami, instruksi reset password telah dikirim.', 'info')
         return redirect(url_for('auth.login'))
     
@@ -183,6 +192,8 @@ def password_reset(token):
         user.password = form.password.data
         db.session.commit()
 
+        current_app.logger.info('User %s berhasil mereset password.', user.username)
+
         flash('Password Anda telah berhasil direset. Silakan login.', 'success')
         return redirect(url_for('auth.login'))
     
@@ -198,6 +209,8 @@ def logout():
     Returns:
         Response: Redirect ke halaman utama setelah logout.
     """
+    current_app.logger.info('User "%s" telah logout.', current_user.username)
+    
     logout_user() # Fungsi ini dari Flask-Login, akan menghapus user dari session
     flash('Anda telah berhasil logout.', 'info')
 

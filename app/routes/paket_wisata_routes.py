@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort
-from flask_login import login_required
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, current_app
+from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.paket_wisata import PaketWisata
 from app.forms import PaketWisataForm
@@ -71,6 +71,10 @@ def tambah_paket():
         db.session.add(paket_baru)
         db.session.commit()
 
+        current_app.logger.info('Admin %s menambahkan Paket Wisata baru "%s" (ID: %d).', 
+            current_user.username, paket_baru.nama, paket_baru.id
+        )
+
         flash('Paket wisata baru berhasil ditambahkan!', 'success')
         return redirect(url_for('paket_wisata.list_paket'))
     
@@ -107,6 +111,10 @@ def edit_paket(id):
         paket.is_promoted = form.is_promoted.data
         db.session.commit()
 
+        current_app.logger.info('Admin %s memperbarui Paket Wisata "%s" (ID: %d).', 
+            current_user.username, paket.nama, paket.id
+        )
+
         flash('Paket wisata berhasil diperbarui!', 'success')
         return redirect(url_for('paket_wisata.detail_paket', id=paket.id))
     
@@ -136,6 +144,10 @@ def hapus_paket(id):
     
     form = FlaskForm()
     if form.validate_on_submit():
+        current_app.logger.info('Admin %s menghapus Paket Wisata "%s" (ID: %d).', 
+            current_user.username, paket.nama, paket.id
+        )
+
         db.session.delete(paket)
         db.session.commit()
         flash('Paket wisata telah berhasil dihapus', 'info')

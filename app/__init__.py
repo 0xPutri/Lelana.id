@@ -65,7 +65,7 @@ def create_app(config_name):
         app.logger.addHandler(file_handler)
 
         app.logger.setLevel(logging.INFO)
-        app.logger.info('Lelana.id startup')
+        app.logger.info('Lelana.id startup in %s mode.', config_name)
 
     from .models.user import User
 

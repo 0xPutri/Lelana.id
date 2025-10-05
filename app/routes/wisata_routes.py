@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, request, jsonify, current_app
 from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.wisata import Wisata
@@ -8,6 +8,7 @@ from app.forms import WisataForm, ReviewForm
 from app.utils.decorators import admin_required
 from app.services.file_handler import save_pictures
 from sqlalchemy.orm import joinedload, subqueryload
+from sqlalchemy.exc import SQLAlchemyError
 from flask_wtf import FlaskForm
 from app.utils.text_filters import censor_text
 
@@ -77,12 +78,25 @@ def detail_wisata(id):
                     foto_baru = FotoUlasan(nama_file=filename, review=review_baru)
                     db.session.add(foto_baru)
             except ValueError as e:
-                flash(f'Gagal mengunggah: {e}', 'danger')
                 db.session.rollback()
+                current_app.logger.warning('User %s gagal unggah foto ulasan: %s', 
+                    current_user.username, str(e), exc_info=True
+                )
+                flash(f'Gagal mengunggah: {e}', 'danger')
+                return redirect(url_for('wisata.detail_wisata', id=w.id))
+            except SQLAlchemyError as e:
+                db.session.rollback()
+                current_app.logger.error('Database error saat menyimpan foto ulasan untuk user %s: %s', 
+                    current_user.username, str(e), exc_info=True
+                )
+                flash('Terjadi kesalahan pada database. Silakan coba lagi.', 'danger')
                 return redirect(url_for('wisata.detail_wisata', id=w.id))
             except Exception as e:
-                flash('Terjadi kesalahan internal saat memproses gambar. Silakan coba lagi.', 'danger')
                 db.session.rollback()
+                current_app.logger.critical('Error tidak terduga saat user %s mengunggah foto: %s', 
+                    current_user.username, str(e), exc_info=True
+                )
+                flash('Terjadi kesalahan internal yang tidak terduga. Tim kami telah diberitahu.', 'danger')
                 return redirect(url_for('wisata.detail_wisata', id=w.id))
 
         db.session.commit()
@@ -123,6 +137,10 @@ def tambah_wisata():
         db.session.add(wisata_baru)
         db.session.commit()
 
+        current_app.logger.info('Admin %s menambahkan Wisata baru "%s" (ID: %d).', 
+            current_user.username, wisata_baru.nama, wisata_baru.id
+        )
+
         flash('Destinasi wisata baru berhasil ditambahkan!', 'success')
         return redirect(url_for('wisata.list_wisata'))
     
@@ -162,6 +180,10 @@ def edit_wisata(id):
         wisata_item.longitude = form.longitude.data
         db.session.commit()
 
+        current_app.logger.info('Admin %s memperbarui Wisata "%s" (ID: %d).', 
+            current_user.username, wisata_item.nama, wisata_item.id
+        )
+
         flash('Data wisata berhasil diperbarui!', 'success')
         return redirect(url_for('wisata.detail_wisata', id=wisata_item.id))
     
@@ -190,6 +212,10 @@ def hapus_wisata(id):
     
     form = FlaskForm()
     if form.validate_on_submit():
+        current_app.logger.info('Admin %s menghapus Wisata "%s" (ID: %d).', 
+            current_user.username, wisata_item.nama, wisata_item.id
+        )
+        
         db.session.delete(wisata_item)
         db.session.commit()
         flash('Data wisata telah berhasil dihapus.', 'info')
