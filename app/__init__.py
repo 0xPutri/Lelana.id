@@ -8,6 +8,7 @@ from flask_limiter.util import get_remote_address
 from config import config
 from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
+from importlib import import_module
 
 db = SQLAlchemy()
 
@@ -25,14 +26,13 @@ csrf = CSRFProtect()
 def create_app(config_name):
     """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
 
-    Fungsi ini menginisialisasi ekstensi inti (database, login, rate limiting, email),
-    memuat filter teks, mendaftarkan blueprint rute, dan mengatur loader pengguna.
-    Untuk database SQLite berbasis file (bukan in-memory), mengaktifkan mode WAL
-    dan mengatur busy timeout untuk meningkatkan konkurensi dan stabilitas.
+    Fungsi ini menginisialisasi semua ekstensi inti (database, login, rate limiting,
+    email, CSRF protection), memuat filter konten, mendaftarkan blueprint rute,
+    dan mengatur optimasi khusus untuk database SQLite (mode WAL dan timeout).
+    Menggunakan factory pattern untuk mendukung berbagai lingkungan.
 
     Args:
-        config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`
-                           (misalnya 'default', 'development', 'production').
+        config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`.
 
     Returns:
         Flask: Instance aplikasi Flask yang telah dikonfigurasi dan siap dijalankan.
@@ -57,32 +57,7 @@ def create_app(config_name):
     def load_user(user_id):
         return db.session.get(User, int(user_id))
 
-    from .routes.main_routes import main as main_blueprint
-    app.register_blueprint(main_blueprint)
-
-    from .routes.auth_routes import auth as auth_blueprint
-    app.register_blueprint(auth_blueprint, url_prefix='/auth')
-
-    from .routes.wisata_routes import wisata as wisata_blueprint
-    app.register_blueprint(wisata_blueprint)
-
-    from .routes.event_routes import event as event_blueprint
-    app.register_blueprint(event_blueprint)
-
-    from .routes.paket_wisata_routes import paket_wisata as paket_wisata_blueprint
-    app.register_blueprint(paket_wisata_blueprint)
-
-    from .routes.itinerari_routes import itinerari as itinerari_blueprint
-    app.register_blueprint(itinerari_blueprint)
-
-    from .routes.admin_routes import admin as admin_blueprint
-    app.register_blueprint(admin_blueprint)
-
-    from .routes.error_routes import errors as errors_blueprint
-    app.register_blueprint(errors_blueprint)
-
-    from .routes.chatbot_routes import chatbot as chatbot_blueprint
-    app.register_blueprint(chatbot_blueprint)
+    register_blueprints(app)
 
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
     if db_uri.startswith('sqlite') and ':memory:' not in db_uri:
@@ -98,3 +73,30 @@ def create_app(config_name):
                     cursor.close()
 
     return app
+
+def register_blueprints(app):
+    """Mendaftarkan semua blueprint rute ke aplikasi Flask secara terpusat.
+
+    Menghindari duplikasi kode pendaftaran blueprint dengan menggunakan daftar
+    terstruktur yang berisi nama modul, nama objek blueprint, dan prefix URL.
+
+    Args:
+        app (Flask): Instance aplikasi Flask tempat blueprint akan didaftarkan.
+    """
+    blueprints = [
+        ('main_routes', 'main', None),
+        ('auth_routes', 'auth', '/auth'),
+        ('wisata_routes', 'wisata', None),
+        ('event_routes', 'event', None),
+        ('paket_wisata_routes', 'paket_wisata', None),
+        ('itinerari_routes', 'itinerari', None),
+        ('admin_routes', 'admin', None),
+        ('error_routes', 'errors', None),
+        ('chatbot_routes', 'chatbot', None),
+    ]
+
+    for module_name, bp_name, prefix in blueprints:
+        module = import_module(f'.routes.{module_name}', package=__package__)
+        blueprint = getattr(module, bp_name)
+
+        app.register_blueprint(blueprint, url_prefix=prefix)
