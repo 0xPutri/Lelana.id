@@ -10,11 +10,8 @@ from app.services.file_handler import save_pictures
 from sqlalchemy.orm import joinedload, subqueryload
 from flask_wtf import FlaskForm
 from app.utils.text_filters import censor_text
-import logging
 
 wisata = Blueprint('wisata', __name__)
-
-logging.basicConfig(level=logging.INFO)
 
 @wisata.route('/wisata')
 def list_wisata():

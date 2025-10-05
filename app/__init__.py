@@ -1,3 +1,6 @@
+import os
+import logging
+from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import event
@@ -26,13 +29,14 @@ csrf = CSRFProtect()
 def create_app(config_name):
     """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
 
-    Fungsi ini menginisialisasi semua ekstensi inti (database, login, rate limiting,
-    email, CSRF protection), memuat filter konten, mendaftarkan blueprint rute,
-    dan mengatur optimasi khusus untuk database SQLite (mode WAL dan timeout).
+    Fungsi ini menginisialisasi ekstensi inti (database, login, rate limiting, email,
+    CSRF protection), memuat filter teks, mengatur logging produksi, mendaftarkan
+    blueprint rute secara dinamis, dan mengoptimalkan koneksi SQLite jika digunakan.
     Menggunakan factory pattern untuk mendukung berbagai lingkungan.
 
     Args:
-        config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`.
+        config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`
+                           (misalnya 'default', 'development', 'production').
 
     Returns:
         Flask: Instance aplikasi Flask yang telah dikonfigurasi dan siap dijalankan.
@@ -50,6 +54,18 @@ def create_app(config_name):
 
     mail.init_app(app)
     csrf.init_app(app)
+
+    if not app.debug and not app.testing:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/lelana.log', maxBytes=10240, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('Lelana.id startup')
 
     from .models.user import User
 
@@ -75,10 +91,10 @@ def create_app(config_name):
     return app
 
 def register_blueprints(app):
-    """Mendaftarkan semua blueprint rute ke aplikasi Flask secara terpusat.
+    """Mendaftarkan semua blueprint rute ke aplikasi secara dinamis.
 
-    Menghindari duplikasi kode pendaftaran blueprint dengan menggunakan daftar
-    terstruktur yang berisi nama modul, nama objek blueprint, dan prefix URL.
+    Menghindari impor manual dengan menggunakan refleksi modul, sehingga
+    memudahkan pemeliharaan saat menambah atau menghapus rute.
 
     Args:
         app (Flask): Instance aplikasi Flask tempat blueprint akan didaftarkan.

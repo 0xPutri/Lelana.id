@@ -9,3 +9,5 @@ uploads/
 tests/
 *dev.txt
 *.ini
+lelana.db*
+logs/

@@ -80,7 +80,6 @@ def get_bot_response(user_query: str):
     Returns:
         str: Jawaban dari chatbot dalam bentuk teks yang telah diformat.
     """
-    current_app.logger.info(f"Mencari informasi untuk query: {user_query}")
     search_results = search_web(user_query)
 
     if not search_results:
@@ -103,7 +102,6 @@ def get_bot_response(user_query: str):
             f"Berdasarkan informasi tersebut, berikan jawaban yang hangat, informatif, dan mudah dibaca untuk pertanyaan berikut: \"{user_query}\""
         )
 
-    current_app.logger.info("Mengirimkan prompt ke Gemini...")
     answer = call_gemini(prompt)
 
     if answer is None:
