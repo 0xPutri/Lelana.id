@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from flask_login import LoginManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -8,6 +10,7 @@ from flask_mail import Mail
 from flask_wtf.csrf import CSRFProtect
 
 db = SQLAlchemy()
+
 login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.session_protection = 'strong'
@@ -23,9 +26,9 @@ def create_app(config_name):
     """Membuat dan mengonfigurasi instance aplikasi Flask berdasarkan nama konfigurasi.
 
     Fungsi ini menginisialisasi ekstensi inti (database, login, rate limiting, email),
-    memuat filter teks (seperti penyaring kata kasar), mendaftarkan blueprint rute,
-    dan mengatur loader pengguna untuk Flask-Login. Menggunakan factory pattern
-    untuk mendukung berbagai lingkungan (development, testing, production).
+    memuat filter teks, mendaftarkan blueprint rute, dan mengatur loader pengguna.
+    Untuk database SQLite berbasis file (bukan in-memory), mengaktifkan mode WAL
+    dan mengatur busy timeout untuk meningkatkan konkurensi dan stabilitas.
 
     Args:
         config_name (str): Nama konfigurasi yang sesuai dengan kunci di modul `config`
@@ -80,5 +83,18 @@ def create_app(config_name):
 
     from .routes.chatbot_routes import chatbot as chatbot_blueprint
     app.register_blueprint(chatbot_blueprint)
+
+    db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+    if db_uri.startswith('sqlite') and ':memory:' not in db_uri:
+        with app.app_context():
+            engine = db.get_engine()
+            @event.listens_for(engine, "connect")
+            def set_sqlite_pragma(dbapi_connection, connection_record):
+                cursor = dbapi_connection.cursor()
+                try:
+                    cursor.execute("PRAGMA journal_mode=WAL")
+                    cursor.execute("PRAGMA busy_timeout = 5000")
+                finally:
+                    cursor.close()
 
     return app
