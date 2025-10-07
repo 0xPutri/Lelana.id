@@ -9,6 +9,7 @@ Werkzeug
 WTForms-SQLAlchemy
 
 python-magic
+python-magic-bin
 Flask-Limiter
 Flask-Mail
 better-profanity
