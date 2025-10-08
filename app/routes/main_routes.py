@@ -81,3 +81,30 @@ def peta_wisata():
         Response: Render template peta wisata.
     """
     return render_template('main/peta.html')
+
+@main.route('/about')
+def about():
+    """Menampilkan halaman 'Tentang Kami' yang menjelaskan misi dan visi platform.
+
+    Returns:
+        Response: Render template halaman tentang kami.
+    """
+    return render_template('main/about.html')
+
+@main.route('/contact')
+def contact():
+    """Menampilkan halaman kontak dengan informasi cara menghubungi tim Lelana.id.
+
+    Returns:
+        Response: Render template halaman kontak.
+    """
+    return render_template('main/contact.html')
+
+@main.route('/privacy')
+def privacy():
+    """Menampilkan kebijakan privasi platform Lelana.id.
+
+    Returns:
+        Response: Render template halaman kebijakan privasi.
+    """
+    return render_template('main/privacy.html')
