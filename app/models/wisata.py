@@ -19,6 +19,7 @@ class Wisata(db.Model):
         longitude (float or None): Koordinat bujur lokasi; opsional.
         tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
         reviews (list[Review]): Daftar ulasan yang diberikan untuk tempat wisata ini.
+        events (list[Event]): Daftar acara yang terkait dengan tempat wisata ini.
     """
     __tablename__ = 'wisata'
 

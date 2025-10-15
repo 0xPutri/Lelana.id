@@ -16,6 +16,7 @@ class Event(db.Model):
         deskripsi (str): Deskripsi lengkap acara; wajib diisi.
         penyelenggara (str or None): Nama penyelenggara acara; opsional; maksimal 100 karakter.
         tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
+        id_wisata (int or None): Foreign key yang merujuk ke 'wisata.id'; opsional.
     """
     __tablename__ = 'event'
 
