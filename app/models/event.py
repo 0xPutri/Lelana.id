@@ -27,6 +27,9 @@ class Event(db.Model):
     penyelenggara = db.Column(db.String(100))
     tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    # Foreign Key untuk relasi opsional ke Wisata
+    id_wisata = db.Column(db.Integer, db.ForeignKey('wisata.id'), nullable=True, index=True)
+
     def __repr__(self):
         """Mengembalikan representasi string dari objek Event untuk debugging.
 
