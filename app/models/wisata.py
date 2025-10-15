@@ -37,6 +37,9 @@ class Wisata(db.Model):
     # Relasi ke Review: Satu wisata bisa punya banyak review
     reviews = db.relationship('Review', backref='wisata_reviewed', lazy='dynamic', cascade="all, delete-orphan")
 
+    # Relasi ke Event: Satu wisata bisa punya banyak event
+    events = db.relationship('Event', backref='wisata', lazy='dynamic')
+
     def __repr__(self):
         """Mengembalikan representasi string dari objek Wisata untuk debugging.
 
