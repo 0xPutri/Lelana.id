@@ -5,6 +5,7 @@ from app.models.paket_wisata import PaketWisata
 from app.forms import PaketWisataForm
 from app.utils.decorators import admin_required
 from sqlalchemy.orm import joinedload
+from sqlalchemy import select
 from flask_wtf import FlaskForm
 
 paket_wisata = Blueprint('paket_wisata', __name__)
@@ -41,7 +42,10 @@ def detail_paket(id):
     Raises:
         HTTPException: 404 Not Found jika paket tidak ada.
     """
-    paket = PaketWisata.query.options(joinedload(PaketWisata.destinasi)).get_or_404(id)
+    stmt = select(PaketWisata).options(joinedload(PaketWisata.destinasi)).where(PaketWisata.id == id)
+    paket = db.session.scalar(stmt)
+    if paket is None:
+        abort(404)
 
     return render_template('paket_wisata/detail.html', paket=paket)
 
