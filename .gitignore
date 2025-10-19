@@ -6,10 +6,9 @@ __pycache__/
 .env
 venv/
 uploads/
-tests/
-*dev.txt
-*.ini
 lelana.db*
 logs/
-routes.md
 documentation
+*dev.txt
+*.ini
+tests/
