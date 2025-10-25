@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, abort, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, abort, current_app, request
 from flask_login import login_required, current_user
 from app import db, limiter
 from app.models.paket_wisata import PaketWisata
@@ -12,19 +12,32 @@ paket_wisata = Blueprint('paket_wisata', __name__)
 
 @paket_wisata.route('/paket-wisata')
 def list_paket():
-    """Menampilkan daftar semua paket wisata yang tersedia.
+    """Menampilkan daftar semua paket wisata yang tersedia dengan paginasi.
 
     Data diurutkan berdasarkan nama secara alfabetis dan mencakup formulir hapus
     untuk keamanan CSRF pada operasi penghapusan.
 
     Returns:
-        Response: Render template daftar paket wisata.
+        Response: Render template daftar paket wisata dengan data paginasi.
     """
-    semua_paket = PaketWisata.query.order_by(PaketWisata.nama).all()
+    page = request.args.get('page', 1, type=int)
+    
+    # Menggunakan db.paginate untuk efisiensi dan paginasi
+    pagination = db.paginate(
+        db.select(PaketWisata).order_by(PaketWisata.nama),
+        page=page,
+        per_page=9,
+        error_out=False
+    )
+    daftar_paket = pagination.items
 
     delete_form = FlaskForm()
 
-    return render_template('paket_wisata/list.html', daftar_paket=semua_paket, delete_form=delete_form)
+    return render_template('paket_wisata/list.html', 
+                           daftar_paket=daftar_paket, 
+                           delete_form=delete_form,
+                           pagination=pagination
+    )
 
 @paket_wisata.route('/paket-wisata/detail/<int:id>')
 def detail_paket(id):

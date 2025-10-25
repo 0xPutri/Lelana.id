@@ -137,6 +137,6 @@ def get_bot_response(user_query: str):
     answer = call_gemini(prompt)
 
     if answer is None:
-        "Maaf, sepertinya Putri sedang mengalami sedikit kendala teknis. Coba lagi beberapa saat lagi ya! 😢"
+        return "Maaf, sepertinya Putri sedang mengalami sedikit kendala teknis. Coba lagi beberapa saat lagi ya! 😢"
     
     return answer.strip()

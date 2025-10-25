@@ -1,4 +1,5 @@
 import re
+from markdown_it import MarkdownIt
 from better_profanity import profanity
 
 def init_profanity_filter(app):
@@ -71,3 +72,33 @@ def censor_text(text: str) -> str:
             result_parts.append(original_parts[i])
 
     return "".join(result_parts)
+
+def markdown_to_html(text):
+    """Mengonversi teks Markdown sederhana menjadi HTML dengan aman.
+
+    Fungsi ini:
+    - Menggantikan escape sequence '\\n' menjadi newline asli,
+    - Memproses setiap baris secara terpisah menggunakan MarkdownIt dalam mode CommonMark,
+    - Menonaktifkan rendering HTML mentah untuk keamanan (XSS prevention),
+    - Mengaktifkan linkify untuk mengubah URL otomatis menjadi tautan,
+    - Menggabungkan hasil dengan tag <br> untuk mempertahankan jeda baris.
+
+    Args:
+        text (str): Teks input yang mungkin mengandung sintaks Markdown dasar.
+
+    Returns:
+        str: Teks yang telah dikonversi ke HTML aman, atau nilai asli jika input tidak valid.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return text
+    
+    standardized_text = text.replace('\\n', '\n')
+    
+    lines = standardized_text.split('\n')
+    
+    md = MarkdownIt('commonmark', {'html': False, 'linkify': True})
+    md.enable('linkify')
+
+    rendered_lines = [md.renderInline(line) for line in lines]
+    
+    return '<br>'.join(rendered_lines)

@@ -44,8 +44,9 @@ def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
 
-    from .utils.text_filters import init_profanity_filter
+    from .utils.text_filters import init_profanity_filter, markdown_to_html
     init_profanity_filter(app)
+    app.jinja_env.filters['markdown'] = markdown_to_html
 
     db.init_app(app)
     login_manager.init_app(app)
