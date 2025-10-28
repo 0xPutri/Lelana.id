@@ -69,9 +69,10 @@ def get_bot_response(user_query: str):
     """Menghasilkan respons chatbot berdasarkan pertanyaan pengguna.
 
     Fungsi ini:
-    1. Melakukan pencarian web untuk mengumpulkan informasi kontekstual.
+    1. Melakukan pencarian web untuk mengumpulkan informasi kontekstual, kecuali jika
+       pengguna menyertakan flag './skip'.
     2. Jika ada hasil, menyusun ringkasan dan mengirimkannya ke Gemini sebagai konteks.
-    3. Jika tidak ada hasil, langsung meminta Gemini menjawab berdasarkan pengetahuannya.
+    3. Jika tidak ada hasil (atau pencarian dilewati), langsung meminta Gemini menjawab.
     4. Mengembalikan jawaban yang ramah dan sesuai dengan persona "Putri", asisten Lelana.id.
 
     Args:
@@ -80,7 +81,13 @@ def get_bot_response(user_query: str):
     Returns:
         str: Jawaban dari chatbot dalam bentuk teks yang telah diformat.
     """
-    search_results = search_web(user_query)
+    no_search_flag = "./skip"
+    if no_search_flag in user_query:
+        current_app.logger.info("Pencarian web dilewati karena flag '%s'.", no_search_flag)
+        user_query = user_query.replace(no_search_flag, "").strip()
+        search_results = []
+    else:
+        search_results = search_web(user_query)
 
     if not search_results:
         current_app.logger.warning("Pencarian web tidak memberikan hasil. Menggunakan fallback ke Gemini langsung.")

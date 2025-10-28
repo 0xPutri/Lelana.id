@@ -8,7 +8,7 @@ venv/
 uploads/
 lelana.db*
 logs/
-documentation
+documentation/
 *dev.txt
 *.ini
 tests/
