@@ -3,65 +3,169 @@
 {% block title %}Daftar Wisata - Lelana.id{% endblock %}
 
 {% block content %}
-<style>
-    .wisata-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-    .wisata-actions { margin-top: 10px; }
-    .wisata-actions a, .wisata-actions button { margin-right: 10px; text-decoration: none; padding: 5px 10px; border-radius: 3px; }
-    .btn-detail { background: #007bff; color: white; }
-    .btn-edit { background: #ffc107; color: black; }
-    .btn-delete { background: #dc3545; color: white; border: none; cursor: pointer; }
-    .pagination { margin-top: 20px; }
-</style>
+    <div class="bg-white dark:bg-gray-900 min-h-screen">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <!-- Header Halaman dan Tombol Aksi Admin -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10 md:mb-12">
+                <div class="flex-grow">
+                    <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight">Destinasi Wisata</h1>
+                    <p class="mt-3 text-base sm:text-lg text-gray-600 dark:text-gray-400">Jelajahi berbagai destinasi wisata menarik yang telah dikurasi.</p>
+                </div>
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <div class="flex-shrink-0">
+                        <a href="{{ url_for('wisata.tambah_wisata') }}" class="w-full sm:w-auto inline-flex items-center justify-center whitespace-nowrap px-5 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900 transition-colors duration-200">
+                            <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Tambah Wisata Baru</span>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
 
-<h2>Daftar Destinasi Wisata</h2>
-
-{% if current_user.is_authenticated and current_user.role == 'admin' %}
-<p><a href="{{ url_for('wisata.tambah_wisata') }}" class="btn-detail">Tambah Wisata Baru</a></p>
-{% endif %}
-
-{% for w in daftar_wisata %}
-<article class="wisata-item">
-    <h3>{{ w.nama }}</h3>
-    <p><strong>Kategori:</strong> {{ w.kategori }} | <strong>Lokasi:</strong> {{ w.lokasi }}</p>
-    <p>{{ w.deskripsi[:150] }}...</p>
-    
-    <div class="wisata-actions">
-        <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="btn-detail">Lihat Detail</a>
-        
-        {% if current_user.is_authenticated and current_user.role == 'admin' %}
-        <a href="{{ url_for('wisata.edit_wisata', id=w.id) }}" class="btn-edit">Edit</a>
-        <form action="{{ url_for('wisata.hapus_wisata', id=w.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus data ini?');">
-            {{ delete_form.hidden_tag() }}
-            <button type="submit" class="btn-delete">Hapus</button>
-        </form>
-        {% endif %}
-    </div>
-</article>
-{% endfor %}
-
-{% if not daftar_wisata %}
-<p>Belum ada data wisata.</p>
-{% endif %}
-
-<div class="pagination">
-    {% if pagination.has_prev %}
-    <a href="{{ url_for('wisata.list_wisata', page=pagination.prev_num) }}">&laquo; Sebelumnya</a>
-    {% endif %}
-    
-    {% for page_num in pagination.iter_pages() %}
-        {% if page_num %}
-            {% if page_num != pagination.page %}
-            <a href="{{ url_for('wisata.list_wisata', page=page_num) }}">{{ page_num }}</a>
+            <!-- Daftar Wisata -->
+            {% if daftar_wisata %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {% for w in daftar_wisata %}
+                        <article class="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1.5">
+                            <!-- Gambar -->
+                            <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="block h-48 w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                                <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="{% if w.gambar_url %}{{ w.gambar_url }}{% else %}https://placehold.co/600x400/10B981/FFFFFF?text={{ w.nama|urlencode }}&font=poppins{% endif %}" alt="Gambar {{ w.nama }}" onerror="this.src='https://placehold.co/600x400/9CA3AF/FFFFFF?text=Gambar+Rusak&font=poppins'; this.onerror=null;">
+                            </a>
+                            <div class="p-5 sm:p-6 flex flex-col flex-grow">
+                                <!-- Kategori & Lokasi -->
+                                <div class="flex items-center flex-wrap gap-x-3 gap-y-2 mb-3">
+                                    <span class="inline-block bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-semibold px-2.5 py-1 rounded-full">
+                                        {{ w.kategori }}
+                                    </span>
+                                    <span class="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
+                                        <svg class="w-4 h-4 mr-1.5 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 10A7 7 0 103 10c0 2.493 1.698 4.988 3.356 6.588 1.05.973 2.062 1.77 2.654 2.146.31.193.57.337.757.433.097.05.192.097.281.14l.018.008.006.003zM10 11.25a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" clip-rule="evenodd" />
+                                        </svg>
+                                        <span class="truncate">{{ w.lokasi }}</span>
+                                    </span>
+                                </div>
+                                <!-- Nama Wisata -->
+                                <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2 flex-grow">
+                                    <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors duration-200">
+                                        {{ w.nama }}
+                                    </a>
+                                </h3>
+                                <!-- Deskripsi -->
+                                                                <div class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-3 prose prose-sm dark:prose-invert max-w-none">
+                                    {{ w.deskripsi | truncate(120) | markdown | safe }}
+                                </div>
+                                <!-- Aksi -->
+                                <div class="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                                    <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="inline-flex items-center text-sm font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200">
+                                        <span>Lihat Detail</span>
+                                        <svg class="ml-1.5 w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                                        <div class="flex items-center space-x-1">
+                                            <a href="{{ url_for('wisata.edit_wisata', id=w.id) }}" class="text-gray-400 hover:text-yellow-500 dark:hover:text-yellow-400 transition-colors duration-200 p-2 rounded-md" title="Edit">
+                                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                                                    <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                                                </svg>
+                                            </a>
+                                            <form action="{{ url_for('wisata.hapus_wisata', id=w.id) }}" method="POST" class="inline-flex" id="delete-form-{{ w.id }}">
+                                                {{ delete_form.hidden_tag() }}
+                                                <button @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ w.id }}'; deleteMessage = 'Apakah Anda yakin ingin menghapus destinasi ini? Tindakan ini tidak dapat dibatalkan.'" type="button" class="text-gray-400 hover:text-red-600 dark:hover:text-red-500 transition-colors duration-200 p-2 rounded-md" title="Hapus">
+                                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
             {% else %}
-            <strong>{{ page_num }}</strong>
+                <!-- Empty State -->
+                <div class="text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 sm:p-16">
+                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636M15.75 9c0 .069-.008.136-.023.201M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="mt-5 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Belum ada data wisata</h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Saat ini belum ada destinasi wisata yang ditambahkan ke dalam sistem.</p>
+                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        <div class="mt-6">
+                            <a href="{{ url_for('wisata.tambah_wisata') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Tambah Wisata Baru</span>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             {% endif %}
-        {% else %}
-        ...
-        {% endif %}
-    {% endfor %}
 
-    {% if pagination.has_next %}
-    <a href="{{ url_for('wisata.list_wisata', page=pagination.next_num) }}">Selanjutnya &raquo;</a>
-    {% endif %}
-</div>
+            <!-- Paginasi -->
+            {% if pagination and pagination.pages > 1 %}
+                <nav class="mt-16 flex items-center justify-center" aria-label="Pagination">
+                    <div class="flex items-center justify-between space-x-2">
+                        <!-- Tombol Sebelumnya -->
+                        {% if pagination.has_prev %}
+                            <a href="{{ url_for('wisata.list_wisata', page=pagination.prev_num) }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Sebelumnya</span>
+                            </a>
+                        {% else %}
+                            <span class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 cursor-not-allowed">
+                                <svg class="w-5 h-5 mr-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Sebelumnya</span>
+                            </span>
+                        {% endif %}
+
+                        <!-- Nomor Halaman -->
+                        <div class="hidden sm:flex items-center space-x-1">
+                            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                {% if page_num %}
+                                    {% if page_num != pagination.page %}
+                                        <a href="{{ url_for('wisata.list_wisata', page=page_num) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+                                            {{ page_num }}
+                                        </a>
+                                    {% else %}
+                                        <span class="inline-flex items-center justify-center w-10 h-10 rounded-lg text-sm font-medium text-white dark:text-gray-900 bg-primary-600 dark:bg-primary-400 border border-primary-600 dark:border-primary-400" aria-current="page">
+                                            {{ page_num }}
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="inline-flex items-center justify-center w-10 h-10 text-sm font-medium text-gray-500 dark:text-gray-400">...</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <!-- Tombol Selanjutnya -->
+                        {% if pagination.has_next %}
+                            <a href="{{ url_for('wisata.list_wisata', page=pagination.next_num) }}" class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-colors duration-200">
+                                <span>Selanjutnya</span>
+                                <svg class="w-5 h-5 ml-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                        {% else %}
+                            <span class="inline-flex items-center px-3.5 py-2 rounded-lg text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 cursor-not-allowed">
+                                <span>Selanjutnya</span>
+                                <svg class="w-5 h-5 ml-1.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                        {% endif %}
+                    </div>
+                </nav>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

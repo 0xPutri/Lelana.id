@@ -3,29 +3,104 @@
 {% block title %}Peta Wisata - Lelana.id{% endblock %}
 
 {% block content %}
-<h2>Peta Interaktif Destinasi Wisata</h2>
-<p>Temukan lokasi wisata di Banyumas dan sekitarnya.</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <!-- Header Halaman -->
+        <div class="text-center mb-8 sm:mb-10">
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white tracking-tight">Peta Wisata Interaktif</h1>
+            <p class="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400">
+                Temukan lokasi-lokasi wisata menarik di Banyumas dan sekitarnya.
+            </p>
+        </div>
 
-<div id="map" style="height: 500px; margin: 20px 0;"></div>
+        <!-- Container Peta -->
+        <div class="relative z-10 w-full h-[60vh] md:h-[70vh] rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div id="map" class="w-full h-full"></div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-    const map = L.map('map').setView([-7.4313, 109.2443], 11);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const map = L.map('map').setView([-7.4313, 109.2443], 11);
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    fetch('{{ url_for("wisata.api_lokasi_wisata") }}')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(lokasi => {
-                const marker = L.marker([lokasi.lat, lokasi.lon]).addTo(map);
-                marker.bindPopup(`<b><a href="${lokasi.detail_url}">${lokasi.nama}</a></b>`);
+            const lightTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             });
-        })
-        .catch(error => console.error('Error:', error));
-</script>
+
+            const darkTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            });
+
+            // Function to apply the correct map theme
+            function setMapTheme(theme) {
+                if (theme === 'dark') {
+                    if (map.hasLayer(lightTile)) map.removeLayer(lightTile);
+                    if (!map.hasLayer(darkTile)) map.addLayer(darkTile);
+                } else {
+                    if (map.hasLayer(darkTile)) map.removeLayer(darkTile);
+                    if (!map.hasLayer(lightTile)) map.addLayer(lightTile);
+                }
+            }
+
+            // Listen for theme changes from the main toggle
+            document.body.addEventListener('themeChanged', (e) => {
+                setMapTheme(e.detail.theme);
+            });
+
+            // Set initial theme
+            const initialTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+            setMapTheme(initialTheme);
+
+            // Fetch location data
+            fetch('{{ url_for("wisata.api_lokasi_wisata") }}').then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).then(data => {
+                data.forEach(lokasi => {
+                    if (lokasi.lat && lokasi.lon) {
+                        const marker = L.marker([lokasi.lat, lokasi.lon]).addTo(map);
+                        const popupContent = `
+                            <div class="p-1">
+                                <h3 class="font-bold text-lg mb-1 text-gray-800 dark:text-gray-100">${lokasi.nama}</h3>
+                                <a href="${lokasi.detail_url}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline font-semibold text-sm">Lihat Detail &rarr;</a>
+                            </div>
+                        `;
+                        marker.bindPopup(popupContent);
+                    }
+                });
+            }).catch(error => {
+                console.error('Error fetching location data:', error);
+                const errorDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+                errorDiv.innerHTML = 'Gagal memuat data lokasi';
+                errorDiv.style.backgroundColor = 'white';
+                errorDiv.style.color = 'red';
+                errorDiv.style.padding = '5px 10px';
+                errorDiv.style.borderRadius = '5px';
+                const control = new L.Control({ position: 'topright' });
+                control.onAdd = function() { return errorDiv; };
+                control.addTo(map);
+            });
+        });
+    </script>
+    <style>
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
+            background: var(--bg-color, #fff);
+            color: var(--text-color, #111827);
+            border-radius: 8px;
+            box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+        }
+        .leaflet-popup-content {
+            margin: 12px !important;
+        }
+        html.dark .leaflet-popup-content-wrapper, html.dark .leaflet-popup-tip {
+            background: var(--bg-color, #1f2937);
+            color: var(--text-color, #f9fafb);
+        }
+    </style>
 {% endblock %}

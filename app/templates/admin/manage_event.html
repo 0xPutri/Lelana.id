@@ -1,41 +1,75 @@
-{% extends "admin/base.html" %}
+{% extends "admin/layouts/admin_base.html" %}
 
-{% block title %}Manajemen Event{% endblock %}
-{% block page_title %}Manajemen Konten: Event{% endblock %}
+{% block page_title %}Manajemen Event{% endblock %}
+
+{% block header_title %}Manajemen Event{% endblock %}
 
 {% block content %}
-<p><a href="{{ url_for('event.tambah_event') }}">Tambah Data Event Baru</a></p>
+    <div class="mb-6 text-right">
+        <a href="{{ url_for('event.tambah_event') }}" class="inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors duration-200">
+            <svg class="-ml-0.5 mr-1.5 h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+            </svg>
+            Tambah Event Baru
+        </a>
+    </div>
 
-<table border="1" style="width:100%; border-collapse: collapse;">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nama Event</th>
-            <th>Tanggal</th>
-            <th>Lokasi</th>
-            <th>Aksi</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event in daftar_event %}
-        <tr>
-            <td>{{ event.id }}</td>
-            <td>{{ event.nama }}</td>
-            <td>{{ event.tanggal.strftime('%d %B %Y') }}</td>
-            <td>{{ event.lokasi }}</td>
-            <td>
-                <a href="{{ url_for('event.edit_event', id=event.id) }}">Edit</a> |
-                <form action="{{ url_for('event.hapus_event', id=event.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Hapus event ini?');">
-                    {{ delete_form.hidden_tag() }}
-                    <input type="submit" value="Hapus" style="background:none; border:none; color:blue; text-decoration:underline; cursor:pointer;">
-                </form>
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="5">Belum ada data event.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <div class="overflow-x-auto"> 
+        <div class="inline-block min-w-full py-2 align-middle">
+            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
+                <thead class="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-0 w-1/12">ID</th> 
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 w-4/12">Nama Event</th> 
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 w-2/12">Tanggal</th> 
+                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 w-3/12">Lokasi</th> 
+                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0 w-2/12"> 
+                            <span class="sr-only">Aksi</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                    {% for event in daftar_event %}
+                    <tr>
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-0">{{ event.id }}</td>
+                        <td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                            <div class="max-w-xs truncate" title="{{ event.nama }}">{{ event.nama }}</div>
+                        </td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{ event.tanggal.strftime('%d %B %Y') }}</td>
+                         <td class="px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                             <div class="max-w-xs truncate" title="{{ event.lokasi }}">{{ event.lokasi }}</div>
+                        </td>
+                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
+                            <div class="flex items-center justify-end space-x-3">
+                                <a href="{{ url_for('event.edit_event', id=event.id) }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors duration-150" title="Edit Event">
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                                    <span class="sr-only">Edit {{ event.nama }}</span>
+                                </a>
+                                <form id="delete-form-{{ event.id }}" action="{{ url_for('event.hapus_event', id=event.id) }}" method="POST" class="inline-flex">
+                                    {{ delete_form.hidden_tag() }}
+                                    <button 
+                                        @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ event.id }}'"
+                                        type="button" 
+                                        class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-150" 
+                                        title="Hapus Event">
+                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                                        <span class="sr-only">Hapus {{ event.nama }}</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" /></svg>
+                            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Belum ada data event</h3>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tidak ada data event yang ditambahkan ke sistem.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+         </div>
+    </div>
 {% endblock %}

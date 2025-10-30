@@ -1,58 +1,102 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}{{ itinerari.judul }}{% endblock %}
+{% block title %}{{ itinerari.judul }} - Lelana.id{% endblock %}
 
 {% block content %}
-<style>
-    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
-    .author-info { font-size: 1.1em; color: #333; }
-    .wisata-list { list-style-type: none; padding-left: 0; }
-    .wisata-list li { background-color: #f8f9fa; border: 1px solid #dee2e6; margin-bottom: 10px; padding: 15px; border-radius: 5px; }
-    .wisata-list li a { text-decoration: none; font-weight: bold; color: #0056b3; }
-</style>
+    <div class="bg-white dark:bg-gray-900 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <!-- Navigasi Kembali -->
+            <div class="mb-8">
+                <a href="{{ url_for('itinerari.list_itinerari') }}" class="inline-flex items-center text-base font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Kembali ke Daftar Itinerari</span>
+                </a>
+            </div>
 
-<div class="detail-container">
-    <h2>{{ itinerari.judul }}</h2>
-    <p class="author-info">
-        Sebuah petualangan yang dibagikan oleh <strong>{{ itinerari.penulis.username }}</strong>
-    </p>
-    <small>Dibuat pada: {{ itinerari.tanggal_dibuat.strftime('%d %B %Y') }}</small>
-    
-    {% if itinerari.deskripsi %}
-        <hr>
-        <h4>Cerita Petualangan:</h4>
-        <p>{{ itinerari.deskripsi|safe }}</p>
-    {% endif %}
+            <!-- Header: Judul dan Info Penulis -->
+            <div class="mb-10 pb-10 border-b border-gray-200 dark:border-gray-700">
+                            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-6">
+                    {{ itinerari.judul }}
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+                        <span class="text-xl font-bold text-primary-600 dark:text-primary-300">
+                            {{ itinerari.penulis.username[0]|upper }}
+                        </span>
+                    </div>
+                    <div class="text-base">
+                        <p class="font-medium text-gray-800 dark:text-gray-200">Dibagikan oleh <strong>{{ itinerari.penulis.username }}</strong></p>
+                        <p class="text-gray-500 dark:text-gray-400">Dibuat pada <time datetime="{{ itinerari.tanggal_dibuat.isoformat() }}">{{ itinerari.tanggal_dibuat.strftime('%d %B %Y') }}</time></p>
+                    </div>
+                </div>
+            </div>
 
-    <hr>
-    <h4>Rute Perjalanan:</h4>
-    {% if itinerari.wisata_termasuk %}
-        <ul class="wisata-list">
-            {% for wisata in itinerari.wisata_termasuk %}
-                <li>
-                    <a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}">{{ wisata.nama }}</a>
-                    <br>
-                    <small>Lokasi: {{ wisata.lokasi }}</small>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>Tidak ada tempat wisata yang ditambahkan ke itinerari ini.</p>
-    {% endif %}
-</div>
+            <!-- Deskripsi/Cerita Petualangan -->
+            {% if itinerari.deskripsi %}
+                <div class="mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Cerita Petualangan</h2>
+                    <article class="prose sm:prose-lg dark:prose-invert max-w-none prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white">
+                        {{ itinerari.deskripsi | markdown | safe }}
+                    </article>
+                </div>
+            {% endif %}
 
-<!-- Tombol Edit dan Hapus hanya untuk penulis -->
-{% if current_user.is_authenticated and current_user.id == itinerari.penulis.id %}
-<div style="margin-top: 20px;">
-    <a href="{{ url_for('itinerari.edit_itinerari', id=itinerari.id) }}" style="text-decoration: none; padding: 8px 12px; background-color: #ffc107; color: black; border-radius: 5px;">Edit Itinerari</a>
-    <form action="{{ url_for('itinerari.hapus_itinerari', id=itinerari.id) }}" method="POST" style="display:inline; margin-left: 10px;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus itinerari ini?');">
-        {{ delete_form.hidden_tag() }}
-        <button type="submit" style="padding: 8px 12px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">Hapus Itinerari</button>
-    </form>
-</div>
-{% endif %}
+            <!-- Rute Perjalanan (Destinasi yang Termasuk) -->
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-8">Rute Perjalanan</h2>
+                {% if itinerari.wisata_termasuk %}
+                    <div class="relative border-l-2 border-gray-200 dark:border-gray-700 ml-4">
+                        <ol class="space-y-10">
+                            {% for wisata in itinerari.wisata_termasuk %}
+                                <li class="relative">
+                                    <div class="absolute -left-[13px] top-1.5 w-6 h-6 bg-primary-600 rounded-full ring-8 ring-white dark:ring-gray-900 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 10A7 7 0 103 10c0 2.493 1.698 4.988 3.356 6.588 1.05.973 2.062 1.77 2.654 2.146.31.193.57.337.757.433.097.05.192.097.281.14l.018.008.006.003zM10 11.25a1.25 1.25 0 100-2.5 1.25 1.25 0 000 2.5z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-8">
+                                        <a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}" class="text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200">
+                                            {{ wisata.nama }}
+                                        </a>
+                                        <p class="mt-1 text-base text-gray-500 dark:text-gray-400">Lokasi: {{ wisata.lokasi }}</p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 sm:p-16">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+                        </svg>
+                        <h3 class="mt-5 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Belum Ada Rute</h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Tidak ada tempat wisata yang ditambahkan ke itinerari ini.</p>
+                    </div>
+                {% endif %}
+            </div>
 
-<p style="margin-top: 20px;">
-    <a href="{{ url_for('itinerari.list_itinerari') }}">&laquo; Kembali ke Daftar Itinerari</a>
-</p>
+            <!-- Tombol Aksi Admin (Edit/Hapus) -->
+            {% if current_user.is_authenticated and current_user.id == itinerari.penulis.id %}
+                <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+                    <a href="{{ url_for('itinerari.edit_itinerari', id=itinerari.id) }}" class="w-full sm:w-auto inline-flex items-center justify-center whitespace-nowrap px-5 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-base font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" />
+                        </svg>
+                        <span>Edit Itinerari</span>
+                    </a>
+                    <form action="{{ url_for('itinerari.hapus_itinerari', id=itinerari.id) }}" method="POST" id="delete-form-{{ itinerari.id }}">
+                            {{ delete_form.hidden_tag() }}
+                            <button @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ itinerari.id }}'; deleteMessage = 'Anda yakin ingin menghapus itinerari ini? Tindakan ini tidak dapat diurungkan.'" type="button" class="w-full inline-flex items-center justify-center whitespace-nowrap px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200">
+                                <svg class="w-5 h-5 mr-2 -ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                                <span>Hapus Itinerari</span>
+                            </button>
+                        </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

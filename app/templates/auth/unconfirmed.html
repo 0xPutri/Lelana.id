@@ -1,9 +1,37 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Konfirmasi Akun{% endblock %}
+{% block title %}Konfirmasi Akun - Lelana.id{% endblock %}
 
 {% block content %}
-<h2>Konfirmasi Akun Anda</h2>
-<p>Sebelum dapat mengakses Lelana.id, Anda perlu mengkonfirmasi akun Anda. Sebuah email telah dikirimkan ke alamat email Anda dengan tautan konfirmasi.</p>
-<p>Belum menerima email? <a href="{{ url_for('auth.resend_confirmation') }}">Kirim ulang email konfirmasi</a>.</p>
+    <div class="flex items-center justify-center min-h-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md p-6 sm:p-8 space-y-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 text-center">
+            <!-- Ikon Email -->
+            <div>
+                <svg class="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+            </div>
+
+            <!-- Header -->
+            <div class="space-y-2">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Konfirmasi Akun Anda</h2>
+                <p class="text-gray-600 dark:text-gray-400">Satu langkah lagi! Kami telah mengirimkan tautan konfirmasi ke email Anda.</p>
+            </div>
+
+            <!-- Isi Konten -->
+            <div class="text-gray-700 dark:text-gray-300">
+                <p>Sebelum dapat mengakses semua fitur Lelana.id, Anda perlu memverifikasi alamat email Anda dengan mengklik tautan yang telah kami kirimkan.</p>
+            </div>
+
+            <!-- Tautan Kirim Ulang -->
+            <div class="pt-4">
+                <p class="text-sm text-center text-gray-600 dark:text-gray-400">
+                    Belum menerima email?
+                    <a href="{{ url_for('auth.resend_confirmation') }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
+                        Kirim ulang email konfirmasi
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
 {% endblock %}

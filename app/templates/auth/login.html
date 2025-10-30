@@ -3,35 +3,86 @@
 {% block title %}Login - Lelana.id{% endblock %}
 
 {% block content %}
-<h2>Login</h2>
-<form method="POST" action="">
-    {{ form.hidden_tag() }}
-    
-    <div class="form-field">
-        {{ form.email.label }}<br>
-        {{ form.email(size=32) }}
-        {% for error in form.email.errors %}
-            <span class="error">[{{ error }}]</span>
-        {% endfor %}
-    </div>
+    {% set input_classes = 'mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm' %}
 
-    <div class="form-field">
-        {{ form.password.label }}<br>
-        {{ form.password(size=32) }}
-        {% for error in form.password.errors %}
-            <span class="error">[{{ error }}]</span>
-        {% endfor %}
-    </div>
+    <div class="flex items-center justify-center min-h-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-md p-6 sm:p-8 space-y-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            <!-- Header Form -->
+            <div class="text-center">
+                <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang Kembali</h2>
+                <p class="mt-2 text-gray-600 dark:text-gray-400">Login untuk melanjutkan petualanganmu.</p>
+            </div>
 
-    <div class="form-field">
-        {{ form.remember() }} {{ form.remember.label }}
-    </div>
+            <!-- Form Login -->
+            <form method="POST" action="" class="space-y-6" novalidate>
+                {{ form.hidden_tag() }}
 
-    <div class="form-field">
-        {{ form.submit() }}
-    </div>
-</form>
+                <!-- Input Email -->
+                <div>
+                    {{ form.email.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300") }}
+                    {{ form.email(class=input_classes, placeholder="email@contoh.com") }}
+                    {% if form.email.errors %}
+                        <div class="mt-2 text-sm text-red-500">
+                            {% for error in form.email.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
 
-<p>Lupa password? <a href="{{ url_for('auth.password_reset_request') }}">Reset di sini</a>.</p>
-<p>Belum punya akun? <a href="{{ url_for('auth.register') }}">Daftar di sini</a></p>
+                <!-- Input Password -->
+                <div>
+                    {{ form.password.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300") }}
+                    {{ form.password(class=input_classes, placeholder="••••••••") }}
+                    {% if form.password.errors %}
+                        <div class="mt-2 text-sm text-red-500">
+                            {% for error in form.password.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Opsi Remember Me & Lupa Password -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        {{ form.remember(class="h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500") }}
+                        {{ form.remember.label(class="ml-2 block text-sm text-gray-900 dark:text-gray-300") }}
+                    </div>
+                    <div class="text-sm">
+                        <a href="{{ url_for('auth.password_reset_request') }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
+                            Lupa password?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tombol Submit -->
+                <div>
+                    {{ form.submit(value='Login', class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer transition-colors") }}
+                </div>
+            </form>
+                      
+
+            <!-- Link ke Halaman Register -->
+            <p class="text-sm text-center text-gray-600 dark:text-gray-400">
+                Belum punya akun?
+                <a href="{{ url_for('auth.register') }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">
+                    Daftar di sini
+                </a>
+            </p>
+            
+            
+            <div class="text-sm text-gray-600 dark:text-gray-400 login-option-separator">
+            	Atau
+            </div>
+            
+            
+            <!-- Opsi login menggunakan aplikasi pihak ketiga -->
+            <a href="{{ url_for('auth.login_google') }}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer transition-colors">
+            	<i class="fa fa-google" aria-hidden="true"></i>
+            	<span>Lanjutkan dengan Google</span>
+            </a>	
+            
+        </div>
+    </div>
 {% endblock %}

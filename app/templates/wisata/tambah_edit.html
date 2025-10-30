@@ -3,53 +3,86 @@
 {% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
 
 {% block content %}
-<h2>{{ judul_halaman }}</h2>
-<form method="POST" action="">
-    {{ form.hidden_tag() }}
-    
-    <div class="form-field">
-        {{ form.nama.label }}<br>
-        {{ form.nama(size=50) }}
-        {% for error in form.nama.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
-    </div>
-    
-    <div class="form-field">
-        {{ form.kategori.label }}<br>
-        {{ form.kategori(size=50) }}
-        {% for error in form.kategori.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
-    </div>
+    {% set input_classes = 'block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 dark:text-white text-base py-3 px-4 transition-colors duration-200' %}
 
-    <div class="form-field">
-        {{ form.lokasi.label }}<br>
-        {{ form.lokasi(size=50) }}
-        {% for error in form.lokasi.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
-    </div>
+    <div class="bg-white dark:bg-gray-900 min-h-screen">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <!-- Header Halaman dan Link Kembali -->
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
+                                <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
+                    {{ judul_halaman }}
+                </h1>
+                <a href="{{ url_for('wisata.list_wisata') }}" class="inline-flex items-center text-base font-medium text-primary-600 dark:text-primary-400 hover:underline whitespace-nowrap flex-shrink-0 mt-2 sm:mt-0">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Kembali ke Daftar</span>
+                </a>
+            </div>
 
-    <div class="form-field">
-        {{ form.deskripsi.label }}<br>
-        {{ form.deskripsi(rows=10, cols=52) }}
-        {% for error in form.deskripsi.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
+            <!-- Form Tambah/Edit -->
+            <form method="POST" action="" class="space-y-6" novalidate>
+                {{ form.hidden_tag() }}
+
+                <!-- Nama Wisata -->
+                <div>
+                    {{ form.nama.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.nama(class=input_classes, placeholder="Cth: Curug Bayan") }}
+                    {% if form.nama.errors %}<div class="mt-2 space-y-1">{% for error in form.nama.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                </div>
+
+                <!-- Kategori -->
+                <div>
+                    {{ form.kategori.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.kategori(class=input_classes, placeholder="Cth: Alam, Budaya, Kuliner") }}
+                    {% if form.kategori.errors %}<div class="mt-2 space-y-1">{% for error in form.kategori.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                </div>
+
+                <!-- Lokasi -->
+                <div>
+                    {{ form.lokasi.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.lokasi(class=input_classes, placeholder="Cth: Baturraden, Banyumas") }}
+                    {% if form.lokasi.errors %}<div class="mt-2 space-y-1">{% for error in form.lokasi.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    {{ form.deskripsi.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.deskripsi(class=input_classes, rows=6, placeholder="Ceritakan tentang destinasi wisata ini...") }}
+                    {% if form.deskripsi.errors %}<div class="mt-2 space-y-1">{% for error in form.deskripsi.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                </div>
+
+                <!-- URL Gambar -->
+                <div>
+                    {{ form.gambar_url.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.gambar_url(class=input_classes, placeholder="https://contoh.com/gambar.jpg") }}
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Tempelkan URL gambar yang valid (opsional).</p>
+                    {% if form.gambar_url.errors %}<div class="mt-2 space-y-1">{% for error in form.gambar_url.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                </div>
+
+                <!-- Grid untuk Latitude dan Longitude -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <!-- Latitude -->
+                    <div>
+                        {{ form.latitude.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                        {{ form.latitude(class=input_classes, type='number', step='any', placeholder="-7.4313") }}
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Koordinat Lintang (opsional).</p>
+                        {% if form.latitude.errors %}<div class="mt-2 space-y-1">{% for error in form.latitude.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    </div>
+                    <!-- Longitude -->
+                    <div>
+                        {{ form.longitude.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                        {{ form.longitude(class=input_classes, type='number', step='any', placeholder="109.2443") }}
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Koordinat Bujur (opsional).</p>
+                        {% if form.longitude.errors %}<div class="mt-2 space-y-1">{% for error in form.longitude.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    {{ form.submit(class_="w-full sm:w-auto inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200") }}
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <div class="form-field">
-        {{ form.gambar_url.label }}<br>
-        {{ form.gambar_url(size=50) }}
-    </div>
-    
-    <div class="form-field">
-        {{ form.latitude.label }}<br>
-        {{ form.latitude(type='number', step='any') }}
-        {% for error in form.latitude.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
-    </div>
-    
-    <div class="form-field">
-        {{ form.longitude.label }}<br>
-        {{ form.longitude(type='number', step='any') }}
-        {% for error in form.longitude.errors %}<span class="error">[{{ error }}]</span>{% endfor %}
-    </div>
-    
-    <div class="form-field">
-        {{ form.submit() }}
-    </div>
-</form>
 {% endblock %}

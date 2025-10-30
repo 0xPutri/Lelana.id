@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Email dari Lelana.id{% endblock %}</title>
+    <!--[if mso]>
+    <style>
+        table, td, h1, p {font-family: Arial, sans-serif !important;}
+    </style>
+    <![endif]-->
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f3f4f6;">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding: 30px 20px; border-bottom: 1px solid #e5e7eb;">
+                            <h1 style="font-size: 28px; font-weight: bold; color: #059669; margin: 0;">Lelana.id</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 30px 30px 20px 30px; font-size: 16px; color: #374151; line-height: 1.6;">
+                            {% block content %}{% endblock %}
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding: 20px 30px 30px 30px; border-top: 1px solid #e5e7eb; font-size: 14px; color: #6b7280;">
+                            {% block footer_text %}
+                                <p style="margin: 0;">Hormat kami,<br><strong>Tim Lelana.id</strong></p>
+                            {% endblock %}
+                            <p style="margin: 20px 0 0 0; font-size: 12px; color: #9ca3af;">Email ini dikirim secara otomatis. Mohon untuk tidak membalas pesan ini.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

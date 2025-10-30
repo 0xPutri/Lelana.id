@@ -1,11 +1,44 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Tidak Terautentikasi{% endblock %}
+{% block title %}Tidak Terautentikasi | Lelana.id{% endblock %}
 
 {% block content %}
-    <div style="text-align: center; padding: 40px;">
-        <h1>Tidak Terautentikasi (Error 401)</h1>
-        <p>Maaf, Anda harus login untuk mengakses halaman ini.</p>
-        <p><a href="{{ url_for('auth.login') }}">Login</a> atau <a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    <div class="max-w-3xl mx-auto py-16 px-6">
+        <div class="text-center">
+            <div class="mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-4">
+                    <svg class="w-10 h-10 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Tidak Terautentikasi</h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">Error 401</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">
+                    Maaf, Anda harus login untuk mengakses halaman ini. Silakan masuk ke akun Anda atau buat akun baru jika belum memilikinya.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('auth.login') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+                        </svg>
+                        Login
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                        </svg>
+                        Buat Akun Baru
+                    </a>
+                </div>
+            </div>
+            <a href="{{ url_for('main.index') }}" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Kembali ke Halaman Utama
+            </a>
+        </div>
     </div>
 {% endblock %}

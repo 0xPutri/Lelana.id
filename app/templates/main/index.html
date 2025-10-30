@@ -2,81 +2,165 @@
 
 {% block title %}Selamat Datang di Lelana.id{% endblock %}
 
+{% block full_width_top %}
+    <!-- Hero Section -->
+    <section class="group relative text-center py-16 sm:py-24 md:py-32">
+        <!-- Background Image and Overlay -->
+        <div class="absolute inset-0">
+            <div class="absolute inset-0 bg-cover bg-center brightness-50 transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:brightness-75" style="background-image: url('{{ url_for('static', filename='backgrounds/pexels_manuela_adler.jpg') }}');"></div>
+            <div class="absolute inset-0 bg-gradient-radial from-black/70 to-black/95"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative container mx-auto px-4 sm:px-6">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight">
+                Selamat Datang di <span class="text-primary-400">Lelana.id</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-lg sm:text-xl text-gray-200">
+                Platform untuk menemukan, merencanakan, dan berbagi cerita petualanganmu di Banyumas dan sekitarnya.
+            </p>
+        </div>
+    </section>
+{% endblock %}
+
 {% block content %}
-<div>
-    <h2>Selamat Datang di Lelana.id!</h2>
-    <p>Platform untuk menemukan, merencanakan, dan berbagi cerita petualanganmu di Banyumas dan sekitarnya.</p>
-</div>
+    <div class="space-y-12 sm:space-y-16 lg:space-y-20">
+        <!-- Destinasi Unggulan -->
+        <section>
+            <div class="text-center mb-8 sm:mb-10">
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Tempat Seru Buat Kamu!</h2>
+                <p class="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-400">Pilihan terbaik dari komunitas petualang.</p>
+            </div>
 
-<hr>
-
-<h3>Destinasi Unggulan Pilihan Komunitas</h3>
-{% if destinasi_list %}
-<div>
-    {% for wisata, review_count, avg_rating in destinasi_list %}
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-        <h4><a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}">{{ wisata.nama }}</a></h4>
-        <p>
-            {% if avg_rating %}
-            <strong>Rating: {{ "%.1f"|format(avg_rating) }}/5.0</strong> (dari {{ review_count }} ulasan)
+            {% if destinasi_list %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {% for wisata, review_count, avg_rating in destinasi_list %}
+                        <div class="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow border border-gray-200 dark:border-gray-700 overflow-hidden transform transition-transform duration-300 hover:-translate-y-2">
+                            <a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}" class="block h-full flex flex-col">
+                                <!-- Placeholder Untuk Gambar -->
+                                <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"></path>
+                                    </svg>
+                                </div>
+                                <div class="p-4 sm:p-5 flex-grow flex flex-col">
+                                    <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ wisata.nama }}</h3>
+                                    <div class="flex items-center mt-2 flex-wrap">
+                                        {% if avg_rating %}
+                                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                            <span class="text-gray-700 dark:text-gray-300 ml-1.5 font-semibold text-sm sm:text-base">{{ "%.1f"|format(avg_rating) }}/5.0</span>
+                                            <span class="text-gray-500 dark:text-gray-400 ml-2 text-xs sm:text-sm">({{ review_count }} ulasan)</span>
+                                        {% else %}
+                                            <span class="text-gray-500 dark:text-gray-400 text-sm sm:text-base">Belum ada ulasan</span>
+                                        {% endif %}
+                                    </div>
+                                                                        <div class="mt-3 text-gray-600 dark:text-gray-400 text-sm sm:text-base line-clamp-3 flex-grow prose prose-sm dark:prose-invert max-w-none">{{ wisata.deskripsi | truncate(150) | markdown | safe }}</div>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
-            Belum ada ulasan
+                <div class="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 16.382V5.618a1 1 0 00-.553-.894L15 2m-6 5l6-3m0 0l6 3m-6-3v10" />
+                    </svg>
+                    <h3 class="mt-4 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Destinasi Belum Tersedia</h3>
+                    <p class="mt-1 text-base sm:text-lg text-gray-500 dark:text-gray-400">Saat ini belum ada destinasi unggulan untuk ditampilkan.</p>
+                </div>
             {% endif %}
-        </p>
-        <p>{{ wisata.deskripsi[:150] }}...</p>
+        </section>
+
+        <!-- Kombinasi Event & Itinerari -->
+        <section class="flex flex-col lg:flex-row lg:justify-between items-start gap-y-12 lg:gap-x-8">
+            <div class="w-full lg:w-5/12">
+                <div class="flex justify-between items-baseline mb-6">
+                    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Event Mendatang</h2>
+                    <a href="{{ url_for('event.list_event') }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-200 transition-colors flex-shrink-0">Lihat Semua</a>
+                </div>
+
+                {% if event_list %}
+                    <ul class="space-y-4">
+                        {% for event in event_list %}
+                            <li>
+                                <a href="{{ url_for('event.detail_event', id=event.id) }}" class="group block p-4 bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors duration-200">
+                                    <p class="font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors text-lg sm:text-xl">{{ event.nama }}</p>
+                                    <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">{{ event.tanggal.strftime('%d %B %Y') }}</p>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-10 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M-4.5 12h22.5" />
+                        </svg>
+                        <h3 class="mt-4 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Tidak Ada Event</h3>
+                        <p class="mt-1 text-base sm:text-lg text-gray-500 dark:text-gray-400">Belum ada event yang dijadwalkan.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="w-full lg:w-6/12">
+                <div class="flex justify-between items-baseline mb-6">
+                    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Itinerari Terbaru</h2>
+                    <a href="{{ url_for('itinerari.list_itinerari') }}" class="text-sm font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-200 transition-colors flex-shrink-0">Lihat Semua</a>
+                </div>
+
+                {% if itinerari_list %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {% for itinerari in itinerari_list %}
+                            <div class="group bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 p-4 sm:p-5 h-full flex flex-col">
+                                <a href="{{ url_for('itinerari.detail_itinerari', id=itinerari.id) }}" class="block flex-grow">
+                                    <h3 class="font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors text-lg sm:text-xl">{{ itinerari.judul }}</h3>
+                                    <p class="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-2">Oleh: {{ itinerari.penulis.username }}</p>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl sm:col-span-2">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                        <h3 class="mt-4 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Belum Ada Itinerari</h3>
+                        <p class="mt-1 text-base sm:text-lg text-gray-500 dark:text-gray-400">Jadilah yang pertama berbagi itinerari!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Penawaran Pilihan -->
+        <section>
+            <div class="text-center mb-8 sm:mb-10">
+                <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">⭐ Penawaran Pilihan ⭐</h2>
+                <p class="mt-2 text-base sm:text-lg text-gray-600 dark:text-gray-400">Paket wisata spesial yang kami rekomendasikan untuk Anda.</p>
+            </div>
+
+            {% if paket_promosi_list %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    {% for paket in paket_promosi_list %}
+                        <div class="group bg-white dark:bg-gray-800 rounded-2xl border-2 border-yellow-400 dark:border-yellow-500 overflow-hidden transform transition-transform duration-300 hover:-translate-y-2">
+                            <a href="{{ url_for('paket_wisata.detail_paket', id=paket.id) }}" class="block p-5 sm:p-6">
+                                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{{ paket.nama }}</h3>
+                                <p class="mt-2 text-lg sm:text-xl font-semibold text-primary-600 dark:text-primary-400">Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
+                                <div class="mt-3 text-gray-600 dark:text-gray-400 text-sm sm:text-base line-clamp-2 prose prose-sm dark:prose-invert">{{ paket.deskripsi | truncate(100) | markdown | safe }}</div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12 sm:py-16 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
+                    </svg>
+                    <h3 class="mt-4 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Belum Ada Penawaran</h3>
+                    <p class="mt-1 text-base sm:text-lg text-gray-500 dark:text-gray-400">Saat ini belum ada penawaran spesial untuk ditampilkan.</p>
+                </div>
+            {% endif %}
+        </section>
     </div>
-    {% endfor %}
-</div>
-{% else %}
-<p>Belum ada destinasi wisata yang ditambahkan.</p>
-{% endif %}
-
-<hr>
-
-<h3>Event Mendatang</h3>
-{% if event_list %}
-<ul>
-    {% for event in event_list %}
-    <li>
-        <a href="{{ url_for('event.detail_event', id=event.id) }}">{{ event.nama }}</a>
-        - {{ event.tanggal.strftime('%d %B %Y') }}
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>Tidak ada event mendatang yang dijadwalkan.</p>
-{% endif %}
-
-<hr>
-
-<h3>Itinerari Terbaru dari Komunitas</h3>
-{% if itinerari_list %}
-<div>
-    {% for itinerari in itinerari_list %}
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-        <h4><a href="{{ url_for('itinerari.detail_itinerari', id=itinerari.id) }}">{{ itinerari.judul }}</a></h4>
-        <p>Oleh: {{ itinerari.penulis.username }}</p>
-    </div>
-    {% endfor %}
-</div>
-{% else %}
-<p>Belum ada itinerari yang dibuat oleh komunitas.</p>
-{% endif %}
-
-<hr>
-
-<h3>⭐ Penawaran & Rekomendasi Pilihan ⭐</h3>
-{% if paket_promosi_list %}
-<div>
-    {% for paket in paket_promosi_list %}
-    <div style="border: 2px solid gold; padding: 10px; margin-bottom: 10px;">
-        <h4><a href="{{ url_for('paket_wisata.detail_paket', id=paket.id) }}">{{ paket.nama }}</a></h4>
-        <p>Harga: Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
-        <p>{{ paket.deskripsi[:150] }}...</p>
-    </div>
-    {% endfor %}
-</div>
-{% else %}
-<p>Saat ini belum ada penawaran spesial.</p>
-{% endif %}
 {% endblock %}

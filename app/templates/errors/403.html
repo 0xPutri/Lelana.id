@@ -1,11 +1,48 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Akses Ditolak{% endblock %}
+{% block title %}Akses Ditolak | Lelana.id{% endblock %}
 
 {% block content %}
-    <div style="text-align: center; padding: 40px;">
-        <h1>Akses Ditolak (Error 403)</h1>
-        <p>Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-        <p><a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    <div class="max-w-3xl mx-auto py-16 px-6">
+        <div class="text-center">
+            <div class="mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+                    <svg class="w-10 h-10 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Akses Ditolak</h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">Error 403</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">
+                    Maaf, Anda tidak memiliki izin untuk mengakses halaman ini. Jika Anda merasa ini adalah kesalahan, silakan hubungi administrator sistem.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('main.index') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Kembali ke Halaman Utama
+                    </a>
+                    {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Dashboard Admin
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 mb-4">
+                <h3 class="text-lg font-semibold text-blue-800 dark:text-blue-200 mb-2">Butuh bantuan?</h3>
+                <p class="text-blue-700 dark:text-blue-300">
+                    Jika Anda memerlukan akses ke halaman ini untuk keperluan tertentu, silakan hubungi tim kami melalui halaman
+                    <a href="{{ url_for('main.contact') }}" class="underline font-medium">Kontak</a>.
+                </p>
+            </div>
+        </div>
     </div>
 {% endblock %}

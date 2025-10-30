@@ -1,11 +1,101 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Terlalu Banyak Permintaan{% endblock %}
+{% block title %}Terlalu Banyak Permintaan | Lelana.id{% endblock %}
 
 {% block content %}
-    <div style="text-align: center; padding: 40px;">
-        <h1>Oops! Terlalu Banyak Permintaan (Error 429)</h1>
-        <p>Anda telah membuat terlalu banyak permintaan dalam waktu singkat. Silakan coba lagi nanti.</p>
-        <p><a href="{{ url_for('main.index') }}">Kembali ke Halaman Utama</a></p>
+    <div class="max-w-3xl mx-auto py-16 px-6">
+        <div class="text-center">
+            <div class="mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-orange-100 dark:bg-orange-900/30 rounded-full mb-4">
+                    <svg class="w-10 h-10 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Terlalu Banyak Permintaan</h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400 mb-2">Error 429</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-8">
+                <p class="text-lg text-gray-700 dark:text-gray-300 mb-6">
+                    Anda telah membuat terlalu banyak permintaan dalam waktu singkat. Untuk menjaga kinerja sistem dan pengalaman pengguna yang adil bagi semua orang, kami telah membatasi jumlah permintaan yang dapat Anda lakukan.
+                </p>
+                <div class="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4 mb-6">
+                    <h3 class="text-lg font-semibold text-orange-800 dark:text-orange-200 mb-2">Apa yang harus Anda lakukan?</h3>
+                    <ul class="text-left text-orange-700 dark:text-orange-300 space-y-2">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Tunggu beberapa saat sebelum mencoba lagi</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Hindari me-refresh halaman secara berulang</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Periksa koneksi internet Anda</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ url_for('main.index') }}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Kembali ke Halaman Utama
+                    </a>
+                    <button id="retry-button" class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-lg text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Coba Lagi
+                    </button>
+                </div>
+            </div>
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Masih mengalami masalah?</h3>
+                <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    Jika Anda terus mengalami masalah ini, silakan hubungi tim kami melalui halaman
+                    <a href="{{ url_for('main.contact') }}" class="underline font-medium">Kontak</a>.
+                </p>
+            </div>
+        </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        let retryCountdown = 30;
+        const retryButton = document.getElementById('retry-button');
+
+        function updateRetryButton() {
+            if (retryCountdown > 0) {
+                retryButton.disabled = true;
+                retryButton.innerHTML = `
+                    <svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Coba Lagi (${retryCountdown}s)
+                `;
+                retryCountdown--;
+                setTimeout(updateRetryButton, 1000);
+            } else {
+                retryButton.disabled = false;
+                retryButton.innerHTML = `
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Coba Lagi
+                `;
+                retryButton.addEventListener('click', function() {
+                    location.reload();
+                });
+            }
+        }
+        updateRetryButton();
+    </script>
 {% endblock %}

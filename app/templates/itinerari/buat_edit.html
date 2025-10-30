@@ -3,42 +3,87 @@
 {% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
 
 {% block content %}
-<style>
-    .form-container { max-width: 700px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-    .form-group input, .form-group textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-    .form-submit { padding: 10px 15px; background-color: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; }
-    .checkbox-list { list-style-type: none; padding: 0; max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
-    .checkbox-list li { margin-bottom: 8px; }
-    .error-message { color: red; font-size: 0.9em; }
-</style>
+    <div class="bg-white dark:bg-gray-900 min-h-screen">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <!-- Header Halaman dan Link Kembali -->
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+                <div class="flex-grow">
+                                        <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
+                        {{ judul_halaman }}
+                    </h1>
+                    <p class="mt-3 text-base sm:text-lg text-gray-600 dark:text-gray-400">Bagikan rangkaian perjalanan dan inspirasi petualanganmu kepada komunitas!</p>
+                </div>
+                <a href="{{ url_for('itinerari.list_itinerari') }}" class="inline-flex items-center text-base font-medium text-primary-600 dark:text-primary-400 hover:underline whitespace-nowrap flex-shrink-0 mt-2 sm:mt-0">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Kembali ke Daftar</span>
+                </a>
+            </div>
 
-<div class="form-container">
-    <h2>{{ judul_halaman }}</h2>
-    <p>Bagikan rangkaian perjalanan dan inspirasi petualanganmu kepada komunitas!</p>
-    <form method="POST" novalidate>
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.judul.label }}
-            {{ form.judul(size=32) }}
-            {% for error in form.judul.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
+            <!-- Form Tambah/Edit -->
+            <form method="POST" class="space-y-6" novalidate>
+                {{ form.hidden_tag() }}
+
+                <!-- Judul Itinerari -->
+                <div>
+                    {{ form.judul.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.judul(class_="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 dark:text-white text-base py-3 px-4 transition-colors duration-200", placeholder="Cth: Petualangan 3 Hari di Baturraden") }}
+                    {% if form.judul.errors %}
+                        <div class="mt-2 space-y-1">
+                            {% for error in form.judul.errors %}
+                                <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Deskripsi -->
+                <div>
+                    {{ form.deskripsi.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {{ form.deskripsi(class_="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 dark:text-white text-base py-3 px-4 transition-colors duration-200", rows=6, placeholder="Ceritakan tentang petualangan ini, berikan tips, atau bagikan momen berkesan...") }}
+                    {% if form.deskripsi.errors %}
+                        <div class="mt-2 space-y-1">
+                            {% for error in form.deskripsi.errors %}
+                                <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Daftar Wisata Termasuk (Checkbox List) -->
+                <div>
+                    {{ form.wisata_termasuk.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
+                    {% if form.wisata_termasuk.query_factory() %}
+                        <div class="mt-2 p-1 h-64 max-h-64 overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                            <div class="space-y-1 p-2">
+                                {% for subfield in form.wisata_termasuk %}
+                                    <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                        {{ subfield(class_="h-5 w-5 rounded border-gray-400 dark:border-gray-500 text-primary-600 bg-gray-100 dark:bg-gray-900 focus:ring-primary-500/50 dark:focus:ring-offset-gray-800") }}
+                                        <span class="text-base text-gray-800 dark:text-gray-200">{{ subfield.label.text }}</span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="mt-2 text-center p-8 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+                            <p class="text-base text-gray-500 dark:text-gray-400">Belum ada data destinasi wisata untuk dipilih. Harap tambahkan data wisata terlebih dahulu.</p>
+                        </div>
+                    {% endif %}
+                    {% if form.wisata_termasuk.errors %}
+                        <div class="mt-2 space-y-1">
+                            {% for error in form.wisata_termasuk.errors %}
+                                <p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+                    {{ form.submit(class_="w-full sm:w-auto inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200") }}
+                </div>
+            </form>
         </div>
-        <div class="form-group">
-            {{ form.deskripsi.label }}
-            {{ form.deskripsi(rows=6, placeholder="Ceritakan tentang petualangan ini, berikan tips, atau bagikan momen berkesan...") }}
-            {% for error in form.deskripsi.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.wisata_termasuk.label }}
-            <ul class="checkbox-list">
-                {{ form.wisata_termasuk() }}
-            </ul>
-            {% for error in form.wisata_termasuk.errors %}<span class="error-message">{{ error }}</span>{% endfor %}
-        </div>
-        <div class="form-group">
-            {{ form.submit(class="form-submit") }}
-        </div>
-    </form>
-</div>
+    </div>
 {% endblock %}

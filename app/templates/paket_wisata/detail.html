@@ -3,34 +3,74 @@
 {% block title %}{{ paket.nama }} - Lelana.id{% endblock %}
 
 {% block content %}
-<style>
-    .detail-container { border: 1px solid #ddd; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .destinasi-list { list-style: square; padding-left: 20px; }
-</style>
+    <div class="bg-white dark:bg-gray-900 min-h-screen">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+            <!-- Navigasi Kembali -->
+            <div class="mb-8">
+                <a href="{{ url_for('paket_wisata.list_paket') }}" class="inline-flex items-center text-base font-medium text-primary-600 dark:text-primary-400 hover:underline">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Kembali ke Daftar Paket</span>
+                </a>
+            </div>
 
-<div class="detail-container">
-    <h2>{{ paket.nama }}</h2>
-    <p><strong>Harga:</strong> Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}</p>
-    
-    <hr>
-    <h4>Deskripsi Paket</h4>
-    <p>{{ paket.deskripsi|safe }}</p>
-    
-    <hr>
-    <h4>Destinasi yang Termasuk:</h4>
-    {% if paket.destinasi %}
-    <ul class="destinasi-list">
-        {% for destinasi in paket.destinasi %}
-        <li><a href="{{ url_for('wisata.detail_wisata', id=destinasi.id) }}">{{ destinasi.nama }}</a></li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>Tidak ada destinasi spesifik yang terdaftar.</p>
-    {% endif %}
-    
-    <hr>
-    <small>Data dibuat pada: {{ paket.tanggal_dibuat.strftime('%d %B %Y') }}</small>
-</div>
+            <!-- Header: Nama Paket dan Harga -->
+            <div class="mb-10 pb-10 border-b border-gray-200 dark:border-gray-700">
+                            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">
+                    {{ paket.nama }}
+                </h1>
+                <p class="text-3xl sm:text-4xl font-bold text-primary-600 dark:text-primary-400 tracking-tight">
+                    Rp {{ "{:,.0f}".format(paket.harga).replace(",", ".") }}
+                </p>
+            </div>
 
-<p><a href="{{ url_for('paket_wisata.list_paket') }}">&laquo; Kembali ke Daftar Paket</a></p>
+            <!-- Deskripsi Paket -->
+            {% if paket.deskripsi %}
+                <div class="mb-12">
+                    <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">Deskripsi Paket</h2>
+                    <article class="prose sm:prose-lg dark:prose-invert max-w-none prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-headings:text-gray-900 dark:prose-headings:text-white">
+                        {{ paket.deskripsi | markdown | safe }}
+                    </article>
+                </div>
+            {% endif %}
+
+            <!-- Destinasi yang Termasuk -->
+            <div>
+                <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">Destinasi yang Termasuk</h2>
+                {% if paket.destinasi %}
+                    <ul class="space-y-3">
+                        {% for destinasi in paket.destinasi %}
+                            <li class="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200">
+                                <a href="{{ url_for('wisata.detail_wisata', id=destinasi.id) }}" class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <svg class="h-6 w-6 text-green-500 dark:text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-base font-medium text-gray-800 dark:text-gray-200 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                                        {{ destinasi.nama }}
+                                    </span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 p-12 sm:p-16">
+                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                        </svg>
+                        <h3 class="mt-5 text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Tidak Ada Destinasi Spesifik</h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Paket wisata ini tidak memiliki daftar destinasi spesifik yang terdaftar.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Metadata -->
+            <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-sm text-gray-500 dark:text-gray-400">Data dibuat pada: <time datetime="{{ paket.tanggal_dibuat.isoformat() }}">{{ paket.tanggal_dibuat.strftime('%d %B %Y') }}</time></p>
+            </div>
+        </div>
+    </div>
 {% endblock %}
