@@ -61,7 +61,6 @@
                     {{ form.submit(value='Login', class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer transition-colors") }}
                 </div>
             </form>
-                      
 
             <!-- Link ke Halaman Register -->
             <p class="text-sm text-center text-gray-600 dark:text-gray-400">
@@ -70,19 +69,6 @@
                     Daftar di sini
                 </a>
             </p>
-            
-            
-            <div class="text-sm text-gray-600 dark:text-gray-400 login-option-separator">
-            	Atau
-            </div>
-            
-            
-            <!-- Opsi login menggunakan aplikasi pihak ketiga -->
-            <a href="{{ url_for('auth.login_google') }}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 cursor-pointer transition-colors">
-            	<i class="fa fa-google" aria-hidden="true"></i>
-            	<span>Lanjutkan dengan Google</span>
-            </a>	
-            
         </div>
     </div>
 {% endblock %}
