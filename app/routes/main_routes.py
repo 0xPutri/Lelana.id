@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 from app.models.review import Review
 from app.models.itinerari import Itinerari
@@ -6,6 +6,7 @@ from app.models.wisata import Wisata
 from app.models.event import Event
 from app.models.paket_wisata import PaketWisata
 from app import db
+from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from datetime import datetime, timezone
 
@@ -108,3 +109,63 @@ def privacy():
         Response: Render template halaman kebijakan privasi.
     """
     return render_template('main/privacy.html')
+
+@main.route('/search')
+def search():
+    """Menangani pencarian terpusat untuk berbagai model data.
+
+    Mencari berdasarkan query yang diberikan pada model Wisata, Event,
+    PaketWisata, dan Itinerari. Pencarian dilakukan secara case-insensitive
+    pada kolom nama, deskripsi, dan beberapa kolom spesifik lainnya.
+
+    Args:
+        q (str): Query pencarian yang diambil dari argumen request URL.
+
+    Returns:
+        Response: Render template halaman hasil pencarian dengan
+                  hasil yang dikelompokkan berdasarkan kategori.
+    """
+    query = request.args.get('q', '')
+    wisata_results = []
+    event_results = []
+    paket_wisata_results = []
+    itinerari_results = []
+
+    if query:
+        search_term = f"%{query}%"
+        
+        wisata_results = Wisata.query.filter(
+            or_(
+                Wisata.nama.ilike(search_term),
+                Wisata.deskripsi.ilike(search_term),
+                Wisata.lokasi.ilike(search_term)
+            )
+        ).all()
+
+        event_results = Event.query.filter(
+            or_(
+                Event.nama.ilike(search_term),
+                Event.deskripsi.ilike(search_term)
+            )
+        ).all()
+
+        paket_wisata_results = PaketWisata.query.filter(
+            or_(
+                PaketWisata.nama.ilike(search_term),
+                PaketWisata.deskripsi.ilike(search_term)
+            )
+        ).all()
+        
+        itinerari_results = Itinerari.query.filter(
+            or_(
+                Itinerari.judul.ilike(search_term),
+                Itinerari.deskripsi.ilike(search_term)
+            )
+        ).all()
+
+    return render_template('main/search_results.html',
+                           query=query,
+                           wisata_list=wisata_results,
+                           event_list=event_results,
+                           paket_wisata_list=paket_wisata_results,
+                           itinerari_list=itinerari_results)
