@@ -1,21 +1,24 @@
 {% extends "auth/email/base_email.html" %}
 
-{% block title %}Konfirmasi Akun - Lelana.id{% endblock %}
+{% block title %}Konfirmasi Alamat Email Anda{% endblock %}
 
 {% block content %}
-    <p style="margin: 0 0 20px 0;">Halo <strong>{{ user.username }}</strong>,</p>
-    <p style="margin: 0 0 20px 0;">Terima kasih telah mendaftar di Lelana.id. Untuk mengaktifkan akun Anda, silakan klik tombol di bawah ini:</p>
+    <p style="margin: 0 0 25px 0;">Yth. <strong>{{ user.username }}</strong>,</p>
+    <p style="margin: 0 0 25px 0;">Terima kasih telah mendaftar di Lelana.id. Untuk menyelesaikan proses pendaftaran, mohon konfirmasikan alamat email Anda dengan menekan tombol di bawah ini.</p>
 
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
         <tr>
-            <td align="center" style="padding: 20px 0;">
-                <a href="{{ url_for('auth.confirm', token=token, _external=True) }}" target="_blank" style="background-color: #10B981; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Konfirmasi Akun</a>
+            <td align="center" style="padding: 10px 0 25px 0;">
+                <a href="{{ url_for('auth.confirm', token=token, _external=True) }}" target="_blank" style="background-color: #059669; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Konfirmasi Email</a>
             </td>
         </tr>
     </table>
 
-    <p style="font-size: 14px; color: #6b7280; margin: 0 0 20px 0;">Jika tombol tidak berfungsi, salin dan tempel tautan berikut di browser Anda:</p>
-    <p style="font-size: 12px; color: #374151; background-color: #f3f4f6; padding: 10px; border-radius: 4px; word-break: break-all;">{{ url_for('auth.confirm', token=token, _external=True) }}</p>
+    <p style="font-size: 14px; color: #666666; margin: 0 0 15px 0;">Jika Anda mengalami kesulitan dengan tombol di atas, silakan salin dan tempel URL berikut ke peramban web Anda:</p>
+    <p style="font-size: 12px; color: #333333; background-color: #f4f4f4; padding: 10px; border-radius: 4px; word-break: break-all;">{{ url_for('auth.confirm', token=token, _external=True) }}</p>
 
-    <p style="margin: 20px 0 0 0; font-size: 14px; color: #6b7280;">Tautan ini hanya berlaku selama 1 jam. Jika Anda tidak merasa mendaftar, mohon abaikan email ini.</p>
+    <p style="margin: 25px 0 0 0; font-size: 14px; color: #666666;">Tautan ini akan kedaluwarsa dalam 1 jam. Jika Anda tidak merasa melakukan pendaftaran ini, mohon abaikan email ini.</p>
+    <br>
+    <p style="margin: 0;">Hormat kami,</p>
+    <p style="margin: 5px 0 0 0;">Tim Lelana.id</p>
 {% endblock %}

@@ -1,0 +1,91 @@
+{% extends "layouts/base.html" %}
+
+{% block page_title %}Hasil Pencarian untuk "{{ query }}"{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+        Hasil Pencarian
+    </h1>
+    <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
+        Menampilkan hasil untuk: <span class="font-semibold text-primary-600 dark:text-primary-400">"{{ query }}"</span>
+    </p>
+
+    {% if not wisata_list and not event_list and not paket_wisata_list and not itinerari_list %}
+        <div class="text-center py-16">
+            <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-300">Tidak ada hasil ditemukan</h2>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Coba gunakan kata kunci lain yang lebih umum.</p>
+        </div>
+    {% else %}
+        <div class="space-y-12">
+            <!-- Hasil Wisata -->
+            {% if wisata_list %}
+                <div>
+                    <h2 class="text-2xl font-semibold border-b-2 border-primary-500 pb-2 mb-4 text-gray-800 dark:text-white">Destinasi Wisata</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for wisata in wisata_list %}
+                            <a href="{{ url_for('wisata.detail_wisata', id=wisata.id) }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                <div class="p-5">
+                                    <h3 class="font-bold text-lg text-primary-600 dark:text-primary-400">{{ wisata.nama }}</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 line-clamp-3">{{ wisata.deskripsi }}</p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Hasil Event -->
+            {% if event_list %}
+                <div>
+                    <h2 class="text-2xl font-semibold border-b-2 border-primary-500 pb-2 mb-4 text-gray-800 dark:text-white">Event</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for event in event_list %}
+                            <a href="{{ url_for('event.detail_event', id=event.id) }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                <div class="p-5">
+                                    <h3 class="font-bold text-lg text-primary-600 dark:text-primary-400">{{ event.nama }}</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 line-clamp-3">{{ event.deskripsi }}</p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Hasil Paket Wisata -->
+            {% if paket_wisata_list %}
+                <div>
+                    <h2 class="text-2xl font-semibold border-b-2 border-primary-500 pb-2 mb-4 text-gray-800 dark:text-white">Paket Wisata</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for paket in paket_wisata_list %}
+                            <a href="{{ url_for('paket_wisata.detail_paket', id=paket.id) }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                <div class="p-5">
+                                    <h3 class="font-bold text-lg text-primary-600 dark:text-primary-400">{{ paket.nama }}</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 line-clamp-3">{{ paket.deskripsi }}</p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Hasil Itinerari -->
+            {% if itinerari_list %}
+                <div>
+                    <h2 class="text-2xl font-semibold border-b-2 border-primary-500 pb-2 mb-4 text-gray-800 dark:text-white">Itinerari</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for itinerari in itinerari_list %}
+                            <a href="{{ url_for('itinerari.detail_itinerari', id=itinerari.id) }}" class="block bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                <div class="p-5">
+                                    <h3 class="font-bold text-lg text-primary-600 dark:text-primary-400">{{ itinerari.nama }}</h3>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm mt-2 line-clamp-3">{{ itinerari.deskripsi }}</p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
