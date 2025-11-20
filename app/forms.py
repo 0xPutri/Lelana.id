@@ -32,11 +32,8 @@ class RegistrationForm(FlaskForm):
     def validate_password(self, password):
         """Memvalidasi kekuatan password berdasarkan kebijakan keamanan.
 
-        Password harus mengandung setidaknya:
-        - Satu huruf kecil
-        - Satu huruf besar
-        - Satu angka
-        - Satu karakter spesial dari himpunan @$!%*?&#
+        Password harus mengandung setidaknya satu huruf kecil, satu huruf besar,
+        satu angka, dan satu karakter spesial.
 
         Args:
             password (PasswordField): Field password dari formulir.
@@ -45,12 +42,16 @@ class RegistrationForm(FlaskForm):
             ValidationError: Jika salah satu kriteria keamanan tidak terpenuhi.
         """
         p = password.data
+        # Memeriksa keberadaan huruf kecil
         if not re.search(r'[a-z]', p):
             raise ValidationError('Password harus mengandung setidaknya satu huruf kecil.')
+        # Memeriksa keberadaan huruf besar
         if not re.search(r'[A-Z]', p):
             raise ValidationError('Password harus mengandung setidaknya satu huruf besar.')
+        # Memeriksa keberadaan angka
         if not re.search(r'\d', p):
             raise ValidationError('Password harus mengandung setidaknya satu angka.')
+        # Memeriksa keberadaan karakter spesial
         if not re.search(r'[@$!%*?&#]', p):
             raise ValidationError('Password harus mengandung setidaknya satu karakter spesial (@$!%*?&#).')
 
@@ -68,22 +69,19 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Username tersebut sudah digunakan. Silakan pilih yang lain.')
     
     def validate_email(self, email):
-        """Memastikan alamat email valid, unik, dan berasal dari domain populer.
+        """Memastikan alamat email berasal dari domain yang diizinkan.
 
         Args:
             email (StringField): Field email dari formulir.
 
         Raises:
-            ValidationError: Jika email sudah digunakan, atau domain tidak diizinkan.
+            ValidationError: Jika domain email tidak diizinkan.
         """
+        # Mengambil daftar domain yang diizinkan dari konfigurasi aplikasi
         allowed_domains = current_app.config['ALLOWED_EMAIL_DOMAINS']
         domain = email.data.split('@')[-1].lower()
         if domain not in allowed_domains:
             raise ValidationError('Pendaftaran hanya diizinkan untuk domain email populer (Gmail, Outlook, Yahoo, dll.).')
-
-        user = User.query.filter_by(email=email.data).first()
-        if user:
-            raise ValidationError('Email tersebut sudah terdaftar. Silakan gunakan email lain.')
 
 class LoginForm(FlaskForm):
     """Formulir login pengguna dengan opsi mengingat sesi.
@@ -176,6 +174,7 @@ class PaketWisataForm(FlaskForm):
     harga = IntegerField('Harga (Rp)', 
                          validators=[DataRequired(message='Harga wajib diisi.')])
 
+    # Field untuk memilih beberapa destinasi wisata
     destinasi = QuerySelectMultipleField(
         'Pilih Destinasi yang Termasuk dalam Paket',
         query_factory=get_all_wisata,
@@ -198,6 +197,7 @@ class ItinerariForm(FlaskForm):
                         validators=[DataRequired(message='Judul wajib diisi.')])
     deskripsi = TextAreaField('Cerita atau Deskripsi Singkat (Opsional)')
 
+    # Field untuk memilih beberapa tempat wisata yang akan dimasukkan ke itinerari
     wisata_termasuk = QuerySelectMultipleField(
         'Pilih Tempat Wisata untuk Dimasukkan',
         query_factory=get_all_wisata,
@@ -211,7 +211,7 @@ class AdminEditUserForm(FlaskForm):
     """Formulir untuk admin mengedit profil pengguna lain.
 
     Memungkinkan perubahan username, email, dan peran (role) dengan validasi
-    untuk memastikan keunikan username dan email.
+    untuk memastikan keunikan username dan email jika diubah.
     """
     username = StringField('Username', 
                            validators=[DataRequired(message='Username wajib diisi.'),
@@ -225,6 +225,13 @@ class AdminEditUserForm(FlaskForm):
     submit = SubmitField('Simpan Perubahan')
 
     def __init__(self, original_user, *args, **kwargs):
+        """Inisialisasi form dengan data pengguna asli.
+
+        Args:
+            original_user (User): Objek pengguna yang sedang diedit.
+            *args: Argumen posisional variabel.
+            **kwargs: Argumen kata kunci arbitrer.
+        """
         super(AdminEditUserForm, self).__init__(*args, **kwargs)
         self.original_user = original_user
 
@@ -237,6 +244,7 @@ class AdminEditUserForm(FlaskForm):
         Raises:
             ValidationError: Jika username baru sudah digunakan oleh pengguna lain.
         """
+        # Hanya validasi jika username di form berbeda dari username asli
         if username.data != self.original_user.username:
             user = User.query.filter_by(username=username.data).first()
             if user:
@@ -251,6 +259,7 @@ class AdminEditUserForm(FlaskForm):
         Raises:
             ValidationError: Jika email baru sudah terdaftar oleh akun lain.
         """
+        # Hanya validasi jika email di form berbeda dari email asli
         if email.data != self.original_user.email:
             user = User.query.filter_by(email=email.data).first()
             if user:
@@ -260,7 +269,6 @@ class PasswordResetRequestForm(FlaskForm):
     """Formulir untuk meminta tautan reset password melalui email.
 
     Memvalidasi bahwa email yang dimasukkan sesuai format dan wajib diisi.
-    Digunakan pada halaman permintaan pemulihan akun.
     """
     email = StringField('Email', 
                         validators=[DataRequired(message='Email wajib diisi.'), 
@@ -271,8 +279,7 @@ class PasswordResetForm(FlaskForm):
     """Formulir untuk menetapkan password baru setelah verifikasi token.
 
     Memastikan password baru memenuhi panjang minimum dan cocok dengan
-    konfirmasi password. Digunakan setelah pengguna mengklik tautan reset
-    yang dikirim melalui email.
+    konfirmasi password.
     """
     password = PasswordField('Password Baru', 
                              validators=[DataRequired(message='Password wajib diisi.'), 

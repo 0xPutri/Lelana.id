@@ -8,29 +8,31 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import select
 from flask_wtf import FlaskForm
 
+# Membuat Blueprint untuk rute-rute terkait paket wisata
 paket_wisata = Blueprint('paket_wisata', __name__)
 
 @paket_wisata.route('/paket-wisata')
 def list_paket():
-    """Menampilkan daftar semua paket wisata yang tersedia dengan paginasi.
-
-    Data diurutkan berdasarkan nama secara alfabetis dan mencakup formulir hapus
-    untuk keamanan CSRF pada operasi penghapusan.
+    """Menampilkan daftar semua paket wisata dengan sistem pagination.
 
     Returns:
-        Response: Render template daftar paket wisata dengan data paginasi.
+        Response: Render template halaman daftar paket wisata dengan data
+                  paket dan kontrol pagination.
     """
+    # Mengambil nomor halaman dari query parameter URL, default ke halaman 1
     page = request.args.get('page', 1, type=int)
     
-    # Menggunakan db.paginate untuk efisiensi dan paginasi
+    # Menggunakan db.paginate untuk query yang lebih modern dan efisien
     pagination = db.paginate(
         db.select(PaketWisata).order_by(PaketWisata.nama),
         page=page,
         per_page=9,
         error_out=False
     )
+    # Mendapatkan item paket wisata untuk halaman saat ini
     daftar_paket = pagination.items
 
+    # Form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('paket_wisata/list.html', 
@@ -41,21 +43,20 @@ def list_paket():
 
 @paket_wisata.route('/paket-wisata/detail/<int:id>')
 def detail_paket(id):
-    """Menampilkan detail lengkap suatu paket wisata berdasarkan ID.
+    """Menampilkan halaman detail untuk satu paket wisata spesifik.
 
-    Memuat daftar destinasi wisata yang termasuk dalam paket menggunakan
-    eager loading untuk menghindari query tambahan.
+    Menggunakan 'eager loading' untuk mengambil data destinasi secara efisien.
 
     Args:
-        id (int): ID unik paket wisata yang ingin dilihat.
+        id (int): ID dari paket wisata yang akan ditampilkan.
 
     Returns:
-        Response: Render template detail paket wisata jika ditemukan.
-
-    Raises:
-        HTTPException: 404 Not Found jika paket tidak ada.
+        Response: Render template halaman detail paket wisata.
     """
+    # Membuat statement query untuk mengambil paket wisata berdasarkan ID
+    # joinedload(PaketWisata.destinasi) memastikan data destinasi diambil dalam query yang sama
     stmt = select(PaketWisata).options(joinedload(PaketWisata.destinasi)).where(PaketWisata.id == id)
+    # Mengeksekusi query dan mengambil satu hasil atau None
     paket = db.session.scalar(stmt)
     if paket is None:
         abort(404)
@@ -67,16 +68,18 @@ def detail_paket(id):
 @admin_required
 @limiter.limit("30 per minute", methods=["POST"])
 def tambah_paket():
-    """Menangani penambahan paket wisata baru oleh admin.
+    """Menangani pembuatan paket wisata baru oleh admin.
 
-    Mengumpulkan data melalui PaketWisataForm, termasuk destinasi yang dipilih
-    dan status promosi, lalu menyimpan ke database.
+    Menampilkan form untuk membuat paket (GET) dan memproses data
+    yang disubmit (POST).
 
     Returns:
-        Response: Render formulir tambah jika GET, atau redirect ke daftar paket jika sukses.
+        Response: Render template form, atau redirect ke daftar paket
+                  setelah berhasil dibuat.
     """
     form = PaketWisataForm()
     if form.validate_on_submit():
+        # Membuat instance PaketWisata baru dari data form
         paket_baru = PaketWisata(
             nama=form.nama.data,
             deskripsi=form.deskripsi.data,
@@ -85,9 +88,11 @@ def tambah_paket():
             is_promoted=form.is_promoted.data
         )
 
+        # Menambahkan dan menyimpan objek ke database
         db.session.add(paket_baru)
         db.session.commit()
 
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s menambahkan Paket Wisata baru "%s" (ID: %d).', 
             current_user.username, paket_baru.nama, paket_baru.id
         )
@@ -102,25 +107,26 @@ def tambah_paket():
 @admin_required
 @limiter.limit("30 per minute", methods=["POST"])
 def edit_paket(id):
-    """Menangani pembaruan data paket wisata oleh admin.
+    """Menangani pembaruan paket wisata yang sudah ada oleh admin.
 
-    Memuat data paket yang ada ke dalam formulir dan menyimpan perubahan
-    setelah validasi berhasil.
+    Menampilkan form yang sudah terisi data (GET) dan memproses
+    perubahan yang disubmit (POST).
 
     Args:
-        id (int): ID paket wisata yang akan diedit.
+        id (int): ID dari paket wisata yang akan diedit.
 
     Returns:
-        Response: Render formulir edit jika GET, atau redirect ke detail paket jika sukses.
-
-    Raises:
-        HTTPException: 404 Not Found jika paket tidak ditemukan.
+        Response: Render template form, atau redirect ke detail paket
+                  setelah berhasil diperbarui.
     """
+    # Mengambil data paket wisata dari database, atau 404 jika tidak ada
     paket = db.session.get(PaketWisata, id)
     if paket is None:
         abort(404)
+    # Menginisialisasi form dengan data dari objek paket wisata
     form = PaketWisataForm(obj=paket)
     if form.validate_on_submit():
+        # Memperbarui atribut objek dengan data dari form
         paket.nama = form.nama.data
         paket.deskripsi = form.deskripsi.data
         paket.harga = form.harga.data
@@ -128,6 +134,7 @@ def edit_paket(id):
         paket.is_promoted = form.is_promoted.data
         db.session.commit()
 
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s memperbarui Paket Wisata "%s" (ID: %d).', 
             current_user.username, paket.nama, paket.id
         )
@@ -142,33 +149,35 @@ def edit_paket(id):
 @admin_required
 @limiter.limit("30 per minute")
 def hapus_paket(id):
-    """Menghapus paket wisata dari sistem berdasarkan ID.
+    """Memproses permintaan penghapusan paket wisata.
 
-    Memerlukan validasi CSRF melalui formulir kosong. Hanya dapat diakses oleh admin.
+    Memerlukan validasi token CSRF sebelum menghapus data.
 
     Args:
-        id (int): ID paket wisata yang akan dihapus.
+        id (int): ID dari paket wisata yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar paket dengan pesan status operasi.
-
-    Raises:
-        HTTPException: 404 Not Found jika paket tidak ditemukan.
+        Response: Redirect ke halaman daftar paket wisata dengan pesan status.
     """
+    # Mengambil data paket wisata dari database, atau 404 jika tidak ada
     paket = db.session.get(PaketWisata, id)
     if paket is None:
         abort(404)
     
+    # Membuat instance form kosong untuk validasi CSRF
     form = FlaskForm()
     if form.validate_on_submit():
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s menghapus Paket Wisata "%s" (ID: %d).', 
             current_user.username, paket.nama, paket.id
         )
 
+        # Menghapus objek dari database
         db.session.delete(paket)
         db.session.commit()
         flash('Paket wisata telah berhasil dihapus', 'info')
     else:
+        # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
     return redirect(url_for('paket_wisata.list_paket'))

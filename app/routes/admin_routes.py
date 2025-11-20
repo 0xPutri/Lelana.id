@@ -9,18 +9,20 @@ from app.models.paket_wisata import PaketWisata
 from app.forms import AdminEditUserForm
 from flask_wtf import FlaskForm
 
+# Membuat Blueprint untuk rute-rute khusus admin
 admin = Blueprint('admin', __name__)
 
 @admin.route('/admin/dashboard')
 @login_required
 @admin_required
 def dashboard():
-    """Menampilkan dashboard admin yang hanya dapat diakses oleh pengguna dengan peran 'admin'.
+    """Menampilkan halaman dashboard utama untuk admin.
 
-    Memerlukan autentikasi dan otorisasi khusus admin.
+    Halaman ini hanya dapat diakses oleh pengguna yang sudah login dan
+    memiliki peran 'admin'.
 
     Returns:
-        Response: Render template dashboard admin.
+        Response: Render template halaman dashboard admin.
     """
     return render_template('admin/dashboard.html')
 
@@ -28,13 +30,18 @@ def dashboard():
 @login_required
 @admin_required
 def manage_users():
-    """Menampilkan daftar semua pengguna sistem untuk dikelola oleh admin.
+    """Menampilkan halaman untuk mengelola semua pengguna terdaftar.
+
+    Mengambil semua data pengguna dari database dan menampilkannya dalam
+    sebuah tabel.
 
     Returns:
-        Response: Render halaman manajemen pengguna dengan daftar pengguna dan formulir hapus.
+        Response: Render template manajemen pengguna dengan data semua pengguna.
     """
+    # Mengambil semua pengguna, diurutkan berdasarkan ID
     users = User.query.order_by(User.id).all()
 
+    # Membuat instance form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
     return render_template('admin/manage_users.html', users=users, delete_form=delete_form)
 
@@ -43,25 +50,30 @@ def manage_users():
 @admin_required
 @limiter.limit("30 per minute", methods=["POST"])
 def edit_user(id):
-    """Mengizinkan admin mengedit profil pengguna lain, termasuk username, email, dan peran.
+    """Menampilkan form dan memproses pengeditan data pengguna.
 
-    Mencegah perubahan peran admin pada akun sendiri dan memastikan validasi unik pada
-    username dan email.
+    Admin dapat mengubah username, email, dan peran pengguna lain. Terdapat
+    proteksi untuk mencegah admin mengubah perannya sendiri.
 
     Args:
-        id (int): ID pengguna yang akan diedit.
+        id (int): ID dari pengguna yang akan diedit.
 
     Returns:
-        Response: Render formulir edit jika GET, atau redirect ke daftar pengguna jika sukses.
+        Response: Render template form edit, atau redirect ke halaman manajemen
+                  pengguna setelah berhasil.
     """
+    # Mengambil data pengguna yang akan diedit atau menampilkan 404 jika tidak ditemukan
     user_to_edit = User.query.filter_by(id=id).first_or_404()
     form = AdminEditUserForm(original_user=user_to_edit)
 
+    # Memproses form jika metode adalah POST dan validasi berhasil
     if form.validate_on_submit():
+        # Mencegah admin mengubah perannya sendiri menjadi bukan admin
         if user_to_edit.id == current_user.id and form.role.data != 'admin':
             flash('Anda tidak mengubah peran (role) akun Anda sendiri.', 'danger')
             return redirect(url_for('admin.edit_user', id=id))
 
+        # Memperbarui data pengguna dari form
         user_to_edit.username = form.username.data
         user_to_edit.email = form.email.data
         user_to_edit.role = form.role.data
@@ -70,6 +82,7 @@ def edit_user(id):
         flash(f'Data pengguna {user_to_edit.username} berhasil diperbarui.', 'success')
         return redirect(url_for('admin.manage_users'))
     
+    # Mengisi form dengan data pengguna yang ada saat metode adalah GET
     form.username.data = user_to_edit.username
     form.email.data = user_to_edit.email
     form.role.data = user_to_edit.role
@@ -81,39 +94,46 @@ def edit_user(id):
 @admin_required
 @limiter.limit("30 per minute")
 def hapus_user(id):
-    """Menghapus pengguna dari sistem dengan validasi keamanan.
+    """Memproses permintaan penghapusan pengguna.
 
-    Mencegah penghapusan akun sendiri dan memastikan setidaknya satu admin tetap ada.
-    Menggunakan formulir CSRF untuk keamanan POST request.
+    Memvalidasi token CSRF dan menerapkan logika keamanan untuk mencegah
+    penghapusan akun sendiri atau admin terakhir.
 
     Args:
-        id (int): ID pengguna yang akan dihapus.
+        id (int): ID dari pengguna yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar pengguna dengan pesan status operasi.
+        Response: Redirect ke halaman manajemen pengguna dengan pesan status.
     """
+    # Mengambil data pengguna yang akan dihapus
     user_to_delete = db.session.get(User, id)
     if user_to_delete is None:
         abort(404)
+    # Membuat instance form kosong untuk validasi CSRF
     form = FlaskForm()
 
+    # Memvalidasi token CSRF dari form yang disubmit
     if form.validate_on_submit():
+        # Mencegah admin menghapus akunnya sendiri
         if user_to_delete.id == current_user.id:
             flash('Anda tidak dapat menghapus akun Anda sendiri.', 'danger')
             return redirect(url_for('admin.manage_users'))
         
+        # Logika untuk mencegah penghapusan admin terakhir
         if user_to_delete.role == 'admin':
             admin_count = User.query.filter_by(role='admin').count()
             if admin_count <= 1:
                 flash('Tidak dapat menghapus admin terakhir. Harus ada setidaknya satu admin.', 'danger')
                 return redirect(url_for('admin.manage_users'))
 
+        # Menghapus pengguna dari sesi database dan menyimpan perubahan
         db.session.delete(user_to_delete)
         db.session.commit()
         
         flash(f'Pengguna {user_to_delete.username} telah berhasil dihapus.', 'info')
     else:
-        flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
+        # Gagal jika token CSRF tidak valid
+        flash('Gagal menghapus pengguna: Token keamanan tidak valid atau kedaluwarsa.', 'danger')
 
     return redirect(url_for('admin.manage_users'))
 
@@ -121,15 +141,15 @@ def hapus_user(id):
 @login_required
 @admin_required
 def manage_wisata():
-    """Menampilkan daftar semua tempat wisata untuk dikelola oleh admin.
-
-    Data diurutkan berdasarkan nama secara alfabetis.
+    """Menampilkan halaman untuk mengelola semua data tempat wisata.
 
     Returns:
-        Response: Render halaman manajemen tempat wisata dengan daftar dan formulir hapus.
+        Response: Render template manajemen wisata dengan data semua tempat wisata.
     """
+    # Mengambil semua data wisata, diurutkan berdasarkan nama
     semua_wisata = Wisata.query.order_by(Wisata.nama).all()
 
+    # Form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('admin/manage_wisata.html', daftar_wisata=semua_wisata, delete_form=delete_form)
@@ -138,15 +158,15 @@ def manage_wisata():
 @login_required
 @admin_required
 def manage_event():
-    """Menampilkan daftar semua acara (event) untuk dikelola oleh admin.
-
-    Data diurutkan berdasarkan tanggal pelaksanaan secara menurun (terbaru di atas).
+    """Menampilkan halaman untuk mengelola semua data acara (event).
 
     Returns:
-        Response: Render halaman manajemen acara dengan daftar dan formulir hapus.
+        Response: Render template manajemen event dengan data semua acara.
     """
+    # Mengambil semua data event, diurutkan berdasarkan tanggal terbaru
     semua_event = Event.query.order_by(Event.tanggal.desc()).all()
 
+    # Form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('admin/manage_event.html', daftar_event=semua_event, delete_form=delete_form)
@@ -155,15 +175,15 @@ def manage_event():
 @login_required
 @admin_required
 def manage_paket_wisata():
-    """Menampilkan daftar semua paket wisata untuk dikelola oleh admin.
-
-    Data diurutkan berdasarkan nama secara alfabetis.
+    """Menampilkan halaman untuk mengelola semua data paket wisata.
 
     Returns:
-        Response: Render halaman manajemen paket wisata dengan daftar dan formulir hapus.
+        Response: Render template manajemen paket wisata dengan data semua paket.
     """
+    # Mengambil semua data paket wisata, diurutkan berdasarkan nama
     semua_paket = PaketWisata.query.order_by(PaketWisata.nama).all()
     
+    # Form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('admin/manage_paket_wisata.html', daftar_paket=semua_paket, delete_form=delete_form)

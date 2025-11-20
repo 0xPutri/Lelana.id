@@ -10,21 +10,21 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from datetime import datetime, timezone
 
+# Membuat Blueprint untuk rute-rute utama dan halaman statis
 main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    """Menampilkan halaman utama situs dengan konten unggulan.
+    """Menampilkan halaman utama (beranda) dengan konten dinamis.
 
-    Menyajikan:
-    - 3 destinasi wisata terpopuler berdasarkan jumlah ulasan dan rating rata-rata,
-    - 3 acara mendatang yang diurutkan berdasarkan tanggal terdekat,
-    - 3 itinerari terbaru yang dibuat pengguna,
-    - Semua paket wisata yang ditandai sebagai promosi.
+    Halaman ini menampilkan beberapa bagian konten unggulan seperti destinasi
+    populer, event terbaru, itinerari terbaru, dan paket promosi.
 
     Returns:
-        Response: Render template halaman utama dengan data konten unggulan.
+        Response: Render template halaman utama dengan data yang relevan.
     """
+    # Query untuk mendapatkan 3 destinasi terpopuler
+    # Popularitas dihitung berdasarkan jumlah review dan rating rata-rata
     destinasi_unggulan = db.session.query(
         Wisata,
         db.func.count(Review.id).label('jumlah_review'),
@@ -34,10 +34,13 @@ def index():
     .order_by(db.desc('jumlah_review'), db.desc('rata_rata_rating'))\
     .limit(3).all()
 
+    # Query untuk mendapatkan 3 event mendatang (tanggal lebih besar atau sama dengan hari ini)
     event_terbaru = Event.query.filter(Event.tanggal >= datetime.now(timezone.utc)).order_by(Event.tanggal.asc()).limit(3).all()
 
+    # Query untuk mendapatkan 3 itinerari terbaru
     itinerari_terbaru = Itinerari.query.order_by(Itinerari.tanggal_dibuat.desc()).limit(3).all()
 
+    # Query untuk mendapatkan semua paket wisata yang sedang dipromosikan
     paket_promosi = PaketWisata.query.filter_by(is_promoted=True).all()
 
     return render_template('main/index.html', 
@@ -49,20 +52,21 @@ def index():
 @main.route('/profile')
 @login_required
 def profile():
-    """Menampilkan halaman profil pengguna yang sedang login.
+    """Menampilkan halaman profil untuk pengguna yang sedang login.
 
-    Memuat daftar ulasan dan itinerari yang dibuat oleh pengguna saat ini,
-    diurutkan berdasarkan waktu pembuatan (terbaru di atas). Ulasan mencakup
-    informasi tempat wisata yang diulas melalui eager loading.
+    Menampilkan daftar ulasan dan itinerari yang telah dibuat oleh pengguna.
 
     Returns:
-        Response: Render template profil pengguna dengan data ulasan dan itinerari.
+        Response: Render template halaman profil dengan data milik pengguna.
     """
+    # Mengambil semua ulasan milik pengguna, diurutkan dari yang terbaru
+    # joinedload(Review.wisata_reviewed) untuk efisiensi query data wisata terkait
     ulasan_pengguna = Review.query.filter_by(user_id=current_user.id)\
         .options(joinedload(Review.wisata_reviewed))\
         .order_by(Review.tanggal_dibuat.desc())\
         .all()
     
+    # Mengambil semua itinerari milik pengguna, diurutkan dari yang terbaru
     itinerari_pengguna = Itinerari.query.filter_by(user_id=current_user.id)\
         .order_by(Itinerari.tanggal_dibuat.desc())\
         .all()
@@ -76,64 +80,62 @@ def profile():
 def peta_wisata():
     """Menampilkan halaman peta interaktif tempat wisata.
 
-    Template ini diharapkan menampilkan lokasi wisata berbasis koordinat geografis.
-
     Returns:
-        Response: Render template peta wisata.
+        Response: Render template halaman peta.
     """
     return render_template('main/peta.html')
 
 @main.route('/about')
 def about():
-    """Menampilkan halaman 'Tentang Kami' yang menjelaskan misi dan visi platform.
+    """Menampilkan halaman statis 'Tentang Kami'.
 
     Returns:
-        Response: Render template halaman tentang kami.
+        Response: Render template halaman 'about'.
     """
     return render_template('main/about.html')
 
 @main.route('/contact')
 def contact():
-    """Menampilkan halaman kontak dengan informasi cara menghubungi tim Lelana.id.
+    """Menampilkan halaman statis 'Kontak'.
 
     Returns:
-        Response: Render template halaman kontak.
+        Response: Render template halaman 'contact'.
     """
     return render_template('main/contact.html')
 
 @main.route('/privacy')
 def privacy():
-    """Menampilkan kebijakan privasi platform Lelana.id.
+    """Menampilkan halaman statis 'Kebijakan Privasi'.
 
     Returns:
-        Response: Render template halaman kebijakan privasi.
+        Response: Render template halaman 'privacy'.
     """
     return render_template('main/privacy.html')
 
 @main.route('/search')
 def search():
-    """Menangani pencarian terpusat untuk berbagai model data.
+    """Menangani pencarian di seluruh situs berdasarkan query pengguna.
 
-    Mencari berdasarkan query yang diberikan pada model Wisata, Event,
-    PaketWisata, dan Itinerari. Pencarian dilakukan secara case-insensitive
-    pada kolom nama, deskripsi, dan beberapa kolom spesifik lainnya.
-
-    Args:
-        q (str): Query pencarian yang diambil dari argumen request URL.
+    Mencari kata kunci pada beberapa model (Wisata, Event, PaketWisata,
+    Itinerari) di kolom-kolom yang relevan secara case-insensitive.
 
     Returns:
-        Response: Render template halaman hasil pencarian dengan
-                  hasil yang dikelompokkan berdasarkan kategori.
+        Response: Render template halaman hasil pencarian dengan semua
+                  hasil yang ditemukan.
     """
+    # Mengambil query pencarian dari argumen URL
     query = request.args.get('q', '')
     wisata_results = []
     event_results = []
     paket_wisata_results = []
     itinerari_results = []
 
+    # Hanya menjalankan query jika ada kata kunci pencarian
     if query:
+        # Menyiapkan term pencarian untuk query 'LIKE' yang case-insensitive
         search_term = f"%{query}%"
         
+        # Mencari di model Wisata pada kolom nama, deskripsi, dan lokasi
         wisata_results = Wisata.query.filter(
             or_(
                 Wisata.nama.ilike(search_term),
@@ -142,6 +144,7 @@ def search():
             )
         ).all()
 
+        # Mencari di model Event pada kolom nama dan deskripsi
         event_results = Event.query.filter(
             or_(
                 Event.nama.ilike(search_term),
@@ -149,6 +152,7 @@ def search():
             )
         ).all()
 
+        # Mencari di model PaketWisata pada kolom nama dan deskripsi
         paket_wisata_results = PaketWisata.query.filter(
             or_(
                 PaketWisata.nama.ilike(search_term),
@@ -156,6 +160,7 @@ def search():
             )
         ).all()
         
+        # Mencari di model Itinerari pada kolom judul dan deskripsi
         itinerari_results = Itinerari.query.filter(
             or_(
                 Itinerari.judul.ilike(search_term),

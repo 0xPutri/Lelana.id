@@ -6,24 +6,30 @@ from app.forms import EventForm
 from app.utils.decorators import admin_required
 from flask_wtf import FlaskForm
 
+# Membuat Blueprint untuk rute-rute terkait event
 event = Blueprint('event', __name__)
 
 @event.route('/event')
 def list_event():
-    """Menampilkan daftar event dengan pagination.
+    """Menampilkan daftar semua event dengan sistem pagination.
 
-    Menyajikan event yang diurutkan berdasarkan tanggal pelaksanaan (terbaru di atas),
-    dengan 5 item per halaman. Menyertakan formulir hapus untuk keamanan CSRF.
+    Menyajikan event yang diurutkan berdasarkan tanggal (terbaru lebih dulu).
+    Setiap halaman menampilkan 5 event.
 
     Returns:
-        Response: Render template daftar event dengan data pagination.
+        Response: Render template halaman daftar event dengan data event
+                  dan kontrol pagination.
     """
+    # Mengambil nomor halaman dari query parameter URL, default ke halaman 1
     page = request.args.get('page', 1, type=int)
+    # Melakukan query ke database dengan pagination
     pagination = Event.query.order_by(Event.tanggal.desc()).paginate(
         page=page, per_page=5, error_out=False
     )
+    # Mendapatkan item event untuk halaman saat ini
     daftar_event_halaman_ini = pagination.items
 
+    # Membuat form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('event/list.html', 
@@ -33,17 +39,15 @@ def list_event():
 
 @event.route('/event/detail/<int:id>')
 def detail_event(id):
-    """Menampilkan detail lengkap suatu event berdasarkan ID.
+    """Menampilkan halaman detail untuk satu event spesifik.
 
     Args:
-        id (int): ID unik event yang ingin dilihat.
+        id (int): ID dari event yang akan ditampilkan.
 
     Returns:
-        Response: Render template detail event jika ditemukan.
-
-    Raises:
-        HTTPException: 404 Not Found jika event tidak ada.
+        Response: Render template halaman detail event.
     """
+    # Mengambil data event dari database berdasarkan ID, atau 404 jika tidak ada
     event_item = db.session.get(Event, id)
     if event_item is None:
         abort(404)
@@ -55,16 +59,19 @@ def detail_event(id):
 @admin_required
 @limiter.limit("30 per minute", methods=["POST"])
 def tambah_event():
-    """Menangani penambahan event baru oleh admin.
+    """Menangani pembuatan event baru oleh admin.
 
-    Hanya dapat diakses oleh pengguna terautentikasi dengan peran admin.
-    Menggunakan formulir EventForm untuk validasi input.
+    Menampilkan form untuk membuat event (GET) dan memproses data
+    yang disubmit (POST).
 
     Returns:
-        Response: Render formulir tambah jika GET, atau redirect ke daftar event jika sukses.
+        Response: Render template form, atau redirect ke daftar event
+                  setelah berhasil dibuat.
     """
     form = EventForm()
+    # Memproses form jika metode adalah POST dan validasi berhasil
     if form.validate_on_submit():
+        # Membuat instance Event baru dari data form
         event_baru = Event(
             nama=form.nama.data,
             tanggal=form.tanggal.data,
@@ -72,9 +79,11 @@ def tambah_event():
             deskripsi=form.deskripsi.data,
             penyelenggara=form.penyelenggara.data
         )
+        # Menambahkan dan menyimpan objek ke database
         db.session.add(event_baru)
         db.session.commit()
 
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s menambahkan Event baru "%s" (ID: %d).', 
             current_user.username, event_baru.nama, event_baru.id
         )
@@ -82,6 +91,7 @@ def tambah_event():
         flash('Event baru berhasil ditambahkan!', 'success')
         return redirect(url_for('event.list_event'))
     
+    # Menampilkan form jika metode adalah GET
     return render_template('event/tambah_edit.html', form=form, judul_halaman='Tambah Event Baru')
 
 @event.route('/event/edit/<int:id>', methods=['GET', 'POST'])
@@ -89,25 +99,26 @@ def tambah_event():
 @admin_required
 @limiter.limit("30 per minute", methods=["POST"])
 def edit_event(id):
-    """Menangani pembaruan data event oleh admin.
+    """Menangani pembaruan data event yang sudah ada oleh admin.
 
-    Memuat data event yang ada ke dalam formulir dan menyimpan perubahan
-    setelah validasi berhasil.
+    Menampilkan form yang sudah terisi data event (GET) dan memproses
+    perubahan yang disubmit (POST).
 
     Args:
-        id (int): ID event yang akan diedit.
+        id (int): ID dari event yang akan diedit.
 
     Returns:
-        Response: Render formulir edit jika GET, atau redirect ke detail event jika sukses.
-
-    Raises:
-        HTTPException: 404 Not Found jika event tidak ditemukan.
+        Response: Render template form, atau redirect ke detail event
+                  setelah berhasil diperbarui.
     """
+    # Mengambil data event yang akan diedit, atau 404 jika tidak ada
     event_item = db.session.get(Event, id)
     if event_item is None:
         abort(404)
+    # Menginisialisasi form dengan data dari objek event
     form = EventForm(obj=event_item)
     if form.validate_on_submit():
+        # Memperbarui atribut objek dengan data dari form
         event_item.nama = form.nama.data
         event_item.tanggal = form.tanggal.data
         event_item.lokasi = form.lokasi.data
@@ -115,6 +126,7 @@ def edit_event(id):
         event_item.penyelenggara = form.penyelenggara.data
         db.session.commit()
 
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s memperbarui Event "%s" (ID: %d).', 
             current_user.username, event_item.nama, event_item.id
         )
@@ -122,6 +134,7 @@ def edit_event(id):
         flash('Data event berhasil diperbarui!', 'success')
         return redirect(url_for('event.detail_event', id=event_item.id))
     
+    # Menampilkan form dengan data yang ada jika metode adalah GET
     return render_template('event/tambah_edit.html', form=form, judul_halaman='Edit Event')
 
 @event.route('/event/hapus/<int:id>', methods=['POST'])
@@ -129,34 +142,36 @@ def edit_event(id):
 @admin_required
 @limiter.limit("30 per minute")
 def hapus_event(id):
-    """Menghapus event dari sistem berdasarkan ID.
+    """Memproses permintaan penghapusan event.
 
-    Memerlukan validasi formulir CSRF untuk mencegah serangan cross-site request forgery.
-    Hanya dapat diakses oleh admin.
+    Memvalidasi token CSRF sebelum menghapus data dari database.
 
     Args:
-        id (int): ID event yang akan dihapus.
+        id (int): ID dari event yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar event dengan pesan status operasi.
-
-    Raises:
-        HTTPException: 404 Not Found jika event tidak ditemukan.
+        Response: Redirect ke halaman daftar event dengan pesan status.
     """
+    # Mengambil data event yang akan dihapus, atau 404 jika tidak ada
     event_item = db.session.get(Event, id)
     if event_item is None:
         abort(404)
 
+    # Membuat instance form kosong untuk validasi CSRF
     form = FlaskForm()
+    # Memvalidasi token CSRF
     if form.validate_on_submit():
+        # Mencatat aktivitas admin
         current_app.logger.info('Admin %s menghapus Event "%s" (ID: %d).', 
             current_user.username, event_item.nama, event_item.id
         )
 
+        # Menghapus objek dari database
         db.session.delete(event_item)
         db.session.commit()
         flash('Event telah berhasil dihapus.', 'info')
     else:
+        # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
     return redirect(url_for('event.list_event'))

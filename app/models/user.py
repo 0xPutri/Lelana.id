@@ -5,145 +5,148 @@ from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app
 
 class User(UserMixin, db.Model):
-    """Model pengguna sistem yang mendukung autentikasi, otorisasi, dan manajemen akun.
+    """Model untuk representasi pengguna dalam sistem.
 
-    Pengguna dapat memiliki peran 'user' atau 'admin', memberikan ulasan, membuat
-    itinerari, serta menjalani proses konfirmasi email. Password disimpan dalam
-    bentuk hash untuk keamanan.
+    Kelas ini mendefinisikan atribut, relasi, dan metode terkait pengguna,
+    termasuk autentikasi, manajemen token (konfirmasi, reset password),
+    dan peran (role).
 
     Attributes:
-        id (int): Identifier unik pengguna (primary key).
-        username (str): Nama pengguna; unik; maksimal 64 karakter; wajib diisi.
-        email (str): Alamat email; unik; maksimal 120 karakter; wajib diisi.
-        password_hash (str): Hash dari password pengguna; disimpan secara aman.
-        role (str): Peran pengguna; nilai default 'user'; bisa berupa 'user' atau 'admin'.
-        is_confirmed (bool): Status konfirmasi email; default False.
-        reviews (list[Review]): Daftar ulasan yang dibuat pengguna ini.
-        itinerari (list[Itinerari]): Daftar itinerari yang dibuat pengguna ini.
+        id (int): Primary key unik untuk setiap pengguna.
+        username (str): Nama pengguna yang unik.
+        email (str): Alamat email pengguna yang unik.
+        password_hash (str): Hash dari password pengguna.
+        role (str): Peran pengguna, default 'user'. Bisa 'user' atau 'admin'.
+        is_confirmed (bool): Status konfirmasi email pengguna, default False.
+        reviews (relationship): Relasi ke ulasan yang dibuat oleh pengguna.
+        itinerari (relationship): Relasi ke itinerari yang dibuat oleh pengguna.
     """
     __tablename__ = 'users'
 
+    # Mendefinisikan kolom-kolom pada tabel 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True, nullable=False)
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
-    role = db.Column(db.String(10), default='user', nullable=False) # Bisa 'user' atau 'admin'
+    role = db.Column(db.String(10), default='user', nullable=False)
 
+    # Kolom untuk menandai apakah pengguna telah mengonfirmasi emailnya
     is_confirmed = db.Column(db.Boolean, nullable=False, default=False)
 
-    # Relasi ke Review: Satu user bisa punya banyak review
+    # Relasi one-to-many ke model Review
+    # 'lazy'='dynamic' berarti query tidak langsung dieksekusi
+    # 'cascade' akan menghapus semua review dari user ini jika user dihapus
     reviews = db.relationship('Review', backref='author', lazy='dynamic', cascade="all, delete-orphan")
 
-    # Relasi ke Itinerari: Satu user bisa membuat banyak itinerari
+    # Relasi one-to-many ke model Itinerari
     itinerari = db.relationship('Itinerari', backref='penulis', lazy='dynamic', cascade="all, delete-orphan")
 
     def generate_confirmation_token(self):
-        """Membuat token konfirmasi email berbasis waktu untuk pengguna ini.
+        """Membuat token konfirmasi email yang aman dan berbatas waktu.
 
-        Token dihasilkan menggunakan SECRET_KEY aplikasi dan berisi ID pengguna.
-        Token ini digunakan dalam proses verifikasi alamat email.
+        Token ini berisi ID pengguna yang ditandatangani secara digital.
 
         Returns:
-            str: Token konfirmasi yang dapat dikirim melalui email.
+            str: Token konfirmasi dalam format string.
         """
+        # Membuat serializer dengan secret key aplikasi
         s = Serializer(current_app.config['SECRET_KEY'])
+        # Menghasilkan token yang berisi ID pengguna
         return s.dumps({'confirm': self.id})
     
     @staticmethod
     def confirm(token, expiration=3600):
-        """Memverifikasi token konfirmasi dan menandai pengguna sebagai terkonfirmasi.
-
-        Token yang kedaluwarsa atau tidak valid akan menghasilkan nilai None.
-        Jika token valid dan pengguna ditemukan, status `is_confirmed` diubah menjadi True.
+        """Memverifikasi token konfirmasi dan mengaktifkan akun pengguna.
 
         Args:
             token (str): Token konfirmasi yang diterima dari pengguna.
-            expiration (int): Masa berlaku token dalam detik (default: 3600 detik = 1 jam).
+            expiration (int): Masa berlaku token dalam detik (default: 1 jam).
 
         Returns:
-            User or None: Objek pengguna jika konfirmasi berhasil; None jika gagal.
+            User | None: Objek pengguna jika konfirmasi berhasil, atau None jika gagal.
         """
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
+            # Memuat token dan memeriksa masa berlakunya
             data = s.loads(token, max_age=expiration)
         except:
+            # Gagal jika token tidak valid atau kedaluwarsa
             return None
+        # Mengambil pengguna berdasarkan ID dari data token
         user = User.query.get(data.get('confirm'))
         if user:
+            # Mengubah status konfirmasi dan menyimpan ke database
             user.is_confirmed = True
             db.session.add(user)
         return user
     
     def generate_reset_token(self):
-        """Membuat token reset password berbasis waktu untuk pengguna ini.
-
-        Token berisi ID pengguna dan ditandatangani menggunakan SECRET_KEY aplikasi.
-        Digunakan dalam proses pemulihan akun saat pengguna lupa password.
+        """Membuat token reset password yang aman dan berbatas waktu.
 
         Returns:
-            str: Token reset password yang aman dan dapat dikirim melalui email.
+            str: Token reset password dalam format string.
         """
         s = Serializer(current_app.config['SECRET_KEY'])
+        # Menghasilkan token yang berisi ID pengguna untuk proses reset
         return s.dumps({'reset': self.id})
     
     @staticmethod
     def verify_reset_token(token, expiration=3600):
-        """Memverifikasi dan memuat pengguna berdasarkan token reset password.
-
-        Token yang kedaluwarsa, rusak, atau tidak valid akan menghasilkan None.
-        Jika valid, fungsi mengembalikan objek pengguna yang sesuai.
+        """Memverifikasi token reset password dan mengembalikan pengguna terkait.
 
         Args:
-            token (str): Token reset password yang diterima dari pengguna.
-            expiration (int): Masa berlaku token dalam detik (default: 3600 = 1 jam).
+            token (str): Token reset password yang diterima.
+            expiration (int): Masa berlaku token dalam detik (default: 1 jam).
 
         Returns:
-            User or None: Objek pengguna jika token valid; None jika tidak.
+            User | None: Objek pengguna jika token valid, atau None jika tidak.
         """
         s = Serializer(current_app.config['SECRET_KEY'])
         try:
+            # Memuat token dan memeriksa masa berlakunya
             data = s.loads(token, max_age=expiration)
             user_id = data.get('reset')
+            # Mengambil pengguna dari database menggunakan ID dari token
             return db.session.get(User, user_id)
         except:
+            # Gagal jika token tidak valid atau kedaluwarsa
             return None
 
     @property
     def password(self):
-        """Mencegah akses langsung ke atribut password.
+        """Mencegah akses baca langsung ke atribut password.
 
         Raises:
-            AttributeError: Selalu memunculkan error karena password tidak boleh dibaca.
+            AttributeError: Selalu muncul saat mencoba membaca atribut ini.
         """
         raise AttributeError('Password bukan atribut yang bisa dibaca')
     
     @password.setter
     def password(self, password):
-        """Mengatur password pengguna dengan menyimpan hash-nya.
-
-        Password asli tidak pernah disimpan; hanya representasi hash yang disimpan
-        di database untuk keamanan.
+        """Mengatur password pengguna dengan membuat hash-nya.
 
         Args:
-            password (str): Password plaintext yang akan di-hash dan disimpan.
+            password (str): Password plaintext yang akan di-hash.
         """
+        # Menghasilkan hash dari password dan menyimpannya
         self.password_hash = generate_password_hash(password)
     
     def verify_password(self, password):
-        """Memverifikasi apakah password yang diberikan cocok dengan hash yang tersimpan.
+        """Memverifikasi password yang diberikan dengan hash yang tersimpan.
 
         Args:
             password (str): Password plaintext untuk diverifikasi.
 
         Returns:
-            bool: True jika password cocok; False jika tidak.
+            bool: True jika password cocok, False jika sebaliknya.
         """
+        # Membandingkan password dengan hash yang ada di database
         return check_password_hash(self.password_hash, password)
 
     def __repr__(self):
         """Mengembalikan representasi string dari objek User untuk debugging.
 
         Returns:
-            str: Representasi string berformat '<User {username}>'.
+            str: Representasi string dari objek.
         """
         return f'<User {self.username}>'

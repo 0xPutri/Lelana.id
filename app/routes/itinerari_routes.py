@@ -7,18 +7,21 @@ from sqlalchemy.orm import joinedload
 from flask_wtf import FlaskForm
 from app.utils.text_filters import censor_text
 
+# Membuat Blueprint untuk rute-rute terkait itinerari
 itinerari = Blueprint('itinerari', __name__)
 
 @itinerari.route('/itinerari')
 def list_itinerari():
-    """Menampilkan daftar semua itinerari yang dibuat pengguna.
+    """Menampilkan daftar semua itinerari yang telah dibuat.
 
-    Data diurutkan berdasarkan waktu pembuatan (terbaru di atas) dan mencakup
-    informasi penulis menggunakan eager loading untuk menghindari N+1 query.
+    Menggunakan 'eager loading' (joinedload) untuk mengambil data penulis
+    secara efisien dan menghindari N+1 query problem.
 
     Returns:
-        Response: Render template daftar itinerari.
+        Response: Render template halaman daftar itinerari.
     """
+    # Query semua itinerari, diurutkan dari yang terbaru
+    # joinedload(Itinerari.penulis) memastikan data penulis (user) diambil dalam query yang sama
     semua_itinerari = Itinerari.query.options(joinedload(Itinerari.penulis))\
         .order_by(Itinerari.tanggal_dibuat.desc()).all()
 
@@ -26,25 +29,23 @@ def list_itinerari():
 
 @itinerari.route('/itinerari/detail/<int:id>')
 def detail_itinerari(id):
-    """Menampilkan detail lengkap suatu itinerari berdasarkan ID.
+    """Menampilkan halaman detail untuk satu itinerari spesifik.
 
-    Memuat data penulis dan daftar destinasi wisata yang termasuk dalam itinerari
-    menggunakan eager loading untuk efisiensi query.
+    Menggunakan 'eager loading' untuk data penulis dan daftar wisata.
 
     Args:
-        id (int): ID unik itinerari yang ingin dilihat.
+        id (int): ID dari itinerari yang akan ditampilkan.
 
     Returns:
-        Response: Render template detail itinerari jika ditemukan.
-
-    Raises:
-        HTTPException: 404 Not Found jika itinerari tidak ada.
+        Response: Render template halaman detail itinerari.
     """
+    # Mengambil itinerari berdasarkan ID, termasuk data penulis dan wisata terkait dalam satu query
     it = Itinerari.query.options(
         joinedload(Itinerari.penulis), 
         joinedload(Itinerari.wisata_termasuk)
     ).filter_by(id=id).first_or_404()
 
+    # Form kosong untuk proteksi CSRF pada tombol hapus
     delete_form = FlaskForm()
 
     return render_template('itinerari/detail.html', itinerari=it, delete_form=delete_form)
@@ -53,21 +54,24 @@ def detail_itinerari(id):
 @login_required
 @limiter.limit("20 per hour", methods=["POST"], key_func=lambda: current_user.id)
 def buat_itinerari():
-    """Menangani pembuatan itinerari baru oleh pengguna terautentikasi.
+    """Menangani pembuatan itinerari baru oleh pengguna.
 
-    Judul dan deskripsi melewati penyaringan konten (censorship) untuk mencegah
-    penggunaan kata tidak pantas. Itinerari dikaitkan dengan pengguna saat ini
-    dan destinasi wisata yang dipilih melalui relasi many-to-many.
+    Data input dari form akan disensor sebelum disimpan ke database.
 
     Returns:
-        Response: Render formulir buat jika GET, atau redirect ke detail itinerari jika sukses.
+        Response: Render template form, atau redirect ke halaman detail
+                  setelah berhasil dibuat.
     """
     form = ItinerariForm()
     if form.validate_on_submit():
+        # Membuat instance Itinerari baru
         it_baru = Itinerari(
+            # Menyensor judul dan deskripsi untuk keamanan
             judul=censor_text(form.judul.data),
             deskripsi=censor_text(form.deskripsi.data),
+            # Mengaitkan itinerari dengan pengguna yang sedang login
             penulis=current_user,
+            # Mengaitkan dengan daftar wisata yang dipilih (relasi many-to-many)
             wisata_termasuk=form.wisata_termasuk.data
         )
 
@@ -83,30 +87,29 @@ def buat_itinerari():
 @login_required
 @limiter.limit("20 per hour", methods=["POST"], key_func=lambda: current_user.id)
 def edit_itinerari(id):
-    """Menangani pembaruan itinerari oleh pemiliknya.
+    """Menangani pembaruan itinerari yang sudah ada.
 
-    Memastikan hanya pemilik itinerari yang dapat mengedit. Judul dan deskripsi
-    melewati penyaringan konten (censorship) sebelum disimpan. Memperbarui juga
-    daftar destinasi wisata yang termasuk dalam itinerari.
+    Hanya pemilik asli yang dapat mengedit itinerarinya.
 
     Args:
-        id (int): ID itinerari yang akan diedit.
+        id (int): ID dari itinerari yang akan diedit.
 
     Returns:
-        Response: Render formulir edit jika GET, atau redirect ke detail itinerari jika sukses.
-
-    Raises:
-        HTTPException: 404 Not Found jika itinerari tidak ditemukan.
-        HTTPException: 403 Forbidden jika pengguna bukan pemilik.
+        Response: Render template form, atau redirect ke halaman detail
+                  setelah berhasil diperbarui.
     """
+    # Mengambil data itinerari dari database
     it = db.session.get(Itinerari, id)
     if it is None:
         abort(404)
+    # Otorisasi: memastikan hanya pemilik yang bisa mengedit
     if it.penulis != current_user:
         abort(403)
 
+    # Menginisialisasi form dengan data dari objek itinerari
     form = ItinerariForm(obj=it)
     if form.validate_on_submit():
+        # Memperbarui atribut objek dengan data dari form yang sudah disensor
         it.judul = censor_text(form.judul.data)
         it.deskripsi = censor_text(form.deskripsi.data)
         it.wisata_termasuk = form.wisata_termasuk.data
@@ -121,33 +124,33 @@ def edit_itinerari(id):
 @login_required
 @limiter.limit("20 per hour", key_func=lambda: current_user.id)
 def hapus_itinerari(id):
-    """Menghapus itinerari dari sistem berdasarkan ID.
+    """Memproses permintaan penghapusan itinerari.
 
-    Hanya pemilik itinerari yang diizinkan menghapus. Memerlukan validasi CSRF
-    melalui formulir kosong untuk keamanan.
+    Hanya pemilik asli yang dapat menghapus dan memerlukan validasi CSRF.
 
     Args:
-        id (int): ID itinerari yang akan dihapus.
+        id (int): ID dari itinerari yang akan dihapus.
 
     Returns:
-        Response: Redirect ke daftar itinerari dengan pesan status operasi.
-
-    Raises:
-        HTTPException: 404 Not Found jika itinerari tidak ditemukan.
-        HTTPException: 403 Forbidden jika pengguna bukan pemilik.
+        Response: Redirect ke halaman daftar itinerari dengan pesan status.
     """
+    # Mengambil data itinerari dari database
     it = db.session.get(Itinerari, id)
     if it is None:
         abort(404)
+    # Otorisasi: memastikan hanya pemilik yang bisa menghapus
     if it.penulis != current_user:
         abort(403)
 
+    # Membuat instance form kosong untuk validasi CSRF
     form = FlaskForm()
     if form.validate_on_submit():
+        # Menghapus objek dari database
         db.session.delete(it)
         db.session.commit()
         flash('Itinerari telah berhasil dihapus.', 'info')
     else:
+        # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kadaluwarsa.', 'danger')
 
     return redirect(url_for('itinerari.list_itinerari'))

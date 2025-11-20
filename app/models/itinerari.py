@@ -1,6 +1,7 @@
 from app import db
 from datetime import datetime, timezone
 
+# Tabel asosiasi untuk relasi many-to-many antara Itinerari dan Wisata
 itinerari_wisata_association = db.Table('itinerari_wisata_association',
     db.Column('itinerari_id', db.Integer, db.ForeignKey('itinerari.id'), primary_key=True),
     db.Column('wisata_id', db.Integer, db.ForeignKey('wisata.id'), primary_key=True)
@@ -9,28 +10,32 @@ itinerari_wisata_association = db.Table('itinerari_wisata_association',
 class Itinerari(db.Model):
     """Model untuk menyimpan rencana perjalanan (itinerari) yang dibuat pengguna.
 
-    Itinerari berisi judul, deskripsi opsional, dan daftar tempat wisata yang
-    dikaitkan melalui relasi many-to-many. Setiap itinerari dimiliki oleh satu
-    pengguna.
+    Setiap itinerari memiliki judul, deskripsi, dan terhubung dengan satu
+    pengguna serta beberapa tempat wisata melalui relasi many-to-many.
 
     Attributes:
-        id (int): Identifier unik itinerari (primary key).
-        judul (str): Judul itinerari; maksimal 150 karakter; wajib diisi.
-        deskripsi (str or None): Deskripsi detail itinerari; opsional.
-        tanggal_dibuat (datetime): Waktu pembuatan entri; otomatis diisi dengan UTC saat objek dibuat.
-        user_id (int): ID pengguna pemilik itinerari; merujuk ke tabel 'users'; wajib diisi.
-        wisata_termasuk (list[Wisata]): Daftar objek Wisata yang termasuk dalam itinerari ini.
+        id (int): Primary key unik untuk setiap itinerari.
+        judul (str): Judul dari rencana perjalanan.
+        deskripsi (str | None): Deskripsi atau catatan tambahan (opsional).
+        tanggal_dibuat (datetime): Timestamp saat entri dibuat (UTC).
+        user_id (int): Foreign key yang menunjuk ke pengguna yang membuat.
+        wisata_termasuk (relationship): Relasi many-to-many ke objek Wisata.
     """
     __tablename__ = 'itinerari'
 
+    # Mendefinisikan kolom-kolom pada tabel 'itinerari'
     id = db.Column(db.Integer, primary_key=True)
     judul = db.Column(db.String(150), nullable=False)
     deskripsi = db.Column(db.Text, nullable=True)
+    # Kolom untuk mencatat waktu pembuatan, default ke waktu UTC saat ini
     tanggal_dibuat = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
-    # Foreign Key untuk relasi ke tabel User
+    # Foreign Key yang menghubungkan itinerari ke pembuatnya (pengguna)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
+    # Relasi many-to-many ke model Wisata melalui tabel asosiasi
+    # 'lazy'='subquery' memuat semua wisata terkait dalam satu query tambahan
+    # 'backref' membuat relasi balik dari Wisata ke Itinerari
     wisata_termasuk = db.relationship('Wisata', secondary=itinerari_wisata_association, 
                                       lazy='subquery', 
                                       backref=db.backref('termasuk_dalam_itinerari', lazy=True))
@@ -39,6 +44,6 @@ class Itinerari(db.Model):
         """Mengembalikan representasi string dari objek Itinerari untuk debugging.
 
         Returns:
-            str: Representasi string berformat '<Itinerari {judul}>'.
+            str: Representasi string dari objek.
         """
         return f'<Itinerari {self.judul}>'

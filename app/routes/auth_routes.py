@@ -5,35 +5,49 @@ from app.models.user import User
 from app.forms import LoginForm, RegistrationForm, PasswordResetForm, PasswordResetRequestForm
 from app.services.email_handler import send_email
 
+# Membuat Blueprint untuk rute-rute terkait autentikasi
 auth = Blueprint('auth', __name__)
 
 @auth.route('/register', methods=['GET', 'POST'])
 @limiter.limit("5 per hour") # Batasi pendaftaran 5 kali per jam per IP
 def register():
-    """Menangani pendaftaran pengguna baru dengan pembatasan laju dan konfirmasi email.
+    """Menangani pendaftaran pengguna baru.
 
-    Pengguna yang mendaftar akan dibuat, diautentikasi secara otomatis, dan menerima
-    email konfirmasi. Akses dibatasi maksimal 5 pendaftaran per jam per alamat IP.
+    Fungsi ini memvalidasi data dari form registrasi, membuat pengguna baru,
+    mengirim email konfirmasi, dan secara otomatis me-login pengguna tersebut.
 
     Returns:
-        Response: Redirect ke halaman utama jika sukses, atau render formulir registrasi.
+        Response: Render template form registrasi, atau redirect ke halaman
+                  utama setelah pendaftaran berhasil.
     """
     form = RegistrationForm()
     if form.validate_on_submit():
+        # Jika email sudah ada, tidak membuat user baru tapi tetap beri kesan berhasil
+        # untuk mencegah enumerasi email.
+        existing_user = User.query.filter_by(email=form.email.data).first()
+        if existing_user:
+            flash('Email konfirmasi telah dikirim. Silakan periksa email Anda.', 'success')
+            return redirect(url_for('main.index'))
+
+        # Membuat instance pengguna baru
         user = User(
             username=form.username.data,
             email=form.email.data
         )
+        # Menyetel password (akan di-hash oleh setter di model)
         user.password = form.password.data
 
+        # Menambahkan dan menyimpan pengguna ke database
         db.session.add(user)
         db.session.commit()
         current_app.logger.info('User baru "%s" (%s) telah terdaftar.', user.username, user.email)
 
+        # Membuat token dan mengirim email konfirmasi
         token = user.generate_confirmation_token()
         send_email(user.email, 'Konfirmasi Akun Lelana.id Anda', 
                    'auth/email/confirm', user=user, token=token)
         
+        # Langsung login pengguna setelah registrasi
         login_user(user)
         flash('Registrasi berhasil! Email konfirmasi telah dikirim. Silakan periksa email Anda.', 'success')
         return redirect(url_for('main.index'))
@@ -42,36 +56,41 @@ def register():
 
 @auth.route('/confirm/<token>')
 def confirm(token):
-    """Memverifikasi token konfirmasi email dan mengaktifkan akun pengguna.
+    """Memproses token konfirmasi email.
 
-    Jika token valid dan belum kedaluwarsa, status `is_confirmed` pengguna diubah
-    menjadi True. Pengguna otomatis login jika belum terautentikasi.
+    Jika token valid, status konfirmasi pengguna akan diperbarui. Pengguna
+    juga akan di-login jika belum ada sesi aktif.
 
     Args:
-        token (str): Token konfirmasi unik yang dikirim melalui email.
+        token (str): Token konfirmasi yang diterima dari URL.
 
     Returns:
-        Response: Redirect ke halaman utama dengan pesan sukses atau error.
+        Response: Redirect ke halaman utama dengan pesan status.
     """
+    # Jika pengguna sudah login dan terkonfirmasi, langsung arahkan
     if current_user.is_authenticated and current_user.is_confirmed:
         return redirect(url_for('main.index'))
     
+    # Memverifikasi token menggunakan metode statis dari model User
     user = User.confirm(token)
     if user:
+        # Menyimpan perubahan status konfirmasi ke database
         db.session.commit()
+        # Jika belum ada sesi, login pengguna
         if not current_user.is_authenticated:
             login_user(user)
         flash('Anda telah berhasil mengkonfirmasi akun Anda. Terima kasih!', 'success')
     else:
+        # Jika token tidak valid atau kedaluwarsa
         flash('Tautan konfirmasi tidak valid atau telah kedaluwarsa.', 'danger')
     return redirect(url_for('main.index'))
 
 @auth.before_app_request
 def before_request():
-    """Memaksa pengguna yang belum mengonfirmasi email untuk mengakses halaman konfirmasi.
+    """Middleware yang berjalan sebelum setiap request.
 
-    Middleware ini mencegah akses ke seluruh rute (kecuali blueprint 'auth' dan static)
-    jika pengguna sudah login tetapi belum mengonfirmasi alamat emailnya.
+    Fungsi ini memeriksa apakah pengguna sudah login tapi belum mengonfirmasi
+    emailnya. Jika ya, pengguna akan diarahkan ke halaman 'unconfirmed'.
     """
     if current_user.is_authenticated \
             and not current_user.is_confirmed \
@@ -81,13 +100,12 @@ def before_request():
 
 @auth.route('/unconfirmed')
 def unconfirmed():
-    """Menampilkan halaman pemberitahuan untuk pengguna yang belum mengonfirmasi email.
-
-    Hanya tersedia untuk pengguna terautentikasi yang status konfirmasinya masih False.
+    """Menampilkan halaman pemberitahuan untuk akun yang belum dikonfirmasi.
 
     Returns:
-        Response: Render halaman unconfirmed.html atau redirect ke index jika tidak relevan.
+        Response: Render template halaman 'unconfirmed'.
     """
+    # Jika pengguna anonim atau sudah terkonfirmasi, arahkan ke halaman utama
     if current_user.is_anonymous or current_user.is_confirmed:
         return redirect(url_for('main.index'))
     return render_template('auth/unconfirmed.html')
@@ -96,13 +114,14 @@ def unconfirmed():
 @login_required
 @limiter.limit("3 per 24 hours")
 def resend_confirmation():
-    """Mengirim ulang email konfirmasi akun kepada pengguna yang sudah login.
+    """Mengirim ulang email konfirmasi ke pengguna yang sedang login.
 
-    Dibatasi maksimal 3 permintaan dalam 24 jam per pengguna untuk mencegah penyalahgunaan.
+    Dibatasi untuk mencegah spam email.
 
     Returns:
-        Response: Redirect ke halaman utama dengan notifikasi pengiriman email.
+        Response: Redirect ke halaman utama dengan pesan status.
     """
+    # Membuat token baru dan mengirimkannya kembali
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Konfirmasi Akun Lelana.id Anda', 
                'auth/email/confirm', user=current_user, token=token)
@@ -113,18 +132,22 @@ def resend_confirmation():
 @auth.route('/login', methods=['GET', 'POST'])
 @limiter.limit("100 per day; 20 per hour; 5 per minute")
 def login():
-    """Menangani proses login pengguna dengan validasi kredensial dan rate limiting.
+    """Menangani proses login pengguna.
 
-    Memverifikasi email dan password, lalu mengautentikasi pengguna jika valid.
-    Dibatasi maksimal 5 percobaan login per menit per alamat IP.
+    Memvalidasi kredensial dari form login. Jika berhasil, membuat sesi
+    login untuk pengguna.
 
     Returns:
-        Response: Redirect ke halaman utama jika login sukses, atau render formulir login.
+        Response: Render template form login, atau redirect ke halaman utama
+                  setelah login berhasil.
     """
     form = LoginForm()
     if form.validate_on_submit():
+        # Mencari pengguna berdasarkan email
         user = User.query.filter_by(email=form.email.data).first()
+        # Memverifikasi keberadaan pengguna dan kecocokan password
         if user and user.verify_password(form.password.data):
+            # Membuat sesi login
             login_user(user, remember=form.remember.data)
             current_app.logger.info('Login berhasil untuk user "%s" dari IP %s.', 
                 user.username, request.remote_addr
@@ -133,6 +156,7 @@ def login():
             flash('Login berhasil!', 'success')
             return redirect(url_for('main.index'))
         else:
+            # Jika login gagal
             current_app.logger.warning('Login GAGAL untuk email "%s" dari IP %s.', 
                 form.email.data, request.remote_addr
             )
@@ -142,53 +166,60 @@ def login():
 @auth.route('/reset-password', methods=['GET', 'POST'])
 @limiter.limit("3 per 24 hours")
 def password_reset_request():
-    """Menangani permintaan pengguna untuk mereset password yang lupa.
+    """Menangani permintaan untuk mereset password.
 
-    Jika email ditemukan, sistem mengirim tautan reset ke alamat tersebut.
-    Pengguna yang sudah login diarahkan ke halaman utama.
+    Mengirim email berisi token reset jika email pengguna terdaftar.
 
     Returns:
-        Response: Render formulir permintaan reset jika GET, atau redirect ke login setelah pengiriman email.
+        Response: Render template form permintaan reset, atau redirect ke
+                  halaman login setelah form disubmit.
     """
+    # Jika pengguna sudah login, tidak perlu reset password
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
     form = PasswordResetRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
+            # Jika pengguna ada, buat token dan kirim email
             token = user.generate_reset_token()
             send_email(user.email, 'Reset Password Akun Lelana.id Anda',
                        'auth/email/reset_password',
                        user=user, token=token)
             
             current_app.logger.info('Email reset password dikirim ke %s.', user.email)
-            flash('Jika email terdaftar di sistem kami, instruksi reset password telah dikirim.', 'info')
+        # Pesan yang ditampilkan sama baik email ada atau tidak, untuk keamanan
+        flash('Jika email terdaftar di sistem kami, instruksi reset password telah dikirim.', 'info')
         return redirect(url_for('auth.login'))
     
     return render_template('auth/reset_password_request.html', form=form)
 
 @auth.route('/reset-password/<token>', methods=['GET', 'POST'])
 def password_reset(token):
-    """Menangani reset password berdasarkan token yang dikirim melalui email.
+    """Memproses reset password menggunakan token.
 
-    Memverifikasi token, lalu memungkinkan pengguna menetapkan password baru.
-    Token yang tidak valid atau kedaluwarsa akan mengarahkan ke halaman login.
+    Memverifikasi token dan menampilkan form untuk memasukkan password baru.
 
     Args:
-        token (str): Token reset password unik dari email.
+        token (str): Token reset password yang diterima dari URL.
 
     Returns:
-        Response: Render formulir reset password jika token valid, atau redirect ke login jika tidak.
+        Response: Render template form reset password, atau redirect ke halaman
+                  login jika token tidak valid atau setelah berhasil.
     """
+    # Jika pengguna sudah login, tidak perlu reset password
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
+    # Memverifikasi token dan mendapatkan pengguna terkait
     user = User.verify_reset_token(token)
     if not user:
+        # Jika token tidak valid atau kedaluwarsa
         flash('Tautan reset password tidak valid atau telah kedaluwarsa.', 'warning')
         return redirect(url_for('auth.login'))
     
     form = PasswordResetForm()
     if form.validate_on_submit():
+        # Menyetel password baru
         user.password = form.password.data
         db.session.commit()
 
@@ -202,16 +233,15 @@ def password_reset(token):
 @auth.route('/logout')
 @login_required
 def logout():
-    """Melakukan logout pengguna yang sedang login.
-
-    Menghapus sesi pengguna dan menampilkan pesan konfirmasi.
+    """Melakukan logout untuk pengguna yang sedang aktif sesinya.
 
     Returns:
         Response: Redirect ke halaman utama setelah logout.
     """
     current_app.logger.info('User "%s" telah logout.', current_user.username)
     
-    logout_user() # Fungsi ini dari Flask-Login, akan menghapus user dari session
+    # Menghapus sesi pengguna dari Flask-Login
+    logout_user()
     flash('Anda telah berhasil logout.', 'info')
 
     return redirect(url_for('main.index'))
