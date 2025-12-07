@@ -9,6 +9,8 @@ uploads/
 lelana.db*
 logs/
 documentation/
+tests/
 *dev.txt
 *.ini
-tests/
+.coverage
+.vscode/
