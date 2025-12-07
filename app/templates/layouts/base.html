@@ -1,0 +1,311 @@
+{% extends "layouts/root_base.html" %}
+
+{% block title %}{% block page_title %}Lelana.id{% endblock %}{% endblock %}
+
+{% block tailwind_colors %}
+{
+primary: {
+DEFAULT: '#10B981', // Emerald-500
+'50': '#ECFDF5',
+'100': '#D1FAE5',
+'200': '#A7F3D0',
+'300': '#6EE7B7',
+'400': '#34D399',
+'500': '#10B981',
+'600': '#059669',
+'700': '#047857',
+'800': '#065F46',
+'900': '#064E3B',
+},
+dark: '#111827', // Gray-900
+light: '#F9FAFB', // Gray-50
+}
+{% endblock %}
+
+{% block head_styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+{% endblock %}
+
+{% block body_content %}
+<div id="app" class="flex flex-col min-h-screen bg-light dark:bg-dark text-gray-800 dark:text-gray-200">
+    <!-- Header -->
+    <header
+        class="bg-white/80 dark:bg-dark/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+            <div class="flex items-center justify-between">
+                <!-- Left Side: Logo and Main Nav -->
+                <div class="flex items-center">
+                    <a href="{{ url_for('main.index') }}"
+                        class="text-xl sm:text-2xl font-bold text-primary-600 dark:text-primary-400 mr-10"> Lelana.id
+                    </a>
+                    <div class="hidden lg:flex items-center space-x-8">
+                        <a href="{{ url_for('wisata.list_wisata') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Wisata</a>
+                        <a href="{{ url_for('event.list_event') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Event</a>
+                        <a href="{{ url_for('paket_wisata.list_paket') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Paket
+                            Wisata</a>
+                        <a href="{{ url_for('itinerari.list_itinerari') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Itinerari</a>
+                        <a href="{{ url_for('chatbot.chat_page') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Tanya
+                            Putri</a>
+                        <a href="{{ url_for('main.peta_wisata') }}"
+                            class="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Peta</a>
+                    </div>
+                </div>
+
+                <!-- Center: Search Bar -->
+                <div class="hidden lg:flex flex-1 justify-center px-6">
+                    <form action="{{ url_for('main.search') }}" method="GET" class="w-full max-w-sm">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                                <svg class="w-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            <input type="search" name="q" value="{{ request.args.get('q', '') }}"
+                                class="block w-full bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg py-2 pl-10 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                placeholder="Cari...">
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Side: Auth and Actions -->
+                <div class="hidden lg:flex items-center space-x-4">
+                    {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}"
+                        class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Admin
+                        Panel</a>
+                    {% endif %}
+                    <a href="{{ url_for('main.profile') }}"
+                        class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Profil</a>
+                    <a href="{{ url_for('auth.logout') }}"
+                        class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">Logout</a>
+                    {% else %}
+                    <a href="{{ url_for('auth.login') }}"
+                        class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">Login</a>
+                    <a href="{{ url_for('auth.register') }}"
+                        class="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">Register</a>
+                    {% endif %}
+                    <!-- Dark Mode Toggle -->
+                    <button @click="darkMode = !darkMode"
+                        class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600">
+                        <svg x-show="!darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Tombol Hamburger (Mobile) -->
+                <div class="lg:hidden flex items-center space-x-2">
+                    <button @click="darkMode = !darkMode"
+                        class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-600">
+                        <svg x-show="!darkMode" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg x-show="darkMode" x-cloak class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
+                                fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <button @click="sidebarOpen = !sidebarOpen" class="text-dark dark:text-light focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Menu Mobile -->
+            <div x-show="sidebarOpen" @click.away="sidebarOpen = false" x-cloak class="lg:hidden mt-4 space-y-2">
+                <!-- Search Bar Mobile -->
+                <div class="px-4 pb-2">
+                    <form action="{{ url_for('main.search') }}" method="GET">
+                        <input type="search" name="q" value="{{ request.args.get('q', '') }}"
+                            class="block w-full bg-gray-100 dark:bg-gray-800 border border-transparent rounded-lg py-2 px-3 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                            placeholder="Cari...">
+                    </form>
+                </div>
+                <a href="{{ url_for('wisata.list_wisata') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Wisata</a>
+                <a href="{{ url_for('event.list_event') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Event</a>
+                <a href="{{ url_for('paket_wisata.list_paket') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Paket
+                    Wisata</a>
+                <a href="{{ url_for('itinerari.list_itinerari') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Itinerari</a>
+                <a href="{{ url_for('chatbot.chat_page') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Tanya
+                    Putri</a>
+                <a href="{{ url_for('main.peta_wisata') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Peta</a>
+                <hr class="my-2 border-gray-200 dark:border-gray-700">
+                {% if current_user.is_authenticated %}
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Admin
+                    Panel</a>
+                {% endif %}
+                <a href="{{ url_for('main.profile') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Profil</a>
+                <a href="{{ url_for('auth.logout') }}"
+                    class="block w-full text-left py-2 px-4 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-600/20 rounded">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}"
+                    class="block py-2 px-4 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">Login</a>
+                <a href="{{ url_for('auth.register') }}"
+                    class="block mt-2 text-center bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors">Register</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    {% block full_width_top %}{% endblock %}
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-6 sm:mb-8 space-y-4">
+            {% for category, message in messages %}
+            {% set color_classes = {
+            'success': 'bg-green-100 dark:bg-green-900/50 border-green-500 text-green-700 dark:text-green-300',
+            'error': 'bg-red-100 dark:bg-red-900/50 border-red-500 text-red-700 dark:text-red-300',
+            'warning': 'bg-yellow-100 dark:bg-yellow-900/50 border-yellow-500 text-yellow-700 dark:text-yellow-300',
+            'info': 'bg-blue-100 dark:bg-blue-900/50 border-blue-500 text-blue-700 dark:text-blue-300'
+            } %}
+            {% set default_class = 'bg-blue-100 dark:bg-blue-900/50 border-blue-500 text-blue-700 dark:text-blue-300' %}
+            <div class="border-l-4 p-4 {{ color_classes[category] or default_class }}" role="alert">
+                <p>{{ message }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+        <div class="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+                <!-- About Section -->
+                <div class="sm:col-span-2 md:col-span-1">
+                    <h3 class="text-lg sm:text-xl font-bold mb-4 text-primary-600 dark:text-primary-400">Lelana.id</h3>
+                    <p class="text-sm sm:text-base text-gray-600 dark:text-gray-400">Menemukan, merencanakan, dan
+                        berbagi cerita petualanganmu di Banyumas dan sekitarnya.</p>
+                </div>
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-semibold text-base sm:text-lg mb-4">Tautan Cepat</h4>
+                    <ul class="space-y-2 text-sm sm:text-base">
+                        <li>
+                            <a href="{{ url_for('main.about') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Tentang
+                                Kami</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('main.contact') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Kontak</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('main.privacy') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Kebijakan
+                                Privasi</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Explore -->
+                <div>
+                    <h4 class="font-semibold text-base sm:text-lg mb-4">Jelajahi</h4>
+                    <ul class="space-y-2 text-sm sm:text-base">
+                        <li>
+                            <a href="{{ url_for('wisata.list_wisata') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Destinasi
+                                Wisata</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('event.list_event') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Event
+                                Lokal</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('paket_wisata.list_paket') }}"
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">Paket
+                                Wisata</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Social Media -->
+                <div>
+                    <h4 class="font-semibold text-base sm:text-lg mb-4">Ikuti Kami</h4>
+                    <div class="flex space-x-4">
+                        <a href="https://www.facebook.com/lelana.id"
+                            class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path fill-rule="evenodd"
+                                    d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                        <a href="https://x.com/lelana.id"
+                            class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/lelana.id"
+                            class="text-gray-500 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path
+                                    d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.2,5.2 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.2,5.2 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="mt-8 sm:mt-12 border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8 text-center text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+                <p>&copy; 2025 Lelana.id. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    // Mobile Menu Toggle
+    document.addEventListener('DOMContentLoaded', () => {
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                const mobileMenu = document.getElementById('mobile-menu');
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+    });
+</script>
+{% block scripts %}{% endblock %}
+{% endblock %}
