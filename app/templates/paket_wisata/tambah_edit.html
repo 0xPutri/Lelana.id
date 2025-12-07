@@ -1,94 +1,153 @@
-{% extends "layouts/base.html" %}
+{% extends "admin/layouts/admin_base.html" %}
 
-{% block title %}{{ judul_halaman }} - Lelana.id{% endblock %}
+{% block title %}{{ judul_halaman }}{% endblock %}
+
+{% block page_title %}{{ judul_halaman }}{% endblock %}
+
+{% block header_title %}{{ judul_halaman }}{% endblock %}
 
 {% block content %}
-    {% set input_classes = 'block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/50 dark:text-white text-base py-3 px-4 transition-colors duration-200' %}
-
-    <div class="bg-white dark:bg-gray-900 min-h-screen">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-            <!-- Header Halaman dan Link Kembali -->
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-10">
-                            <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {{ judul_halaman }}
-                </h1>
-                <a href="{{ url_for('paket_wisata.list_paket') }}" class="inline-flex items-center text-base font-medium text-primary-600 dark:text-primary-400 hover:underline whitespace-nowrap flex-shrink-0 mt-2 sm:mt-0">
-                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Kembali ke Daftar</span>
-                </a>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 shadow-sm ring-1 ring-gray-900/5 sm:rounded-xl md:col-span-2">
+        <div class="px-4 py-6 sm:p-8">
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-semibold leading-7 text-gray-900 dark:text-white">Formulir Paket Wisata
+                    </h2>
+                    <p class="mt-1 text-sm leading-6 text-gray-600 dark:text-gray-400">Isi detail paket wisata yang
+                        ditawarkan.</p>
+                </div>
+                <a href="{{ url_for('paket_wisata.list_paket') }}"
+                    class="text-sm font-semibold leading-6 text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">Kembali
+                    ke Daftar</a>
             </div>
 
-            <!-- Form Tambah/Edit -->
             <form method="POST" class="space-y-6" novalidate>
                 {{ form.hidden_tag() }}
 
                 <!-- Nama Paket -->
                 <div>
-                    {{ form.nama.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
-                    {{ form.nama(class=input_classes, placeholder="Cth: Paket Wisata Alam Sehari") }}
-                    {% if form.nama.errors %}<div class="mt-2 space-y-1">{% for error in form.nama.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    {{ form.nama.label(class="block text-sm font-medium leading-6 text-gray-900 dark:text-white") }}
+                    <div class="mt-2">
+                        {{ form.nama(class_="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900 dark:text-white
+                        shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400
+                        focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-700/50 sm:text-sm sm:leading-6
+                        transition-all duration-200", placeholder="Cth: Paket Wisata Alam Sehari") }}
+                    </div>
+                    {% if form.nama.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.nama.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Deskripsi -->
                 <div>
-                    {{ form.deskripsi.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
-                    {{ form.deskripsi(class=input_classes, rows=5, placeholder="Jelaskan detail paket wisata ini...") }}
-                    {% if form.deskripsi.errors %}<div class="mt-2 space-y-1">{% for error in form.deskripsi.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    {{ form.deskripsi.label(class="block text-sm font-medium leading-6 text-gray-900 dark:text-white")
+                    }}
+                    <div class="mt-2">
+                        {{ form.deskripsi(class_="block w-full rounded-md border-0 py-1.5 px-3 text-gray-900
+                        dark:text-white
+                        shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400
+                        focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-700/50 sm:text-sm sm:leading-6
+                        transition-all duration-200", rows=5, placeholder="Jelaskan detail paket wisata ini...") }}
+                    </div>
+                    {% if form.deskripsi.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.deskripsi.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Harga -->
                 <div>
-                    {{ form.harga.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
-                    <div class="relative">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <span class="text-gray-500 dark:text-gray-400 text-base">Rp</span>
+                    {{ form.harga.label(class="block text-sm font-medium leading-6 text-gray-900 dark:text-white") }}
+                    <div class="relative mt-2 rounded-md shadow-sm">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <span class="text-gray-500 dark:text-gray-400 sm:text-sm">Rp</span>
                         </div>
-                        {{ form.harga(class=input_classes + ' pl-12', type='number', placeholder="100000") }}
+                        {{ form.harga(class_="block w-full rounded-md border-0 py-1.5 px-3 pl-10 text-gray-900
+                        dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400
+                        focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:bg-gray-700/50 sm:text-sm sm:leading-6
+                        transition-all duration-200", type='number', placeholder="100000") }}
                     </div>
-                    {% if form.harga.errors %}<div class="mt-2 space-y-1">{% for error in form.harga.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    {% if form.harga.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.harga.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Daftar Destinasi (Checkbox List) -->
                 <div>
-                    {{ form.destinasi.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
-                    <div class="mt-2 p-1 h-60 max-h-60 overflow-y-auto rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800">
+                    {{ form.destinasi.label(class="block text-sm font-medium leading-6 text-gray-900 dark:text-white")
+                    }}
+                    <div
+                        class="mt-2 p-1 h-60 max-h-60 overflow-y-auto rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800/50">
                         {% if form.destinasi.query_factory() %}
-                            <div class="space-y-1 p-2">
-                                {% for subfield in form.destinasi %}
-                                    <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
-                                        {{ subfield(class_="h-5 w-5 rounded border-gray-400 dark:border-gray-500 text-primary-600 bg-gray-100 dark:bg-gray-900 focus:ring-primary-500/50 dark:focus:ring-offset-gray-800") }}
-                                        <span class="text-base text-gray-800 dark:text-gray-200">{{ subfield.label.text }}</span>
-                                    </label>
-                                {% endfor %}
-                            </div>
+                        <div class="space-y-1 p-2">
+                            {% for subfield in form.destinasi %}
+                            <label
+                                class="flex items-center space-x-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
+                                {{ subfield(class_="h-4 w-4 rounded border-gray-300 dark:border-gray-600
+                                text-primary-600 focus:ring-primary-600 bg-white dark:bg-gray-700") }}
+                                <span class="text-sm text-gray-900 dark:text-gray-200">{{ subfield.label.text }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
                         {% else %}
-                            <div class="flex items-center justify-center h-full">
-                                <p class="text-base text-gray-500 dark:text-gray-400">Belum ada data destinasi wisata.</p>
-                            </div>
+                        <div class="flex items-center justify-center h-full">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada data destinasi wisata.</p>
+                        </div>
                         {% endif %}
                     </div>
-                    {% if form.destinasi.errors %}<div class="mt-2 space-y-1">{% for error in form.destinasi.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                    {% if form.destinasi.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.destinasi.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Pilihan Promosi (Single Checkbox) -->
-                <div>
-                    <label class="relative inline-flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors cursor-pointer">
-                        {{ form.is_promoted(class_="h-5 w-5 rounded border-gray-400 dark:border-gray-500 text-primary-600 bg-gray-100 dark:bg-gray-900 focus:ring-primary-500/50 dark:focus:ring-offset-gray-800") }}
-                        <div class="text-base">
-                            <span class="font-medium text-gray-900 dark:text-white">Jadikan Paket Promosi</span>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Centang jika paket ini ingin ditampilkan di halaman utama.</p>
-                        </div>
-                    </label>
-                    {% if form.is_promoted.errors %}<div class="mt-2 space-y-1">{% for error in form.is_promoted.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
+                <div class="relative flex gap-x-3">
+                    <div class="flex h-6 items-center">
+                        {{ form.is_promoted(class_="h-4 w-4 rounded border-gray-300 dark:border-gray-600
+                        text-primary-600 focus:ring-primary-600 bg-white dark:bg-gray-700") }}
+                    </div>
+                    <div class="text-sm leading-6">
+                        <label for="is_promoted" class="font-medium text-gray-900 dark:text-white">Jadikan Paket
+                            Promosi</label>
+                        <p class="text-gray-500 dark:text-gray-400">Centang jika paket ini ingin ditampilkan di halaman
+                            utama.</p>
+                    </div>
+                    {% if form.is_promoted.errors %}
+                    <div class="mt-2 text-sm text-red-600 dark:text-red-400">
+                        {% for error in form.is_promoted.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Tombol Aksi -->
-                <div class="pt-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
-                    {{ form.submit(class_="w-full sm:w-auto inline-flex justify-center py-3 px-8 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200") }}
+                <div
+                    class="flex items-center justify-end gap-x-6 border-t border-gray-900/10 dark:border-gray-700 pt-8 mt-8">
+                    <a href="{{ url_for('paket_wisata.list_paket') }}"
+                        class="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">Batal</a>
+                    {{ form.submit(class_="rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white
+                    shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2
+                    focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-all duration-200") }}
                 </div>
             </form>
         </div>
     </div>
+</div>
 {% endblock %}

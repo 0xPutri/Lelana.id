@@ -5,67 +5,121 @@
 {% block header_title %}Manajemen Pengguna{% endblock %}
 
 {% block content %}
-    <div class="overflow-x-auto">
-        <div class="inline-block min-w-full align-middle">
-            <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-600">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                        <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-0">ID</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Username</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Email</th>
-                        <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">Peran (Role)</th>
-                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-0">
-                            <span class="sr-only">Aksi</span>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
-                    {% for user in users %}
-                    <tr>
-                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-0">{{ user.id }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{ user.username }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{ user.email }}</td>
-                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                            <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
-                                {% if user.role == 'admin' %} bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/10 dark:ring-red-500/30 
-                                {% else %} bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/10 dark:ring-green-500/30 
-                                {% endif %}">
-                                {{ user.role }}
-                            </span>
-                        </td>
-                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                            <div class="flex items-center justify-end space-x-3">
-                                <a href="{{ url_for('admin.edit_user', id=user.id) }}" class="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 transition-colors duration-150" title="Edit Pengguna">
-                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
-                                    <span class="sr-only">Edit {{ user.username }}</span>
-                                </a>
-                                {% if user.id != current_user.id %}
-                                <form id="delete-form-{{ user.id }}" action="{{ url_for('admin.hapus_user', id=user.id) }}" method="POST" class="inline-flex">
-                                    {{ delete_form.hidden_tag() }}
-                                    <button 
-                                        @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ user.id }}'"
-                                        type="button" 
-                                        class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-150" 
-                                        title="Hapus Pengguna">
-                                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-                                        <span class="sr-only">Hapus {{ user.username }}</span>
-                                    </button>
-                                </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="5" class="px-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800">
-                             <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-3.197-.94 5.971 5.971 0 00-3.196.941" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 6.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            <h3 class="mt-2 text-sm font-semibold text-gray-900 dark:text-white">Belum ada pengguna</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tidak ada data pengguna yang terdaftar di sistem.</p>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-         </div>
+<div class="sm:flex sm:items-center sm:justify-between mb-8">
+    <div>
+        <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Daftar Pengguna</h3>
+        <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">Kelola semua pengguna yang terdaftar di sistem.</p>
     </div>
+</div>
+
+<div class="flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th scope="col"
+                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">
+                                ID</th>
+                            <th scope="col"
+                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">
+                                Username</th>
+                            <th scope="col"
+                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Email
+                            </th>
+                            <th scope="col"
+                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Peran
+                            </th>
+                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                <span class="sr-only">Aksi</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
+                        {% for user in users %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+                            <td
+                                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
+                                {{ user.id }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                                <div class="flex items-center">
+                                    <div
+                                        class="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-xs mr-3">
+                                        {{ user.username[0]|upper }}
+                                    </div>
+                                    <div class="font-medium text-gray-900 dark:text-white">{{ user.username }}</div>
+                                </div>
+                            </td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{
+                                user.email }}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
+                                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
+                                        {% if user.role == 'admin' %} bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 ring-1 ring-inset ring-purple-700/10 dark:ring-purple-400/30 
+                                        {% else %} bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/10 dark:ring-green-400/30 
+                                        {% endif %}">
+                                    {{ user.role|capitalize }}
+                                </span>
+                            </td>
+                            <td
+                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ url_for('admin.edit_user', id=user.id) }}"
+                                        class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 transition-colors"
+                                        title="Edit">
+                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                        </svg>
+                                        <span class="sr-only">Edit, {{ user.username }}</span>
+                                    </a>
+                                    {% if user.id != current_user.id %}
+                                    <form id="delete-form-{{ user.id }}"
+                                        action="{{ url_for('admin.hapus_user', id=user.id) }}" method="POST"
+                                        class="inline-flex">
+                                        {{ delete_form.hidden_tag() }}
+                                        <button
+                                            @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ user.id }}'; deleteMessage = 'Apakah Anda yakin ingin menghapus pengguna {{ user.username }}? Tindakan ini tidak dapat dibatalkan.'"
+                                            type="button"
+                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
+                                            title="Hapus">
+                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                            </svg>
+                                            <span class="sr-only">Hapus, {{ user.username }}</span>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5"
+                                class="px-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900">
+                                <div class="flex flex-col items-center justify-center">
+                                    <div class="rounded-full bg-gray-100 dark:bg-gray-800 p-3 mb-4">
+                                        <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Belum ada pengguna
+                                    </h3>
+                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tidak ada data pengguna
+                                        yang terdaftar di sistem.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
