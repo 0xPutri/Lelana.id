@@ -136,9 +136,9 @@
         class="flex-none bg-white dark:bg-gray-900 p-4 pb-6 sm:pb-8 border-t border-gray-100 dark:border-gray-800 z-10">
         <div class="max-w-3xl mx-auto w-full">
             <div
-                class="relative flex items-end gap-2 bg-gray-100 dark:bg-gray-800 rounded-[2rem] border border-transparent focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 transition-all duration-200 shadow-sm hover:shadow-md">
+                class="relative flex items-end gap-2 bg-gray-100 dark:bg-gray-800 rounded-[2rem] border border-transparent focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 focus-within:outline-none transition-all duration-200 shadow-sm hover:shadow-md">
                 <textarea id="user-input" rows="1" placeholder="Tanya sesuatu pada Putri..."
-                    class="block w-full py-4 pl-6 pr-14 text-base text-gray-900 dark:text-white bg-transparent border-none focus:ring-0 resize-none max-h-32 scrollbar-hide"
+                    class="block w-full py-4 pl-6 pr-14 text-base text-gray-900 dark:text-white bg-transparent border-none focus:ring-0 focus:outline-none resize-none max-h-32 scrollbar-hide"
                     style="min-height: 56px;"></textarea>
 
                 <button id="send-btn"
@@ -179,54 +179,21 @@
             if (this.value === '') this.style.height = '56px';
         });
 
-        function formatText(text) {
-            let formatted = text
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-            const lines = formatted.split('\n');
-            let inList = false;
-            let result = '';
-            for (let i = 0; i < lines.length; i++) {
-                let line = lines[i];
-                const isListItem = line.trim().startsWith('* ') || line.trim().startsWith('- ');
-
-                if (isListItem && !inList) {
-                    inList = true;
-                    result += '<ul class="list-disc ml-5 space-y-1 mt-2 mb-2">';
-                }
-                if (!isListItem && inList) {
-                    inList = false;
-                    result += '</ul>';
-                }
-
-                if (isListItem) {
-                    result += '<li>' + line.trim().substring(1).trim() + '</li>';
-                } else {
-                    result += line + (i < lines.length - 1 ? '<br>' : '');
-                }
-            }
-            if (inList) {
-                result += '</ul>';
-            }
-            return result;
-        }
-
         function addMessage(sender, text) {
             if (welcomeScreen && !welcomeScreen.classList.contains('hidden')) {
                 welcomeScreen.classList.add('hidden');
             }
 
             const messageWrapper = document.createElement('div');
-            const formattedText = formatText(text);
+            
+            const escapeHTML = (str) => str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 
             if (sender === 'user') {
                 messageWrapper.classList.add('flex', 'justify-end', 'mb-6');
                 messageWrapper.innerHTML = `
                         <div class="max-w-[85%] sm:max-w-[75%]">
                             <div class="bg-primary-600 text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-sm">
-                                <p class="text-sm sm:text-base leading-relaxed">${formattedText}</p>
+                                <p class="text-sm sm:text-base leading-relaxed">${escapeHTML(text)}</p>
                             </div>
                         </div>
                     `;
@@ -242,7 +209,7 @@
                         </div>
                         <div class="max-w-[85%] sm:max-w-[75%]">
                             <div class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-5 py-3.5 rounded-2xl rounded-tl-sm shadow-sm border border-gray-100 dark:border-gray-700">
-                                <div class="text-sm sm:text-base leading-relaxed prose dark:prose-invert max-w-none">${formattedText}</div>
+                                <div class="text-sm sm:text-base leading-relaxed prose dark:prose-invert max-w-none whitespace-pre-line">${text}</div>
                             </div>
                         </div>
                     `;
