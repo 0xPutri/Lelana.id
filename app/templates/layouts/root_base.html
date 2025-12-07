@@ -53,6 +53,34 @@
             font-family: 'Poppins', sans-serif;
         }
     </style>
+
+    <!-- Scrollbar Kustom -->
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.4); /* gray-400/40% */
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(156, 163, 175, 0.6); /* gray-400/60% */
+        }
+
+        /* Style untuk dark mode */
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: rgba(107, 114, 128, 0.4); /* gray-500/40% */
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(107, 114, 128, 0.6); /* gray-500/60% */
+        }
+    </style>
     {% block head_styles %}{% endblock %}
 </head>
 <body class="h-full antialiased"
