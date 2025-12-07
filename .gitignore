@@ -1,16 +1,33 @@
-migrations/
+# Python cache
 __pycache__/
-.venv
-*.db
-.pytest_cache
-.env
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
 venv/
-uploads/
+
+# Databases
+*.db
 lelana.db*
-logs/
-documentation/
-tests/
-*dev.txt
-*.ini
+
+# Testing
+.pytest_cache/
 .coverage
+
+# Environment variables
+.env
+
+# Logs & uploads
+logs/
+uploads/
+
+# Migrations
+migrations/
+
+# Editor / IDE
 .vscode/
+
+# Documentation
+documentation/
