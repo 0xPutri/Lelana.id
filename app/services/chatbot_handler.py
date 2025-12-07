@@ -1,3 +1,4 @@
+import markdown
 import requests
 from flask import current_app
 
@@ -62,7 +63,7 @@ def call_gemini(prompt: str):
         return "Error: Kunci API Gemini belum dikonfigurasi."
 
     # Membangun URL endpoint Gemini API
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={gemini_api_key}"
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={gemini_api_key}"
     headers = {"Content-Type": "application/json"}
     # Membentuk body permintaan sesuai dengan format yang dibutuhkan API
     body = {"contents": [{"parts": [{"text": prompt}]}]}
@@ -171,5 +172,8 @@ def get_bot_response(user_query: str):
     if answer is None:
         return "Maaf, sepertinya Putri sedang mengalami sedikit kendala teknis. Coba lagi beberapa saat lagi ya! 😢"
     
-    # Mengembalikan jawaban akhir setelah menghapus spasi di awal/akhir
-    return answer.strip()
+    # Mengonversi jawaban dari Markdown ke HTML sebelum dikirim
+    html_answer = markdown.markdown(answer.strip(), extensions=['fenced_code', 'tables'])
+    
+    # Mengembalikan jawaban dalam format HTML
+    return html_answer
