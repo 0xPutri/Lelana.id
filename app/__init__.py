@@ -100,7 +100,7 @@ def create_app(config_name):
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
     if db_uri.startswith('sqlite') and ':memory:' not in db_uri:
         with app.app_context():
-            engine = db.get_engine()
+            engine = db.engine
             @event.listens_for(engine, "connect")
             def set_sqlite_pragma(dbapi_connection, connection_record):
                 """Mengatur PRAGMA untuk koneksi SQLite.

@@ -11,7 +11,7 @@ def init_profanity_filter(app):
     Args:
         app (Flask): Instance aplikasi Flask untuk mengakses konfigurasi.
     """
-    profanity.load_censor_words()
+    profanity.load_censor_words([])
     bad_words = app.config.get('BAD_WORDS_ID', [])
     if bad_words:
         profanity.add_censor_words(bad_words)

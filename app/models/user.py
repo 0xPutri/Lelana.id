@@ -73,7 +73,7 @@ class User(UserMixin, db.Model):
             # Gagal jika token tidak valid atau kedaluwarsa
             return None
         # Mengambil pengguna berdasarkan ID dari data token
-        user = User.query.get(data.get('confirm'))
+        user = db.session.get(User, data.get('confirm'))
         if user:
             # Mengubah status konfirmasi dan menyimpan ke database
             user.is_confirmed = True
