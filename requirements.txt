@@ -14,5 +14,5 @@ Flask-Mail
 better-profanity
 requests
 markdown-it-py
-linkify-it-pyMarkdown
 Markdown
+linkify-it-pyMarkdown

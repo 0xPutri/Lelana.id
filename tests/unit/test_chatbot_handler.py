@@ -32,7 +32,7 @@ def test_get_bot_response_with_web_results(mock_search_web, mock_call_gemini, ap
         assert "- Judul Hasil 1: Cuplikan hasil 1." in prompt_arg
         assert user_query in prompt_arg
 
-        assert response == "Jawaban dari Gemini."
+        assert response == "<p>Jawaban dari Gemini.</p>"
 
 
 @patch('app.services.chatbot_handler.call_gemini')
@@ -103,7 +103,7 @@ def test_get_bot_response_skip_search_flag(mock_search_web, mock_call_gemini, ap
         assert "./skip" not in prompt_arg
         assert "berdasarkan pengetahuan umum kamu" in prompt_arg
 
-        assert response == "Jawaban tanpa pencarian."
+        assert response == "<p>Jawaban tanpa pencarian.</p>"
 
 
 def test_search_web_no_api_key(app):
