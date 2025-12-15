@@ -172,13 +172,10 @@
 
             const lightboxImage = document.getElementById('lightbox-image');
             const lightboxCloseBtn = document.getElementById('lightbox-close');
-            // Target semua link di dalam galeri ulasan
             const imageLinks = document.querySelectorAll('.review-gallery a');
 
             imageLinks.forEach(link => {
-                // Hapus atribut target="_blank" agar tidak membuka tab baru
                 link.removeAttribute('target');
-                // Tambahkan cursor pointer untuk menandakan bisa di-klik
                 link.style.cursor = 'pointer';
 
                 link.addEventListener('click', function(e) {
@@ -186,26 +183,24 @@
                     const imageUrl = this.href;
                     lightboxImage.setAttribute('src', imageUrl);
                     lightbox.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden'; // Mencegah scroll di background
+                    document.body.style.overflow = 'hidden';
                 });
             });
 
             function closeLightbox() {
                 lightbox.classList.add('hidden');
-                lightboxImage.setAttribute('src', ''); // Hapus src untuk menghentikan loading & memori
-                document.body.style.overflow = 'auto'; // Kembalikan scroll
+                lightboxImage.setAttribute('src', '');
+                document.body.style.overflow = 'auto';
             }
 
             if(lightboxCloseBtn) lightboxCloseBtn.addEventListener('click', closeLightbox);
             
-            // Tutup jika klik di area luar gambar
             lightbox.addEventListener('click', function(e) {
                 if (e.target === lightbox) {
                     closeLightbox();
                 }
             });
 
-            // Tutup dengan tombol Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && !lightbox.classList.contains('hidden')) {
                     closeLightbox();

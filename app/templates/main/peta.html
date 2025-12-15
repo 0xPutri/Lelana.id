@@ -34,7 +34,6 @@
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             });
 
-            // Function to apply the correct map theme
             function setMapTheme(theme) {
                 if (theme === 'dark') {
                     if (map.hasLayer(lightTile)) map.removeLayer(lightTile);
@@ -45,16 +44,13 @@
                 }
             }
 
-            // Listen for theme changes from the main toggle
             document.body.addEventListener('themeChanged', (e) => {
                 setMapTheme(e.detail.theme);
             });
 
-            // Set initial theme
             const initialTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
             setMapTheme(initialTheme);
 
-            // Fetch location data
             fetch('{{ url_for("wisata.api_lokasi_wisata") }}').then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
