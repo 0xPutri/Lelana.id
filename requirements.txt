@@ -5,6 +5,7 @@ email-validator
 Flask-WTF
 Flask-Login
 python-dotenv
+dotenv
 Werkzeug
 WTForms-SQLAlchemy
 
@@ -15,4 +16,4 @@ better-profanity
 requests
 markdown-it-py
 Markdown
-linkify-it-pyMarkdown
+linkify-it-py
