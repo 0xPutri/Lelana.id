@@ -79,7 +79,7 @@
                         <!-- Upload Foto -->
                         <div>
                             {{ form.foto.label(class="block text-base font-medium mb-2 text-gray-800 dark:text-gray-300") }}
-                            {{ form.foto(class="block w-full text-base text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-700 focus:outline-none file:bg-gray-100 dark:file:bg-gray-700/50 file:border-0 file:px-4 file:py-3 file:mr-4 file:font-medium file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-200 dark:hover:file:bg-gray-600/50 transition-colors duration-200") }}
+                            {{ form.foto(class="block w-full text-base text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-700 focus:outline-none file:bg-gray-100 dark:file:bg-gray-700/50 file:border-0 file:px-4 file:py-3 file:mr-4 file:font-medium file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-200 dark:hover:file:bg-gray-600/50 transition-colors duration-200", multiple=True) }}
                             <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Unggah foto untuk ulasan Anda (opsional, maks. 5 foto).</p>
                             {% if form.foto.errors %}<div class="mt-2 space-y-1">{% for error in form.foto.errors %}<p class="text-sm text-red-600 dark:text-red-400">{{ error }}</p>{% endfor %}</div>{% endif %}
                         </div>
@@ -167,6 +167,19 @@
     {{ super() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Form Submission Handler for Rating
+            const reviewForm = document.querySelector('form[method="POST"]');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    const ratingInput = reviewForm.querySelector('[name="rating"]');
+                    if (ratingInput && ratingInput.value) {
+                        const ratingValue = parseFloat(ratingInput.value.replace(',', '.'));
+                        ratingInput.value = Math.round(ratingValue);
+                    }
+                });
+            }
+
+            // Image Lightbox Logic
             const lightbox = document.getElementById('image-lightbox');
             if (!lightbox) return;
 
