@@ -3,40 +3,26 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% set email_subject %}{%- block title -%}Email dari Lelana.id{%- endblock -%}{% endset %}
-    <title>{{ email_subject }}</title>
-    <!--[if mso]>
-    <style>
-        table, td, p, a {font-family: Arial, sans-serif !important;}
-    </style>
-    <![endif]-->
+    <title>{% block title %}{% endblock %} - Lelana.id</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; width: 100%; background-color: #ffffff;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #ffffff;">
+<body style="margin: 0; padding: 0; background-color: #f7f7f7; font-family: sans-serif;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#f7f7f7">
         <tr>
             <td align="center" style="padding: 20px;">
-                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 570px; margin: 0 auto;">
-                    <!-- Header -->
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #ffffff; border: 1px solid #dddddd;">
                     <tr>
-                        <td style="padding: 20px 0; border-bottom: 1px solid #dddddd;">
-                            <p style="margin: 0; font-size: 20px; font-weight: bold; color: #333333;">
-                                Lelana.id
-                            </p>
+                        <td align="center" style="padding: 20px 0; border-bottom: 1px solid #dddddd;">
+                            <h1 style="margin: 0; font-size: 24px; color: #333333;">Lelana.id</h1>
                         </td>
                     </tr>
-
-                    <!-- Content -->
                     <tr>
-                        <td style="padding: 30px 0; font-size: 16px; color: #333333; line-height: 1.6;">
+                        <td style="padding: 30px 20px;">
                             {% block content %}{% endblock %}
                         </td>
                     </tr>
-
-                    <!-- Footer -->
                     <tr>
-                        <td align="center" style="padding: 20px 0; border-top: 1px solid #dddddd; font-size: 12px; color: #999999;">
-                            <p style="margin: 0;">&copy; 2025 Lelana.id. Semua hak cipta dilindungi.</p>
-                            <p style="margin: 10px 0 0 0;">Anda menerima email ini karena Anda mendaftar di Lelana.id. Jika Anda merasa ini adalah kesalahan, silakan abaikan email ini.</p>
+                        <td align="center" style="padding: 20px; border-top: 1px solid #dddddd; font-size: 12px; color: #999999;">
+                            <p style="margin: 0;">&copy; 2025 Lelana.id</p>
                         </td>
                     </tr>
                 </table>
