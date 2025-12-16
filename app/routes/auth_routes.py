@@ -123,7 +123,7 @@ def resend_confirmation():
     """
     # Membuat token baru dan mengirimkannya kembali
     token = current_user.generate_confirmation_token()
-    send_email(current_user.email, 'Konfirmasi Akun Lelana.id Anda', 
+    send_email(current_user.email, 'Selangkah lagi! Konfirmasi akun Lelana.id kamu 🌿', 
                'auth/email/confirm', user=current_user, token=token)
     
     flash('Email konfirmasi baru telah dikirimkan.', 'success')
