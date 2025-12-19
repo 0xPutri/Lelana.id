@@ -24,32 +24,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             const map = L.map('map').setView([-7.4313, 109.2443], 11);
 
-            const lightTile = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // Selalu gunakan layer peta yang terang
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            });
-
-            const darkTile = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-            });
-
-            function setMapTheme(theme) {
-                if (theme === 'dark') {
-                    if (map.hasLayer(lightTile)) map.removeLayer(lightTile);
-                    if (!map.hasLayer(darkTile)) map.addLayer(darkTile);
-                } else {
-                    if (map.hasLayer(darkTile)) map.removeLayer(darkTile);
-                    if (!map.hasLayer(lightTile)) map.addLayer(lightTile);
-                }
-            }
-
-            document.body.addEventListener('themeChanged', (e) => {
-                setMapTheme(e.detail.theme);
-            });
-
-            const initialTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
-            setMapTheme(initialTheme);
+            }).addTo(map);
 
             fetch('{{ url_for("wisata.api_lokasi_wisata") }}').then(response => {
                 if (!response.ok) {
