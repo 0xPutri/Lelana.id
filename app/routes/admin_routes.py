@@ -1,3 +1,5 @@
+import json
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, abort, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.utils.decorators import admin_required
@@ -8,6 +10,7 @@ from app.models.event import Event
 from app.models.paket_wisata import PaketWisata
 from app.forms import AdminEditUserForm
 from flask_wtf import FlaskForm
+from sqlalchemy import func
 
 # Membuat Blueprint untuk rute-rute khusus admin
 admin = Blueprint('admin', __name__)
@@ -18,13 +21,68 @@ admin = Blueprint('admin', __name__)
 def dashboard():
     """Menampilkan halaman dashboard utama untuk admin.
 
-    Halaman ini hanya dapat diakses oleh pengguna yang sudah login dan
-    memiliki peran 'admin'.
+    Halaman ini mengumpulkan dan menampilkan statistik agregat tentang konten
+    dan pengguna di platform, serta visualisasi data aktivitas terkini.
 
     Returns:
-        Response: Render template halaman dashboard admin.
+        Response: Render template halaman dashboard admin dengan data statistik.
     """
-    return render_template('admin/dashboard.html')
+    # Menghitung total entitas utama
+    total_users = db.session.query(func.count(User.id)).scalar()
+    total_wisata = db.session.query(func.count(Wisata.id)).scalar()
+    total_paket = db.session.query(func.count(PaketWisata.id)).scalar()
+    total_event = db.session.query(func.count(Event.id)).scalar()
+
+    # Menyiapkan data untuk grafik aktivitas konten 30 hari terakhir
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    
+    # Query untuk mengambil jumlah konten baru per hari
+    wisata_by_day = db.session.query(
+            func.date(Wisata.tanggal_dibuat).label('date'), 
+            func.count(Wisata.id).label('count')
+        ).filter(Wisata.tanggal_dibuat >= thirty_days_ago).group_by('date').all()
+
+    event_by_day = db.session.query(
+            func.date(Event.tanggal_dibuat).label('date'), 
+            func.count(Event.id).label('count')
+        ).filter(Event.tanggal_dibuat >= thirty_days_ago).group_by('date').all()
+
+    paket_by_day = db.session.query(
+            func.date(PaketWisata.tanggal_dibuat).label('date'), 
+            func.count(PaketWisata.id).label('count')
+        ).filter(PaketWisata.tanggal_dibuat >= thirty_days_ago).group_by('date').all()
+
+    # Menggabungkan data dari semua tipe konten
+    content_activity = {}
+    for row in wisata_by_day + event_by_day + paket_by_day:
+        date_str = row.date
+        content_activity[date_str] = content_activity.get(date_str, 0) + row.count
+
+    # Mengisi hari-hari tanpa aktivitas dengan nilai 0
+    sorted_dates = sorted(content_activity.keys())
+    chart_labels = []
+    chart_data = []
+    if sorted_dates:
+        start_date = datetime.strptime(sorted_dates[0], '%Y-%m-%d').date()
+        end_date = datetime.utcnow().date()
+        delta = end_date - start_date
+        
+        for i in range(delta.days + 1):
+            day = start_date + timedelta(days=i)
+            day_str = day.strftime('%Y-%m-%d')
+            chart_labels.append(day.strftime('%b %d'))
+            chart_data.append(content_activity.get(day_str, 0))
+
+    # Mengemas semua statistik untuk dikirim ke template
+    stats = {
+        'total_users': total_users,
+        'total_wisata': total_wisata,
+        'total_paket': total_paket,
+        'total_event': total_event,
+        'chart_data': json.dumps({'labels': chart_labels, 'data': chart_data})
+    }
+    
+    return render_template('admin/dashboard.html', stats=stats)
 
 @admin.route('/admin/users')
 @login_required

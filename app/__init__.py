@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from flask import Flask, request, current_app, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -95,6 +96,15 @@ def create_app(config_name):
 
     # Mendaftarkan semua blueprint rute ke aplikasi
     register_blueprints(app)
+
+    @app.context_processor
+    def inject_now():
+        """Menyuntikkan variabel 'now' ke dalam semua konteks template.
+
+        Returns:
+            dict: Dictionary berisi objek datetime UTC saat ini.
+        """
+        return {'now': datetime.utcnow()}
 
     # Optimasi spesifik untuk database SQLite untuk meningkatkan kinerja konkuren
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
