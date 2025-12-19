@@ -1,125 +1,133 @@
 {% extends "admin/layouts/admin_base.html" %}
 
-{% block page_title %}Manajemen Pengguna{% endblock %}
+{% block title %}Manajemen Pengguna{% endblock %}
 
-{% block header_title %}Manajemen Pengguna{% endblock %}
+{% block styles %}
+<!-- DataTables CSS -->
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
-<div class="sm:flex sm:items-center sm:justify-between mb-8">
-    <div>
-        <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">Daftar Pengguna</h3>
-        <p class="mt-2 text-sm text-gray-700 dark:text-gray-400">Kelola semua pengguna yang terdaftar di sistem.</p>
+
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Manajemen Pengguna</h1>
+<p class="mb-4">Kelola semua pengguna yang terdaftar di sistem. Anda dapat mencari, mengurutkan, dan mengelola data pengguna melalui tabel di bawah ini.</p>
+
+<!-- DataTales Example -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Daftar Pengguna</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="usersTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Peran</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="mr-2">
+                                    <div class="icon-circle bg-primary">
+                                        <i class="fas fa-user text-white"></i>
+                                    </div>
+                                </div>
+                                <div>{{ user.username }}</div>
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.role == 'admin' %}
+                                <span class="badge badge-pill badge-primary">{{ user.role|capitalize }}</span>
+                            {% else %}
+                                <span class="badge badge-pill badge-secondary">{{ user.role|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{{ url_for('admin.edit_user', id=user.id) }}" class="btn btn-info btn-circle btn-sm" title="Edit">
+                                <i class="fas fa-pencil-alt"></i>
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <button type="button" class="btn btn-danger btn-circle btn-sm" title="Hapus"
+                                    data-toggle="modal" data-target="#deleteUserModal"
+                                    data-user-id="{{ user.id }}" data-user-name="{{ user.username }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<div class="flow-root">
-    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th scope="col"
-                                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">
-                                ID</th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">
-                                Username</th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Email
-                            </th>
-                            <th scope="col"
-                                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">Peran
-                            </th>
-                            <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                                <span class="sr-only">Aksi</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-900">
-                        {% for user in users %}
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
-                            <td
-                                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-white sm:pl-6">
-                                {{ user.id }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                                <div class="flex items-center">
-                                    <div
-                                        class="h-8 w-8 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-xs mr-3">
-                                        {{ user.username[0]|upper }}
-                                    </div>
-                                    <div class="font-medium text-gray-900 dark:text-white">{{ user.username }}</div>
-                                </div>
-                            </td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">{{
-                                user.email }}</td>
-                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-300">
-                                <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
-                                        {% if user.role == 'admin' %} bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 ring-1 ring-inset ring-purple-700/10 dark:ring-purple-400/30 
-                                        {% else %} bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/10 dark:ring-green-400/30 
-                                        {% endif %}">
-                                    {{ user.role|capitalize }}
-                                </span>
-                            </td>
-                            <td
-                                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <div class="flex items-center justify-end gap-3">
-                                    <a href="{{ url_for('admin.edit_user', id=user.id) }}"
-                                        class="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300 transition-colors"
-                                        title="Edit">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                                        </svg>
-                                        <span class="sr-only">Edit, {{ user.username }}</span>
-                                    </a>
-                                    {% if user.id != current_user.id %}
-                                    <form id="delete-form-{{ user.id }}"
-                                        action="{{ url_for('admin.hapus_user', id=user.id) }}" method="POST"
-                                        class="inline-flex">
-                                        {{ delete_form.hidden_tag() }}
-                                        <button
-                                            @click.prevent="deleteModalOpen = true; deleteFormId = 'delete-form-{{ user.id }}'; deleteMessage = 'Apakah Anda yakin ingin menghapus pengguna {{ user.username }}? Tindakan ini tidak dapat dibatalkan.'"
-                                            type="button"
-                                            class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors"
-                                            title="Hapus">
-                                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                                                stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                            </svg>
-                                            <span class="sr-only">Hapus, {{ user.username }}</span>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr>
-                            <td colspan="5"
-                                class="px-3 py-10 text-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900">
-                                <div class="flex flex-col items-center justify-center">
-                                    <div class="rounded-full bg-gray-100 dark:bg-gray-800 p-3 mb-4">
-                                        <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                        </svg>
-                                    </div>
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Belum ada pengguna
-                                    </h3>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Tidak ada data pengguna
-                                        yang terdaftar di sistem.</p>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus Pengguna</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Apakah Anda yakin ingin menghapus pengguna <strong id="userNameToDelete"></strong>? Tindakan ini tidak dapat dibatalkan.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                <form id="deleteForm" method="POST" action="">
+                    {{ delete_form.hidden_tag() }}
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Page level plugins -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+// Call the dataTables jQuery plugin
+$(document).ready(function() {
+  $('#usersTable').DataTable({
+    "language": {
+      "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
+    },
+    "columnDefs": [
+      { "orderable": false, "targets": 4 } // Disable sorting on 'Aksi' column
+    ]
+  });
+});
+
+// Handle delete modal population
+$('#deleteUserModal').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget); // Button that triggered the modal
+  var userId = button.data('user-id'); // Extract info from data-* attributes
+  var userName = button.data('user-name');
+  
+  var modal = $(this);
+  modal.find('#userNameToDelete').text(userName);
+  
+  // Construct the URL for the form action
+  var actionUrl = "{{ url_for('admin.hapus_user', id=0) }}".replace('0', userId);
+  modal.find('#deleteForm').attr('action', actionUrl);
+});
+</script>
 {% endblock %}

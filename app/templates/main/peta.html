@@ -63,7 +63,12 @@
                         const popupContent = `
                             <div class="p-1">
                                 <h3 class="font-bold text-lg mb-1 text-gray-800 dark:text-gray-100">${lokasi.nama}</h3>
-                                <a href="${lokasi.detail_url}" target="_blank" class="text-primary-600 dark:text-primary-400 hover:underline font-semibold text-sm">Lihat Detail &rarr;</a>
+                                <a href="${lokasi.detail_url}" target="_blank" class="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300 font-semibold text-sm transition-colors">
+                                    Lihat Detail
+                                    <svg class="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6M18 6h-6m6 0l-7.5 7.5" />
+                                    </svg>
+                                </a>
                             </div>
                         `;
                         marker.bindPopup(popupContent);

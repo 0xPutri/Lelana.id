@@ -1,188 +1,228 @@
 {% extends "admin/layouts/admin_base.html" %}
 
-{% block title %}Dashboard Utama{% endblock %}
-
-{% block page_title %}Dashboard Utama{% endblock %}
+{% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<!-- Welcome Banner -->
-<div
-    class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-900 dark:to-gray-900 shadow-xl mb-10">
-    <div class="absolute inset-0">
-        <svg class="absolute left-0 top-0 h-full w-auto -translate-x-1/4 transform opacity-20" viewBox="0 0 100 100"
-            preserveAspectRatio="none" aria-hidden="true">
-            <circle cx="0" cy="0" r="100" fill="white" />
-        </svg>
-        <svg class="absolute right-0 bottom-0 h-full w-auto translate-x-1/4 transform opacity-20" viewBox="0 0 100 100"
-            preserveAspectRatio="none" aria-hidden="true">
-            <circle cx="100" cy="100" r="100" fill="white" />
-        </svg>
-    </div>
-    <div class="relative p-8 sm:p-10">
-        <div class="sm:flex sm:items-center sm:justify-between">
-            <div>
-                <h2 class="text-3xl font-bold tracking-tight text-white">
-                    Selamat Datang, {{ current_user.username }}!
-                </h2>
-                <p class="mt-4 max-w-2xl text-lg text-primary-100">
-                    Pusat kendali Lelana.id. Kelola konten, pengguna, dan pantau aktivitas platform Anda dengan mudah
-                    dari sini.
-                </p>
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+</div>
+
+<!-- Content Row - Statistik Cards -->
+<div class="row">
+
+    <!-- Total Pengguna Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Pengguna</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_users|default('0') }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-users fa-2x text-gray-300"></i>
+                    </div>
+                </div>
             </div>
-            <div class="mt-6 sm:mt-0">
-                <span
-                    class="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-sm font-medium text-white ring-1 ring-inset ring-white/20 backdrop-blur-sm">
-                    {{ now.strftime('%d %B %Y') if now else 'Hari ini' }}
-                </span>
+        </div>
+    </div>
+
+    <!-- Total Wisata Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Total Wisata</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_wisata|default('0') }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-map-marked-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Paket Wisata Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Total Paket Wisata</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_paket|default('0') }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-box-open fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Event Card -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow-sm h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Total Event</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_event|default('0') }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Action Cards -->
-<div class="mb-10">
-    <div class="flex items-center justify-between mb-6">
-        <h3 class="text-xl font-bold leading-6 text-gray-900 dark:text-white">Akses Cepat</h3>
-    </div>
-
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <!-- Manajemen Pengguna -->
-        <a href="{{ url_for('admin.manage_users') }}"
-            class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:ring-primary-500 dark:hover:ring-primary-500">
-            <div
-                class="absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-primary-50 dark:bg-primary-900/20 transition-all duration-300 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 blur-2xl">
+<!-- Content Row - Chart -->
+<div class="row">
+    <div class="col-xl-12">
+        <div class="card shadow-sm mb-4">
+            <!-- Card Header -->
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Aktivitas Konten (30 Hari Terakhir)</h6>
             </div>
-            <div class="relative flex flex-col h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                        </svg>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-300 dark:text-gray-600 group-hover:text-primary-500 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kelola Data</p>
-                    <h3
-                        class="mt-1 text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        Pengguna</h3>
+            <!-- Card Body -->
+            <div class="card-body">
+                <div class="chart-area">
+                    <canvas id="contentActivityChart"></canvas>
                 </div>
             </div>
-        </a>
-
-        <!-- Manajemen Wisata -->
-        <a href="{{ url_for('admin.manage_wisata') }}"
-            class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:ring-primary-500 dark:hover:ring-primary-500">
-            <div
-                class="absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-primary-50 dark:bg-primary-900/20 transition-all duration-300 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 blur-2xl">
-            </div>
-            <div class="relative flex flex-col h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                        </svg>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-300 dark:text-gray-600 group-hover:text-primary-500 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kelola Data</p>
-                    <h3
-                        class="mt-1 text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        Wisata</h3>
-                </div>
-            </div>
-        </a>
-
-        <!-- Manajemen Event -->
-        <a href="{{ url_for('admin.manage_event') }}"
-            class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:ring-primary-500 dark:hover:ring-primary-500">
-            <div
-                class="absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-primary-50 dark:bg-primary-900/20 transition-all duration-300 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 blur-2xl">
-            </div>
-            <div class="relative flex flex-col h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                        </svg>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-300 dark:text-gray-600 group-hover:text-primary-500 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kelola Data</p>
-                    <h3
-                        class="mt-1 text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        Event</h3>
-                </div>
-            </div>
-        </a>
-
-        <!-- Manajemen Paket Wisata -->
-        <a href="{{ url_for('admin.manage_paket_wisata') }}"
-            class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:ring-primary-500 dark:hover:ring-primary-500">
-            <div
-                class="absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-primary-50 dark:bg-primary-900/20 transition-all duration-300 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 blur-2xl">
-            </div>
-            <div class="relative flex flex-col h-full">
-                <div class="flex items-center justify-between mb-4">
-                    <div
-                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 group-hover:bg-primary-600 group-hover:text-white dark:group-hover:bg-primary-500 transition-colors duration-300">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-1.5h5.25m-5.25 0h5.25m-5.25 0H9m-9 0h2.25m-2.25 0h2.25m-2.25 0H9M9 18v-3.375c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125V18m12.75 0v-3.375c0-.621-.504-1.125-1.125-1.125H15c-.621 0-1.125.504-1.125 1.125V18m0 0h1.5m-1.5 0H15m0 0h1.5M15 9l1.125-1.125A2.25 2.25 0 0015 5.625h-3a2.25 2.25 0 00-2.25 2.25v1.5m3 0l1.125 1.125m-1.125-1.125a2.25 2.25 0 01-2.25 2.25h-3a2.25 2.25 0 01-2.25-2.25v-1.5A2.25 2.25 0 015.625 6H9a2.25 2.25 0 012.25 2.25v1.5m3 0H9" />
-                        </svg>
-                    </div>
-                    <svg class="h-5 w-5 text-gray-300 dark:text-gray-600 group-hover:text-primary-500 transition-colors"
-                        fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Kelola Data</p>
-                    <h3
-                        class="mt-1 text-lg font-bold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                        Paket Wisata</h3>
-                </div>
-            </div>
-        </a>
-    </div>
-</div>
-
-<!-- Introductory Text -->
-<div class="rounded-2xl bg-gray-50 dark:bg-gray-800/50 p-6 border border-gray-100 dark:border-gray-700/50">
-    <div class="flex items-start gap-4">
-        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-            </svg>
-        </div>
-        <div class="space-y-1">
-            <h4 class="text-base font-semibold text-gray-900 dark:text-white">Panduan Singkat</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                Gunakan menu navigasi di sebelah kiri untuk mengakses fitur manajemen. Anda dapat menambah, mengedit,
-                dan menghapus data sesuai kebutuhan. Pastikan untuk selalu memeriksa kembali data sebelum melakukan
-                perubahan permanen.
-            </p>
         </div>
     </div>
 </div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Set new default font family and font color to mimic Bootstrap's default styling
+Chart.defaults.global.defaultFontFamily = 'Nunito', '-apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
+Chart.defaults.global.defaultFontColor = '#858796';
+
+function number_format(number, decimals, dec_point, thousands_sep) {
+  // *     example: number_format(1234.56, 2, ',', ' ');
+  // *     return: '1 234,56'
+  number = (number + '').replace(',', '').replace(' ', '');
+  var n = !isFinite(+number) ? 0 : +number,
+    prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+    sep = (typeof thousands_sep === 'undefined') ? ',' : thousands_sep,
+    dec = (typeof dec_point === 'undefined') ? '.' : dec_point,
+    s = '',
+    toFixedFix = function(n, prec) {
+      var k = Math.pow(10, prec);
+      return '' + Math.round(n * k) / k;
+    };
+  // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+  s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+  if (s[0].length > 3) {
+    s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+  }
+  if ((s[1] || '').length < prec) {
+    s[1] = s[1] || '';
+    s[1] += new Array(prec - s[1].length + 1).join('0');
+  }
+  return s.join(dec);
+}
+
+// Bar Chart Example
+document.addEventListener("DOMContentLoaded", function() {
+    const chartData = JSON.parse({{ stats.chart_data|tojson }});
+    var ctx = document.getElementById("contentActivityChart");
+    if (ctx) {
+        var myBarChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+            label: "Konten Baru",
+            backgroundColor: "#4e73df",
+            hoverBackgroundColor: "#2e59d9",
+            borderColor: "#4e73df",
+            data: chartData.data,
+            }],
+        },
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+            padding: {
+                left: 10,
+                right: 25,
+                top: 25,
+                bottom: 0
+            }
+            },
+            scales: {
+            xAxes: [{
+                time: {
+                unit: 'day'
+                },
+                gridLines: {
+                display: false,
+                drawBorder: false
+                },
+                ticks: {
+                maxTicksLimit: 15
+                }
+            }],
+            yAxes: [{
+                ticks: {
+                min: 0,
+                padding: 10,
+                // Include a dollar sign in the ticks
+                callback: function(value, index, values) {
+                    if (Math.floor(value) === value) {
+                        return number_format(value);
+                    }
+                }
+                },
+                gridLines: {
+                color: "rgb(234, 236, 244)",
+                zeroLineColor: "rgb(234, 236, 244)",
+                drawBorder: false,
+                borderDash: [2],
+                zeroLineBorderDash: [2]
+                }
+            }],
+            },
+            legend: {
+            display: false
+            },
+            tooltips: {
+            backgroundColor: "rgb(255,255,255)",
+            bodyFontColor: "#858796",
+            titleMarginBottom: 10,
+            titleFontColor: '#6e707e',
+            titleFontSize: 14,
+            borderColor: '#dddfeb',
+            borderWidth: 1,
+            xPadding: 15,
+            yPadding: 15,
+            displayColors: false,
+            intersect: false,
+            mode: 'index',
+            caretPadding: 10,
+            callbacks: {
+                label: function(tooltipItem, chart) {
+                var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                return datasetLabel + ': ' + number_format(tooltipItem.yLabel);
+                }
+            }
+            }
+        }
+        });
+    }
+});
+</script>
 {% endblock %}
