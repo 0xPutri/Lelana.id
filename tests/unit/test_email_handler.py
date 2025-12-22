@@ -34,5 +34,5 @@ def test_send_email(app):
             assert msg.subject == 'Konfirmasi Akun'
             assert msg.recipients == ['penerima@example.com']
             assert 'Yth. <strong>testuser</strong>,' in msg.html
-            assert 'Untuk menyelesaikan proses pendaftaran' in msg.html
+            assert 'Mohon konfirmasikan alamat email Anda' in msg.html
             assert 'dummy-token' in msg.html

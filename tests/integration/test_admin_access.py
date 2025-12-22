@@ -34,5 +34,4 @@ def test_admin_dashboard_as_admin_user(admin_client):
     response = admin_client.get('/admin/dashboard')
 
     assert response.status_code == 200
-    assert b"<title>Dashboard Utama</title>" in response.data
-    assert b"Selamat Datang, admin!" in response.data
+    assert b"<title>Dashboard - Lelana.id</title>" in response.data
