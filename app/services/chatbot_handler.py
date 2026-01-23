@@ -63,7 +63,7 @@ def call_gemini(prompt: str):
         return "Error: Kunci API Gemini belum dikonfigurasi."
 
     # Membangun URL endpoint Gemini API
-    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={gemini_api_key}"
+    gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key={gemini_api_key}"
     headers = {"Content-Type": "application/json"}
     # Membentuk body permintaan sesuai dengan format yang dibutuhkan API
     body = {"contents": [{"parts": [{"text": prompt}]}]}

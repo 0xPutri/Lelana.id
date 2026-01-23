@@ -30,7 +30,18 @@
                         <article class="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1.5">
                             <!-- Gambar -->
                             <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="block h-48 w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                                <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="{% if w.gambar_url %}{{ w.gambar_url }}{% else %}https://placehold.co/600x400/10B981/FFFFFF?text={{ w.nama|urlencode }}&font=poppins{% endif %}" alt="Gambar {{ w.nama }}" onerror="this.src='https://placehold.co/600x400/9CA3AF/FFFFFF?text=Gambar+Rusak&font=poppins'; this.onerror=null;">
+                                {% if w.gambar_url %}
+                                    <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                         src="{{ w.gambar_url }}"
+                                         alt="Gambar {{ w.nama }}"
+                                         onerror="this.outerHTML = `<div class='w-full h-full flex items-center justify-center'><svg class='w-10 h-10 text-gray-400 dark:text-gray-500' fill='none' stroke='currentColor' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14'></path></svg></div>`;">
+                                {% else %}
+                                    <div class="w-full h-full flex items-center justify-center">
+                                        <svg class="w-10 h-10 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"></path>
+                                        </svg>
+                                    </div>
+                                {% endif %}
                             </a>
                             <div class="p-5 sm:p-6 flex flex-col flex-grow">
                                 <!-- Kategori & Lokasi -->

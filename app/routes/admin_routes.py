@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from flask import Blueprint, render_template, abort, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.utils.decorators import admin_required
@@ -34,7 +34,7 @@ def dashboard():
     total_event = db.session.query(func.count(Event.id)).scalar()
 
     # Menyiapkan data untuk grafik aktivitas konten 30 hari terakhir
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
     
     # Query untuk mengambil jumlah konten baru per hari
     wisata_by_day = db.session.query(
@@ -64,7 +64,7 @@ def dashboard():
     chart_data = []
     if sorted_dates:
         start_date = datetime.strptime(sorted_dates[0], '%Y-%m-%d').date()
-        end_date = datetime.utcnow().date()
+        end_date = datetime.now(timezone.utc).date()
         delta = end_date - start_date
         
         for i in range(delta.days + 1):

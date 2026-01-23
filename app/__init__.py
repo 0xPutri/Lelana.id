@@ -1,6 +1,6 @@
 import os
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from logging.handlers import RotatingFileHandler
 from flask import Flask, request, current_app, Response
 from flask_sqlalchemy import SQLAlchemy
@@ -104,7 +104,7 @@ def create_app(config_name):
         Returns:
             dict: Dictionary berisi objek datetime UTC saat ini.
         """
-        return {'now': datetime.utcnow()}
+        return {'now': datetime.now(timezone.utc)}
 
     # Optimasi spesifik untuk database SQLite untuk meningkatkan kinerja konkuren
     db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
