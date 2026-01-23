@@ -4,98 +4,121 @@
 
 {% block content %}
 
-<h1 class="h3 mb-4 text-gray-800">{{ judul_halaman }}</h1>
+<!-- Page Heading -->
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">{{ judul_halaman }}</h1>
+</div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Formulir Event</h6>
-                <a href="{{ url_for('admin.manage_event') }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar
-                </a>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="" novalidate>
-                    {{ form.hidden_tag() }}
-
-                    <div class="form-group">
-                        {{ form.nama.label(class="form-label") }}
-                        {{ form.nama(class="form-control " + ("is-invalid" if form.nama.errors else ""), placeholder="Cth: Festival Kesenian Banyumas") }}
-                        {% if form.nama.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.nama.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            {{ form.tanggal.label(class="form-label") }}
-                            {{ form.tanggal(class="form-control " + ("is-invalid" if form.tanggal.errors else "")) }}
-                            {% if form.tanggal.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.tanggal.errors %}<p>{{ error }}</p>{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="form-group col-md-6">
-                            {{ form.lokasi.label(class="form-label") }}
-                            {{ form.lokasi(class="form-control " + ("is-invalid" if form.lokasi.errors else ""), placeholder="Cth: Alun-Alun Purwokerto") }}
-                            {% if form.lokasi.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.lokasi.errors %}<p>{{ error }}</p>{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.deskripsi.label(class="form-label") }}
-                        {{ form.deskripsi(class="form-control " + ("is-invalid" if form.deskripsi.errors else ""), rows=5, placeholder="Jelaskan detail tentang event ini...") }}
-                        {% if form.deskripsi.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.deskripsi.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.penyelenggara.label(class="form-label") }}
-                        {{ form.penyelenggara(class="form-control " + ("is-invalid" if form.penyelenggara.errors else ""), placeholder="Cth: Dinas Pariwisata Banyumas (Opsional)") }}
-                        <small class="form-text text-muted">Isi jika diketahui.</small>
-                        {% if form.penyelenggara.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.penyelenggara.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ url_for('admin.manage_event') }}" class="btn btn-secondary mr-2">Batal</a>
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h6 class="text-lg font-semibold text-blue-600">Formulir Event</h6>
+        <a href="{{ url_for('admin.manage_event') }}"
+            class="text-sm text-gray-600 hover:text-blue-600 flex items-center transition-colors">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
+        </a>
     </div>
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Panduan Pengisian</h6>
+    <div class="p-6">
+        <form method="POST" action="" novalidate class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <!-- Nama -->
+            <div>
+                {{ form.nama.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                {% set nama_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                {% if form.nama.errors %}
+                {% set nama_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg focus:ring-red-500
+                focus:border-red-500 block w-full p-2.5" %}
+                {% endif %}
+                {{ form.nama(class=nama_class, placeholder="Cth: Festival Kesenian Banyumas") }}
+                {% if form.nama.errors %}
+                {% for error in form.nama.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
             </div>
-            <div class="card-body">
-                <p>Isi semua field yang wajib untuk menambahkan atau mengedit data event.</p>
-                <ul>
-                    <li><strong>Nama, Tanggal, Lokasi,</strong> dan <strong>Deskripsi</strong> adalah field yang wajib diisi.</li>
-                    <li><strong>Penyelenggara</strong> bersifat opsional.</li>
-                    <li>Pastikan tanggal yang dimasukkan sudah benar.</li>
-                </ul>
-                <p class="mt-3">Event yang ditambahkan akan langsung terlihat oleh pengguna di halaman daftar event.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Tanggal -->
+                <div>
+                    {{ form.tanggal.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                    {% set tanggal_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                    {% if form.tanggal.errors %}
+                    {% set tanggal_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                    {% endif %}
+                    {{ form.tanggal(class=tanggal_class) }}
+                    {% if form.tanggal.errors %}
+                    {% for error in form.tanggal.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Lokasi -->
+                <div>
+                    {{ form.lokasi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                    {% set lokasi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                    {% if form.lokasi.errors %}
+                    {% set lokasi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                    {% endif %}
+                    {{ form.lokasi(class=lokasi_class, placeholder="Cth: Alun-Alun Purwokerto") }}
+                    {% if form.lokasi.errors %}
+                    {% for error in form.lokasi.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
             </div>
-        </div>
+
+            <!-- Deskripsi -->
+            <div>
+                {{ form.deskripsi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                {% set deskripsi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                {% if form.deskripsi.errors %}
+                {% set deskripsi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                {% endif %}
+                {{ form.deskripsi(class=deskripsi_class, rows=5, placeholder="Jelaskan detail tentang event ini...") }}
+                {% if form.deskripsi.errors %}
+                {% for error in form.deskripsi.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Penyelenggara -->
+            <div>
+                {{ form.penyelenggara.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                {% set penyelenggara_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                {% if form.penyelenggara.errors %}
+                {% set penyelenggara_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                {% endif %}
+                {{ form.penyelenggara(class=penyelenggara_class, placeholder="Cth: Dinas Pariwisata Banyumas
+                (Opsional)") }}
+                <p class="mt-1 text-sm text-gray-500">Isi jika diketahui.</p>
+                {% if form.penyelenggara.errors %}
+                {% for error in form.penyelenggara.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="flex items-center justify-end pt-4 border-t border-gray-200 gap-3 mt-6">
+                <a href="{{ url_for('admin.manage_event') }}"
+                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    Batal
+                </a>
+                {{ form.submit(class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+                font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none") }}
+            </div>
+        </form>
     </div>
 </div>
 

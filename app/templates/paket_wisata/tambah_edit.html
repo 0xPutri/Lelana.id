@@ -4,118 +4,130 @@
 
 {% block content %}
 
-<h1 class="h3 mb-4 text-gray-800">{{ judul_halaman }}</h1>
+<!-- Page Heading -->
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">{{ judul_halaman }}</h1>
+</div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">Formulir Paket Wisata</h6>
-                <a href="{{ url_for('admin.manage_paket_wisata') }}" class="btn btn-secondary btn-sm">
-                    <i class="fas fa-arrow-left fa-sm text-white-50"></i> Kembali ke Daftar
-                </a>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="" novalidate>
-                    {{ form.hidden_tag() }}
-
-                    <div class="form-row">
-                        <div class="form-group col-md-8">
-                            {{ form.nama.label(class="form-label") }}
-                            {{ form.nama(class="form-control " + ("is-invalid" if form.nama.errors else ""), placeholder="Cth: Paket Wisata Alam Sehari") }}
-                            {% if form.nama.errors %}
-                                <div class="invalid-feedback">
-                                    {% for error in form.nama.errors %}<p>{{ error }}</p>{% endfor %}
-                                </div>
-                            {% endif %}
-                        </div>
-                        <div class="form-group col-md-4">
-                            {{ form.harga.label(class="form-label") }}
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Rp</span>
-                                </div>
-                                {{ form.harga(class="form-control " + ("is-invalid" if form.harga.errors else ""), type='number', placeholder="100000") }}
-                                {% if form.harga.errors %}
-                                    <div class="invalid-feedback">
-                                        {% for error in form.harga.errors %}<p>{{ error }}</p>{% endfor %}
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.deskripsi.label(class="form-label") }}
-                        {{ form.deskripsi(class="form-control " + ("is-invalid" if form.deskripsi.errors else ""), rows=5, placeholder="Jelaskan detail paket wisata ini...") }}
-                        {% if form.deskripsi.errors %}
-                            <div class="invalid-feedback">
-                                {% for error in form.deskripsi.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        {{ form.destinasi.label(class="form-label") }}
-                        <div class="card" style="height: 15rem; overflow-y: auto;">
-                            <div class="card-body">
-                                {% if form.destinasi.query_factory %}
-                                    {% for subfield in form.destinasi %}
-                                        <div class="custom-control custom-checkbox">
-                                            {{ subfield(class="custom-control-input") }}
-                                            {{ subfield.label(class="custom-control-label") }}
-                                        </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <p class="text-muted">Belum ada data destinasi wisata untuk dipilih.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% if form.destinasi.errors %}
-                            <div class="text-danger small mt-2">
-                                {% for error in form.destinasi.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <div class="custom-control custom-switch">
-                            {{ form.is_promoted(class="custom-control-input") }}
-                            {{ form.is_promoted.label(class="custom-control-label") }}
-                        </div>
-                        <small class="form-text text-muted">Centang jika paket ini ingin ditampilkan di halaman utama.</small>
-                        {% if form.is_promoted.errors %}
-                            <div class="text-danger small mt-2">
-                                {% for error in form.is_promoted.errors %}<p>{{ error }}</p>{% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ url_for('admin.manage_paket_wisata') }}" class="btn btn-secondary mr-2">Batal</a>
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-        </div>
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+        <h6 class="text-lg font-semibold text-blue-600">Formulir Paket Wisata</h6>
+        <a href="{{ url_for('admin.manage_paket_wisata') }}"
+            class="text-sm text-gray-600 hover:text-blue-600 flex items-center transition-colors">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
+        </a>
     </div>
-    <div class="col-lg-4">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Panduan Pengisian</h6>
+    <div class="p-6">
+        <form method="POST" action="" novalidate class="space-y-6">
+            {{ form.hidden_tag() }}
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Nama -->
+                <div class="md:col-span-2">
+                    {{ form.nama.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                    {% set nama_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                    {% if form.nama.errors %}
+                    {% set nama_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                    {% endif %}
+                    {{ form.nama(class=nama_class, placeholder="Cth: Paket Wisata Alam Sehari") }}
+                    {% if form.nama.errors %}
+                    {% for error in form.nama.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Harga -->
+                <div class="md:col-span-1">
+                    {{ form.harga.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                            <span class="text-gray-500 text-sm">Rp</span>
+                        </div>
+                        {% set harga_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                        focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" %}
+                        {% if form.harga.errors %}
+                        {% set harga_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                        focus:ring-red-500 focus:border-red-500 block w-full ps-10 p-2.5" %}
+                        {% endif %}
+                        {{ form.harga(class=harga_class, type='number', placeholder="100000") }}
+                    </div>
+                    {% if form.harga.errors %}
+                    {% for error in form.harga.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    {% endfor %}
+                    {% endif %}
+                </div>
             </div>
-            <div class="card-body">
-                <p>Isi semua field yang wajib untuk membuat atau mengedit paket wisata.</p>
-                <ul>
-                    <li><strong>Nama, Harga,</strong> dan <strong>Deskripsi</strong> adalah field yang wajib diisi.</li>
-                    <li>Pilih minimal satu <strong>Destinasi</strong> dari daftar yang tersedia. Jika daftar kosong, harap tambahkan data wisata terlebih dahulu.</li>
-                    <li>Aktifkan <strong>Jadikan Paket Promosi</strong> agar paket ini muncul di bagian khusus pada halaman utama.</li>
-                </ul>
-                <p class="mt-3">Paket yang dibuat akan langsung terlihat oleh pengguna.</p>
+
+            <!-- Deskripsi -->
+            <div>
+                {{ form.deskripsi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                {% set deskripsi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
+                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
+                {% if form.deskripsi.errors %}
+                {% set deskripsi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
+                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
+                {% endif %}
+                {{ form.deskripsi(class=deskripsi_class, rows=5, placeholder="Jelaskan detail paket wisata ini...") }}
+                {% if form.deskripsi.errors %}
+                {% for error in form.deskripsi.errors %}
+                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                {% endfor %}
+                {% endif %}
             </div>
-        </div>
+
+            <!-- Destinasi -->
+            <div>
+                {{ form.destinasi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                <div class="h-60 overflow-y-auto bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2">
+                    {% if form.destinasi.query_factory %}
+                    {% for subfield in form.destinasi %}
+                    <div class="flex items-center">
+                        {{ subfield(class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded
+                        focus:ring-blue-500") }}
+                        {{ subfield.label(class="ms-2 text-sm font-medium text-gray-900 cursor-pointer") }}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-gray-500 text-sm">Belum ada data destinasi wisata untuk dipilih.</p>
+                    {% endif %}
+                </div>
+                {% if form.destinasi.errors %}
+                <div class="mt-2 text-sm text-red-600">
+                    {% for error in form.destinasi.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Promoted Toggle -->
+            <div>
+                <label class="inline-flex items-center cursor-pointer">
+                    {{ form.is_promoted(class="sr-only peer") }}
+                    <div
+                        class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                    </div>
+                    <span class="ms-3 text-sm font-medium text-gray-900">{{ form.is_promoted.label.text }}</span>
+                </label>
+                <p class="mt-1 text-sm text-gray-500">Centang jika paket ini ingin ditampilkan di halaman utama.</p>
+                {% if form.is_promoted.errors %}
+                <div class="text-red-600 text-sm mt-1">
+                    {% for error in form.is_promoted.errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center justify-end pt-4 border-t border-gray-200 gap-3 mt-6">
+                <a href="{{ url_for('admin.manage_paket_wisata') }}"
+                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    Batal
+                </a>
+                {{ form.submit(class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
+                font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none") }}
+            </div>
+        </form>
     </div>
 </div>
 

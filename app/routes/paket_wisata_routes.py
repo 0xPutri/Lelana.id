@@ -98,7 +98,7 @@ def tambah_paket():
         )
 
         flash('Paket wisata baru berhasil ditambahkan!', 'success')
-        return redirect(url_for('paket_wisata.list_paket'))
+        return redirect(url_for('admin.manage_paket_wisata'))
     
     return render_template('paket_wisata/tambah_edit.html', form=form, judul_halaman='Tambah Paket Wisata')
 
@@ -140,7 +140,7 @@ def edit_paket(id):
         )
 
         flash('Paket wisata berhasil diperbarui!', 'success')
-        return redirect(url_for('paket_wisata.detail_paket', id=paket.id))
+        return redirect(url_for('admin.manage_paket_wisata'))
     
     return render_template('paket_wisata/tambah_edit.html', form=form, judul_halaman='Edit Paket Wisata')
 
@@ -180,4 +180,4 @@ def hapus_paket(id):
         # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
-    return redirect(url_for('paket_wisata.list_paket'))
+    return redirect(url_for('admin.manage_paket_wisata'))

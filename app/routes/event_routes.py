@@ -89,7 +89,7 @@ def tambah_event():
         )
             
         flash('Event baru berhasil ditambahkan!', 'success')
-        return redirect(url_for('event.list_event'))
+        return redirect(url_for('admin.manage_event'))
     
     # Menampilkan form jika metode adalah GET
     return render_template('event/tambah_edit.html', form=form, judul_halaman='Tambah Event Baru')
@@ -132,7 +132,7 @@ def edit_event(id):
         )
 
         flash('Data event berhasil diperbarui!', 'success')
-        return redirect(url_for('event.detail_event', id=event_item.id))
+        return redirect(url_for('admin.manage_event'))
     
     # Menampilkan form dengan data yang ada jika metode adalah GET
     return render_template('event/tambah_edit.html', form=form, judul_halaman='Edit Event')
@@ -174,4 +174,4 @@ def hapus_event(id):
         # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
-    return redirect(url_for('event.list_event'))
+    return redirect(url_for('admin.manage_event'))

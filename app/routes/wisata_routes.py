@@ -152,7 +152,7 @@ def tambah_wisata():
         )
 
         flash('Destinasi wisata baru berhasil ditambahkan!', 'success')
-        return redirect(url_for('wisata.list_wisata'))
+        return redirect(url_for('admin.manage_wisata'))
     
     return render_template('wisata/tambah_edit.html', form=form, judul_halaman='Tambah Wisata')
 
@@ -194,7 +194,7 @@ def edit_wisata(id):
         )
 
         flash('Data wisata berhasil diperbarui!', 'success')
-        return redirect(url_for('wisata.detail_wisata', id=wisata_item.id))
+        return redirect(url_for('admin.manage_wisata'))
     
     return render_template('wisata/tambah_edit.html', form=form, judul_halaman='Edit Wisata')
 
@@ -233,7 +233,7 @@ def hapus_wisata(id):
         # Gagal jika token CSRF tidak valid
         flash('Permintaan tidak valid atau sesi telah kedaluwarsa.', 'danger')
 
-    return redirect(url_for('wisata.list_wisata'))
+    return redirect(url_for('admin.manage_wisata'))
 
 @wisata.route('/api/wisata/lokasi')
 @limiter.limit("60 per minute")

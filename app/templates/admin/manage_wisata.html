@@ -3,58 +3,99 @@
 {% block title %}Manajemen Wisata{% endblock %}
 
 {% block styles %}
-<!-- DataTables CSS -->
-<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+<!-- DataTables CSS for Tailwind -->
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<style>
+    /* Custom DataTables Styling for Tailwind */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        color: #374151;
+        font-size: 0.875rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.375rem 0.75rem;
+        margin: 0 0.125rem;
+        border-radius: 0.375rem;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+        background: #3b82f6 !important;
+        color: white !important;
+        border: 1px solid #3b82f6 !important;
+    }
+
+    .dataTables_wrapper .dataTables_filter input {
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        padding: 0.375rem 0.75rem;
+        margin-left: 0.5rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
 
 <!-- Page Heading -->
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Manajemen Wisata</h1>
-    <a href="{{ url_for('wisata.tambah_wisata') }}" class="btn btn-primary btn-icon-split">
-        <span class="icon text-white-50">
-            <i class="fas fa-plus"></i>
-        </span>
-        <span class="text">Tambah Wisata Baru</span>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-800">Manajemen Wisata</h1>
+        <p class="text-gray-600 mt-2">Kelola semua data wisata yang tersedia di platform. Anda dapat mencari,
+            mengurutkan, dan mengelola data melalui tabel di bawah ini.</p>
+    </div>
+    <a href="{{ url_for('wisata.tambah_wisata') }}"
+        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm hover:shadow-md transition-all focus:ring-4 focus:ring-blue-300">
+        <i class="fas fa-plus mr-2"></i>
+        <span>Tambah Wisata Baru</span>
     </a>
 </div>
 
-<p class="mb-4">Kelola semua data wisata yang tersedia di platform. Anda dapat mencari, mengurutkan, dan mengelola data melalui tabel di bawah ini.</p>
-
-<!-- DataTales Example -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Daftar Wisata</h6>
+<!-- Table Card -->
+<div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-blue-600">Daftar Wisata</h3>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                <thead>
+    <div class="p-6">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left" id="dataTable">
+                <thead class="text-xs uppercase bg-gray-50 text-gray-700">
                     <tr>
-                        <th>ID</th>
-                        <th>Nama Wisata</th>
-                        <th>Kategori</th>
-                        <th>Lokasi</th>
-                        <th class="text-center">Aksi</th>
+                        <th class="px-4 py-3">ID</th>
+                        <th class="px-4 py-3">Nama Wisata</th>
+                        <th class="px-4 py-3">Kategori</th>
+                        <th class="px-4 py-3">Lokasi</th>
+                        <th class="px-4 py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200">
                     {% for wisata in daftar_wisata %}
-                    <tr>
-                        <td>{{ wisata.id }}</td>
-                        <td>{{ wisata.nama }}</td>
-                        <td><span class="badge badge-info">{{ wisata.kategori }}</span></td>
-                        <td>{{ wisata.lokasi }}</td>
-                        <td class="text-center">
-                            <a href="{{ url_for('wisata.edit_wisata', id=wisata.id) }}" class="btn btn-info btn-circle btn-sm" title="Edit">
-                                <i class="fas fa-pencil-alt"></i>
-                            </a>
-                            <button type="button" class="btn btn-danger btn-circle btn-sm" title="Hapus"
-                                    data-toggle="modal" data-target="#deleteModal"
-                                    data-id="{{ wisata.id }}" data-name="{{ wisata.nama }}" data-type="wisata">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ wisata.id }}</td>
+                        <td class="px-4 py-3 font-medium text-gray-900">{{ wisata.nama }}</td>
+                        <td class="px-4 py-3">
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">
+                                {{ wisata.kategori }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-700">{{ wisata.lokasi }}</td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="{{ url_for('wisata.edit_wisata', id=wisata.id) }}"
+                                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 transition-colors"
+                                    title="Edit">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <button type="button"
+                                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition-colors"
+                                    data-modal-target="deleteModal" data-modal-toggle="deleteModal"
+                                    data-id="{{ wisata.id }}" data-name="{{ wisata.nama }}" data-type="wisata"
+                                    title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -64,25 +105,44 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
+<!-- Delete Confirmation Modal (Flowbite) -->
+<div id="deleteModal" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Konfirmasi Hapus
+                </h3>
+                <button type="button"
+                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                    data-modal-toggle="deleteModal">
+                    <i class="fas fa-times"></i>
+                    <span class="sr-only">Close modal</span>
                 </button>
             </div>
-            <div class="modal-body">
-                Apakah Anda yakin ingin menghapus <strong id="itemNameToDelete"></strong>? Tindakan ini tidak dapat dibatalkan.
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
-                <form id="deleteForm" method="POST" action="">
-                    {{ delete_form.hidden_tag() }}
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <p class="text-gray-700 mb-4">
+                    Apakah Anda yakin ingin menghapus <strong id="itemNameToDelete"></strong>? Tindakan ini tidak dapat
+                    dibatalkan.
+                </p>
+                <!-- Modal footer -->
+                <div class="flex items-center gap-3">
+                    <button data-modal-toggle="deleteModal" type="button"
+                        class="flex-1 text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
+                        Batal
+                    </button>
+                    <form id="deleteForm" method="POST" action="" class="flex-1">
+                        {{ delete_form.hidden_tag() }}
+                        <button type="submit"
+                            class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
+                            Hapus
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -93,40 +153,42 @@
 {% block scripts %}
 <!-- Page level plugins -->
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 
 <script>
-// Call the dataTables jQuery plugin
-$(document).ready(function() {
-  $('#dataTable').DataTable({
-    "language": {
-      "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
-    },
-    "columnDefs": [
-      { "orderable": false, "targets": 4 } // Disable sorting on 'Aksi' column
-    ]
-  });
-});
+    // Call the dataTables jQuery plugin
+    $(document).ready(function () {
+        $('#dataTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
+            },
+            "columnDefs": [
+                { "orderable": false, "targets": 4 } // Disable sorting on 'Aksi' column
+            ]
+        });
+    });
 
-// Handle delete modal population
-$('#deleteModal').on('show.bs.modal', function (event) {
-  var button = $(event.relatedTarget); // Button that triggered the modal
-  var itemId = button.data('id'); 
-  var itemName = button.data('name');
-  var itemType = button.data('type');
-  
-  var modal = $(this);
-  modal.find('#itemNameToDelete').text(itemName);
-  
-  // Construct the URL for the form action based on item type
-  var actionUrl = "";
-  if (itemType === 'wisata') {
-      actionUrl = "{{ url_for('wisata.hapus_wisata', id=0) }}".replace('0', itemId);
-  }
-  // Add other types here in the future, e.g., event, paket_wisata
-  // else if (itemType === 'event') { ... }
+    // Handle delete modal population
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('[data-modal-target="deleteModal"]');
 
-  modal.find('#deleteForm').attr('action', actionUrl);
-});
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const itemId = this.getAttribute('data-id');
+                const itemName = this.getAttribute('data-name');
+                const itemType = this.getAttribute('data-type');
+
+                // Update modal content
+                document.getElementById('itemNameToDelete').textContent = itemName;
+
+                // Construct the URL for the form action based on item type
+                let actionUrl = "";
+                if (itemType === 'wisata') {
+                    actionUrl = "{{ url_for('wisata.hapus_wisata', id=0) }}".replace('0', itemId);
+                }
+
+                document.getElementById('deleteForm').setAttribute('action', actionUrl);
+            });
+        });
+    });
 </script>
 {% endblock %}
