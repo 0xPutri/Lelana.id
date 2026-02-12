@@ -79,7 +79,7 @@ def dashboard():
         'total_wisata': total_wisata,
         'total_paket': total_paket,
         'total_event': total_event,
-        'chart_data': json.dumps({'labels': chart_labels, 'data': chart_data})
+        'chart_data': {'labels': chart_labels, 'data': chart_data}
     }
     
     return render_template('admin/dashboard.html', stats=stats)

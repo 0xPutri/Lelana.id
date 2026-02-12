@@ -138,10 +138,24 @@
 
         let chartData;
         try {
+            // The data attribute contains a stringified JSON, which itself is inside a string.
+            // We need to parse it twice to get the actual object.
             chartData = JSON.parse(dataSource.dataset.chart);
         } catch (e) {
+            console.error("Gagal mem-parsing data chart:", e);
             return;
         }
+
+        // --- Theme-aware Chart Configuration ---
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        
+        const primaryColor = '#10B981';
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.05)' : '#f5f5f5';
+        const tickColor = isDarkMode ? '#a3a3a3' : '#737373';
+        const lineBorderColor = isDarkMode ? primaryColor : '#171717';
+        const lineBgColorStart = isDarkMode ? 'rgba(16, 185, 129, 0.2)' : 'rgba(23, 23, 23, 0.08)';
+        const pointBgColor = isDarkMode ? primaryColor : '#171717';
+        const pointBorderColor = isDarkMode ? '#1f2937' : '#fff'; // gray-800 for dark, white for light
 
         const ctx = chartElement.getContext('2d');
         new Chart(ctx, {
@@ -151,10 +165,10 @@
                 datasets: [{
                     label: 'Konten Baru',
                     data: chartData.data,
-                    borderColor: '#171717',
+                    borderColor: lineBorderColor,
                     backgroundColor: (context) => {
                         const bg = context.chart.ctx.createLinearGradient(0, 0, 0, 400);
-                        bg.addColorStop(0, 'rgba(23, 23, 23, 0.08)');
+                        bg.addColorStop(0, lineBgColorStart);
                         bg.addColorStop(1, 'rgba(23, 23, 23, 0)');
                         return bg;
                     },
@@ -163,8 +177,8 @@
                     tension: 0.4,
                     pointRadius: 0,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#171717',
-                    pointBorderColor: '#fff',
+                    pointBackgroundColor: pointBgColor,
+                    pointBorderColor: pointBorderColor,
                     pointBorderWidth: 2.5,
                 }]
             },
@@ -188,7 +202,7 @@
                         grid: { display: false },
                         border: { display: false },
                         ticks: {
-                            color: '#a3a3a3',
+                            color: tickColor,
                             font: { size: 11, family: 'Inter', weight: '500' },
                             padding: 10
                         }
@@ -196,12 +210,12 @@
                     y: {
                         beginAtZero: true,
                         grid: {
-                            color: '#f5f5f5',
+                            color: gridColor,
                             drawBorder: false
                         },
                         border: { display: false },
                         ticks: {
-                            color: '#a3a3a3',
+                            color: tickColor,
                             font: { size: 11, family: 'Inter', weight: '500' },
                             precision: 0,
                             padding: 10
