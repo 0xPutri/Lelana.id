@@ -6,7 +6,7 @@
     {% set input_classes = 'mt-1 block w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm placeholder-gray-400 dark:placeholder-gray-500 text-gray-900 dark:text-white focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm' %}
 
     <div class="flex items-center justify-center min-h-full py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
-        <div class="w-full max-w-md p-6 sm:p-8 space-y-8 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+        <div class="w-full max-w-md p-6 sm:p-8 space-y-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
             <!-- Header Form -->
             <div class="text-center">
                 <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Selamat Datang Kembali</h2>
@@ -33,7 +33,12 @@
                 <!-- Input Password -->
                 <div>
                     {{ form.password.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300") }}
-                    {{ form.password(class=input_classes, placeholder="••••••••") }}
+                    <div class="relative mt-1">
+                        {{ form.password(id='password', class=input_classes ~ ' pr-12', placeholder="••••••••") }}
+                        <button type="button" onclick="togglePasswordVisibility('password', 'password-toggle-icon')" class="absolute inset-y-0 right-0 flex items-center justify-center h-full w-12 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <i id="password-toggle-icon" data-lucide="eye" class="w-5 h-5"></i>
+                        </button>
+                    </div>
                     {% if form.password.errors %}
                         <div class="mt-2 text-sm text-red-500">
                             {% for error in form.password.errors %}
@@ -71,4 +76,24 @@
             </p>
         </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleIcon = document.getElementById(iconId);
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.setAttribute('data-lucide', 'eye');
+        }
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+</script>
 {% endblock %}

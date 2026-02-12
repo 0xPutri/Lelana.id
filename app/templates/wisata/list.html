@@ -27,7 +27,7 @@
             {% if daftar_wisata %}
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                     {% for w in daftar_wisata %}
-                        <article class="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1.5">
+                        <article class="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ease-in-out hover:shadow-md hover:-translate-y-1.5">
                             <!-- Gambar -->
                             <a href="{{ url_for('wisata.detail_wisata', id=w.id) }}" class="block h-48 w-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
                                 {% if w.gambar_url %}
