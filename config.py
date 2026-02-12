@@ -30,7 +30,6 @@ class Config:
         BAD_WORDS_ID (list): Daftar kata terlarang untuk filtering konten.
         ALLOWED_EMAIL_DOMAINS (list): Domain email yang diizinkan.
         GEMINI_API_KEY (str): Kunci API untuk layanan Google Gemini.
-        SERPER_API_KEY (str): Kunci API untuk layanan Serper.
     """
     # Mengaktifkan proteksi CSRF secara default
     WTF_CSRF_ENABLED = True
@@ -80,7 +79,6 @@ class Config:
 
     # Kunci API untuk layanan eksternal
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
-    SERPER_API_KEY = os.environ.get('SERPER_API_KEY')
 
 class DevelopmentConfig(Config):
     """Konfigurasi untuk lingkungan pengembangan.
