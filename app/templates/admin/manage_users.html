@@ -1,200 +1,151 @@
 {% extends "admin/layouts/admin_base.html" %}
 
-{% block title %}Manajemen Pengguna{% endblock %}
-
-{% block styles %}
-<!-- DataTables CSS for Tailwind -->
-<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
-<style>
-    /* Custom DataTables Styling for Tailwind */
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        color: #374151;
-        font-size: 0.875rem;
-    }
-
-    .dataTables_wrapper .dataTables_paginate .paginate_button {
-        padding: 0.375rem 0.75rem;
-        margin: 0 0.125rem;
-        border-radius: 0.375rem;
-    }
-
-    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-        background: #3b82f6 !important;
-        color: white !important;
-        border: 1px solid #3b82f6 !important;
-    }
-
-    .dataTables_wrapper .dataTables_filter input {
-        border: 1px solid #d1d5db;
-        border-radius: 0.375rem;
-        padding: 0.375rem 0.75rem;
-        margin-left: 0.5rem;
-    }
-</style>
-{% endblock %}
+{% block title %}Pengguna{% endblock %}
 
 {% block content %}
-
-<!-- Page Heading -->
-<div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">Manajemen Pengguna</h1>
-    <p class="text-gray-600 mt-2">Kelola semua pengguna yang terdaftar di sistem. Anda dapat mencari, mengurutkan, dan
-        mengelola data pengguna melalui tabel di bawah ini.</p>
+<!-- Page Header Section -->
+<div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-900">Pengguna</h1>
+    <p class="mt-1 text-sm text-neutral-500">Kelola akun pengguna dan izin sistem platform</p>
 </div>
 
-<!-- Table Card -->
-<div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-blue-600">Daftar Pengguna</h3>
-    </div>
-    <div class="p-6">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left" id="usersTable">
-                <thead class="text-xs uppercase bg-gray-50 text-gray-700">
-                    <tr>
-                        <th class="px-4 py-3">ID</th>
-                        <th class="px-4 py-3">Username</th>
-                        <th class="px-4 py-3">Email</th>
-                        <th class="px-4 py-3">Peran</th>
-                        <th class="px-4 py-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for user in users %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-medium text-gray-900">{{ user.id }}</td>
-                        <td class="px-4 py-3">
-                            <div class="flex items-center gap-3">
-                                <div class="flex-shrink-0">
-                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                        <i class="fas fa-user text-blue-600 text-sm"></i>
-                                    </div>
-                                </div>
-                                <span class="font-medium text-gray-900">{{ user.username }}</span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3 text-gray-700">{{ user.email }}</td>
-                        <td class="px-4 py-3">
-                            {% if user.role == 'admin' %}
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {{ user.role|capitalize }}
-                            </span>
-                            {% else %}
-                            <span
-                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                {{ user.role|capitalize }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <div class="flex items-center justify-center gap-2">
-                                <a href="{{ url_for('admin.edit_user', id=user.id) }}"
-                                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-white bg-cyan-600 rounded-lg hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-300 transition-colors"
-                                    title="Edit">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                {% if user.id != current_user.id %}
-                                <button type="button"
-                                    class="inline-flex items-center justify-center w-8 h-8 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition-colors"
-                                    data-modal-target="deleteUserModal" data-modal-toggle="deleteUserModal"
-                                    data-user-id="{{ user.id }}" data-user-name="{{ user.username }}" title="Hapus">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal (Flowbite) -->
-<div id="deleteUserModal" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-md max-h-full">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow">
-            <!-- Modal header -->
-            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-                <h3 class="text-lg font-semibold text-gray-900">
-                    Konfirmasi Hapus Pengguna
-                </h3>
-                <button type="button"
-                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                    data-modal-toggle="deleteUserModal">
-                    <i class="fas fa-times"></i>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-4 md:p-5">
-                <p class="text-gray-700 mb-4">
-                    Apakah Anda yakin ingin menghapus pengguna <strong id="userNameToDelete"></strong>? Tindakan ini
-                    tidak dapat dibatalkan.
-                </p>
-                <!-- Modal footer -->
+<!-- Users Data Table -->
+<div class="bg-white rounded-xl border border-neutral-200 shadow-sm">
+    <!-- Mobile: Card View -->
+    <div class="block sm:hidden">
+        {% for user in users %}
+        <div class="border-b border-neutral-200 last:border-b-0 p-4">
+            <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-3">
-                    <button data-modal-toggle="deleteUserModal" type="button"
-                        class="flex-1 text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
-                        Batal
-                    </button>
-                    <form id="deleteForm" method="POST" action="" class="flex-1">
-                        {{ delete_form.hidden_tag() }}
-                        <button type="submit"
-                            class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-colors">
-                            Hapus
-                        </button>
-                    </form>
+                    <div
+                        class="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center text-sm font-semibold">
+                        {{ user.username[:2]|upper }}
+                    </div>
+                    <div>
+                        <div class="text-sm font-medium text-neutral-900">{{ user.username }}</div>
+                        <div class="text-xs text-neutral-500">{{ user.email }}</div>
+                    </div>
                 </div>
+                {% if user.role == 'admin' %}
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-900 text-white">
+                    Admin
+                </span>
+                {% else %}
+                <span
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700">
+                    Pengguna
+                </span>
+                {% endif %}
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ url_for('admin.edit_user', id=user.id) }}"
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm text-neutral-600 hover:text-neutral-900 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    Ubah
+                </a>
+                {% if user.id != current_user.id %}
+                <button type="button" onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')"
+                    class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-sm text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Hapus
+                </button>
+                {% endif %}
             </div>
         </div>
+        {% endfor %}
+    </div>
+
+    <!-- Desktop: Table View -->
+    <div class="hidden sm:block overflow-x-auto">
+        <table class="min-w-full divide-y divide-neutral-200">
+            <thead class="bg-neutral-50">
+                <tr>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        Pengguna
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        Email
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        Peran
+                    </th>
+                    <th scope="col"
+                        class="px-6 py-3 text-right text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                        Aksi
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-neutral-200">
+                {% for user in users %}
+                <tr class="hover:bg-neutral-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div
+                                class="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-semibold">
+                                {{ user.username[:2]|upper }}
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-medium text-neutral-900">{{ user.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-neutral-500">{{ user.email }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if user.role == 'admin' %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-900 text-white leading-none">
+                            Admin
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-700 leading-none">
+                            Pengguna
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{{ url_for('admin.edit_user', id=user.id) }}"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                Ubah
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <button type="button" onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 hover:text-red-700 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                Hapus
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 
+<!-- Pagination -->
+{% include 'admin/includes/_pagination.html' %}
+
+<!-- Modal Section -->
+{% include 'admin/includes/_delete_modal.html' %}
 {% endblock %}
 
 {% block scripts %}
-<!-- Page level plugins -->
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
 <script>
-    // Call the dataTables jQuery plugin
-    $(document).ready(function () {
-        $('#usersTable').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
-            },
-            "columnDefs": [
-                { "orderable": false, "targets": 4 } // Disable sorting on 'Aksi' column
-            ]
-        });
-    });
-
-    // Handle delete modal population with Flowbite
-    document.addEventListener('DOMContentLoaded', function () {
-        // Get all delete buttons
-        const deleteButtons = document.querySelectorAll('[data-modal-target="deleteUserModal"]');
-
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const userId = this.getAttribute('data-user-id');
-                const userName = this.getAttribute('data-user-name');
-
-                // Update modal content
-                document.getElementById('userNameToDelete').textContent = userName;
-
-                // Construct the URL for the form action
-                const actionUrl = "{{ url_for('admin.hapus_user', id=0) }}".replace('0', userId);
-                document.getElementById('deleteForm').setAttribute('action', actionUrl);
-            });
-        });
-    });
+    function confirmDelete(userId, username) {
+        const deleteUrl = "{{ url_for('admin.hapus_user', id=0) }}".replace('0', userId);
+        document.getElementById('deleteItemName').textContent = username;
+        document.getElementById('deleteForm').action = deleteUrl;
+        AdminModal.open('deleteModal');
+    }
 </script>
 {% endblock %}

@@ -1,0 +1,42 @@
+<!-- Top Navigation Bar -->
+<header
+    class="sticky top-0 z-30 h-16 bg-white border-b border-neutral-200 flex items-center justify-between px-4 lg:px-8">
+    <div class="flex items-center gap-4">
+        <!-- Mobile Menu Button -->
+        <button @click="sidebarOpen = !sidebarOpen"
+            class="lg:hidden p-2 text-neutral-600 hover:text-neutral-900 transition-colors">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+
+        <h1 class="text-lg font-semibold text-neutral-900">
+            {% block page_title %}
+            {% if request.endpoint == 'admin.dashboard' %}Dasbor Dasbor
+            {% elif 'wisata' in request.endpoint %}Destinasi
+            {% elif 'event' in request.endpoint %}Acara
+            {% elif 'paket' in request.endpoint %}Paket Wisata
+            {% elif 'user' in request.endpoint %}Pengguna
+            {% else %}Panel Admin
+            {% endif %}
+            {% endblock %}
+        </h1>
+    </div>
+
+    <!-- User Profile & Actions -->
+    <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 pr-4 border-r border-neutral-200">
+            <div
+                class="w-8 h-8 rounded-full bg-neutral-900 text-white flex items-center justify-center text-xs font-semibold">
+                {{ current_user.username[:2]|upper }}
+            </div>
+            <div class="hidden sm:block">
+                <p class="text-sm font-medium text-neutral-900 leading-none">{{ current_user.username }}</p>
+                <p class="text-xs text-neutral-500 mt-1">Administrator</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('auth.logout') }}" class="p-2 text-neutral-400 hover:text-red-600 transition-colors"
+            title="Keluar">
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+        </a>
+    </div>
+</header>

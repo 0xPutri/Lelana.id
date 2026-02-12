@@ -3,60 +3,54 @@
 {% block title %}{{ judul_halaman }}{% endblock %}
 
 {% block content %}
-
-<!-- Page Heading -->
+<!-- Back Button -->
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">{{ judul_halaman }}</h1>
+    <a href="{{ url_for('admin.manage_paket_wisata') }}"
+        class="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Kembali ke Daftar Paket
+    </a>
 </div>
 
-<div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h6 class="text-lg font-semibold text-blue-600">Formulir Paket Wisata</h6>
-        <a href="{{ url_for('admin.manage_paket_wisata') }}"
-            class="text-sm text-gray-600 hover:text-blue-600 flex items-center transition-colors">
-            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
-        </a>
-    </div>
-    <div class="p-6">
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-900">{{ judul_halaman }}</h1>
+    <p class="mt-1 text-sm text-neutral-500">Lengkapi informasi paket perjalanan di bawah ini</p>
+</div>
+
+<!-- Form -->
+<div class="max-w-4xl">
+    <div class="bg-white rounded-lg border border-neutral-200 p-6">
         <form method="POST" action="" novalidate class="space-y-6">
             {{ form.hidden_tag() }}
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Nama -->
                 <div class="md:col-span-2">
-                    {{ form.nama.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                    {% set nama_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                    {% if form.nama.errors %}
-                    {% set nama_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                    {% endif %}
-                    {{ form.nama(class=nama_class, placeholder="Cth: Paket Wisata Alam Sehari") }}
+                    {{ form.nama.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                    {{ form.nama(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm transition-colors"
+                    + (" border-red-300 bg-red-50" if form.nama.errors else ""), placeholder="Contoh: Paket Alam Satu Hari") }}
                     {% if form.nama.errors %}
                     {% for error in form.nama.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
 
                 <!-- Harga -->
                 <div class="md:col-span-1">
-                    {{ form.harga.label(class="block mb-2 text-sm font-medium text-gray-900") }}
+                    {{ form.harga.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
                     <div class="relative">
-                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                            <span class="text-gray-500 text-sm">Rp</span>
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <span class="text-neutral-500 text-sm">Rp</span>
                         </div>
-                        {% set harga_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                        focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5" %}
-                        {% if form.harga.errors %}
-                        {% set harga_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                        focus:ring-red-500 focus:border-red-500 block w-full ps-10 p-2.5" %}
-                        {% endif %}
-                        {{ form.harga(class=harga_class, type='number', placeholder="100000") }}
+                        {{ form.harga(class="w-full pl-10 pr-3 py-2 border border-neutral-300 rounded-md text-sm
+                        transition-colors" + (" border-red-300 bg-red-50" if form.harga.errors else ""), type='number',
+                        placeholder="100000") }}
                     </div>
                     {% if form.harga.errors %}
                     {% for error in form.harga.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
@@ -64,39 +58,34 @@
 
             <!-- Deskripsi -->
             <div>
-                {{ form.deskripsi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                {% set deskripsi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                {% if form.deskripsi.errors %}
-                {% set deskripsi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                {% endif %}
-                {{ form.deskripsi(class=deskripsi_class, rows=5, placeholder="Jelaskan detail paket wisata ini...") }}
+                {{ form.deskripsi.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                {{ form.deskripsi(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                transition-colors" + (" border-red-300 bg-red-50" if form.deskripsi.errors else ""), rows=5,
+                placeholder="Deskripsikan detail paket wisata...") }}
                 {% if form.deskripsi.errors %}
                 {% for error in form.deskripsi.errors %}
-                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                 {% endfor %}
                 {% endif %}
             </div>
 
             <!-- Destinasi -->
             <div>
-                {{ form.destinasi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                <div class="h-60 overflow-y-auto bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2">
+                {{ form.destinasi.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                <div class="h-60 overflow-y-auto bg-neutral-50 border border-neutral-300 rounded-md p-4 space-y-2">
                     {% if form.destinasi.query_factory %}
                     {% for subfield in form.destinasi %}
                     <div class="flex items-center">
-                        {{ subfield(class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded
-                        focus:ring-blue-500") }}
-                        {{ subfield.label(class="ms-2 text-sm font-medium text-gray-900 cursor-pointer") }}
+                        {{ subfield(class="w-4 h-4 text-neutral-900 bg-white border-neutral-300 rounded") }}
+                        {{ subfield.label(class="ml-2 text-sm text-neutral-900 cursor-pointer") }}
                     </div>
                     {% endfor %}
                     {% else %}
-                    <p class="text-gray-500 text-sm">Belum ada data destinasi wisata untuk dipilih.</p>
+                    <p class="text-neutral-500 text-sm">Tidak ada destinasi yang tersedia untuk dipilih.</p>
                     {% endif %}
                 </div>
                 {% if form.destinasi.errors %}
-                <div class="mt-2 text-sm text-red-600">
+                <div class="mt-1 text-sm text-red-600">
                     {% for error in form.destinasi.errors %}<p>{{ error }}</p>{% endfor %}
                 </div>
                 {% endif %}
@@ -107,11 +96,14 @@
                 <label class="inline-flex items-center cursor-pointer">
                     {{ form.is_promoted(class="sr-only peer") }}
                     <div
-                        class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                        class="relative w-11 h-6 bg-neutral-200 rounded-full peer peer-checked:bg-neutral-900 transition-colors">
+                        <div
+                            class="absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform peer-checked:translate-x-5">
+                        </div>
                     </div>
-                    <span class="ms-3 text-sm font-medium text-gray-900">{{ form.is_promoted.label.text }}</span>
+                    <span class="ml-3 text-sm font-medium text-neutral-900">{{ form.is_promoted.label.text }}</span>
                 </label>
-                <p class="mt-1 text-sm text-gray-500">Centang jika paket ini ingin ditampilkan di halaman utama.</p>
+                <p class="mt-1 text-xs text-neutral-500">Centang jika paket ini ingin ditampilkan di halaman utama</p>
                 {% if form.is_promoted.errors %}
                 <div class="text-red-600 text-sm mt-1">
                     {% for error in form.is_promoted.errors %}<p>{{ error }}</p>{% endfor %}
@@ -119,16 +111,22 @@
                 {% endif %}
             </div>
 
-            <div class="flex items-center justify-end pt-4 border-t border-gray-200 gap-3 mt-6">
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
                 <a href="{{ url_for('admin.manage_paket_wisata') }}"
-                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    class="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
                     Batal
                 </a>
-                {{ form.submit(class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
-                font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none") }}
+                {{ form.submit(class="px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-md
+                hover:bg-neutral-800 transition-colors") }}
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

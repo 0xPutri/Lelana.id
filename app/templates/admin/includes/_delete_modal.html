@@ -1,0 +1,50 @@
+<!-- Generic Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+    aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-neutral-900 bg-opacity-50 transition-opacity" aria-hidden="true"
+            onclick="AdminModal.close('deleteModal')"></div>
+
+        <!-- Center modal -->
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+        <div
+            class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full border border-neutral-200">
+            <div class="bg-white px-6 pt-6 pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div
+                        class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-semibold text-neutral-900" id="modal-title">
+                            {% block modal_title %}Konfirmasi Penghapusan{% endblock %}
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-neutral-500">
+                                {% block modal_description %}
+                                Apakah Anda yakin ingin menghapus <strong id="deleteItemName">item ini</strong>?
+                                Tindakan ini bersifat permanen dan tidak dapat dibatalkan.
+                                {% endblock %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-neutral-50 px-6 py-4 sm:flex sm:flex-row-reverse gap-3">
+                <form id="deleteForm" method="POST" class="inline-flex w-full sm:w-auto">
+                    {{ delete_form.hidden_tag() if delete_form else '' }}
+                    <button type="submit"
+                        class="w-full inline-flex justify-center rounded-lg border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm transition-colors">
+                        {% block modal_confirm_btn %}Konfirmasi Hapus{% endblock %}
+                    </button>
+                </form>
+                <button type="button" onclick="AdminModal.close('deleteModal')"
+                    class="mt-3 w-full inline-flex justify-center rounded-lg border border-neutral-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 sm:mt-0 sm:text-sm transition-colors">
+                    Batal
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

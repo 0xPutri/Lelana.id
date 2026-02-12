@@ -36,3 +36,6 @@ def make_shell_context():
         db=db, User=User, Wisata=Wisata, Event=Event, PaketWisata=PaketWisata,
         Itinerari=Itinerari, Review=Review, FotoUlasan=FotoUlasan
     )
+
+if __name__ == '__main__':
+    app.run()

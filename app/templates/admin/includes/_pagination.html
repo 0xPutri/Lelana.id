@@ -1,0 +1,98 @@
+<!-- Pagination Component -->
+{% if pagination and pagination.pages > 1 %}
+<div class="flex items-center justify-between border-t border-neutral-200 bg-white px-4 py-3 sm:px-6 mt-6 rounded-b-xl">
+    <!-- Mobile: Simple Previous/Next -->
+    <div class="flex flex-1 justify-between sm:hidden">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for(request.endpoint, page=pagination.prev_num) }}"
+            class="relative inline-flex items-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+            Sebelumnya
+        </a>
+        {% else %}
+        <span
+            class="relative inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-400 cursor-not-allowed">
+            Sebelumnya
+        </span>
+        {% endif %}
+
+        {% if pagination.has_next %}
+        <a href="{{ url_for(request.endpoint, page=pagination.next_num) }}"
+            class="relative ml-3 inline-flex items-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+            Selanjutnya
+        </a>
+        {% else %}
+        <span
+            class="relative ml-3 inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-400 cursor-not-allowed">
+            Selanjutnya
+        </span>
+        {% endif %}
+    </div>
+
+    <!-- Desktop: Full Pagination -->
+    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-neutral-700">
+                Menampilkan
+                <span class="font-medium">{{ ((pagination.page - 1) * pagination.per_page) + 1 }}</span>
+                sampai
+                <span class="font-medium">{{ pagination.page * pagination.per_page if pagination.page *
+                    pagination.per_page < pagination.total else pagination.total }}</span>
+                        dari
+                        <span class="font-medium">{{ pagination.total }}</span>
+                        hasil
+            </p>
+        </div>
+        <div>
+            <nav class="isolate inline-flex -space-x-px rounded-lg shadow-sm" aria-label="Pagination">
+                <!-- Previous Button -->
+                {% if pagination.has_prev %}
+                <a href="{{ url_for(request.endpoint, page=pagination.prev_num) }}"
+                    class="relative inline-flex items-center rounded-l-lg px-2 py-2 text-neutral-400 ring-1 ring-inset ring-neutral-300 hover:bg-neutral-50 focus:z-20">
+                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                </a>
+                {% else %}
+                <span
+                    class="relative inline-flex items-center rounded-l-lg px-2 py-2 text-neutral-300 ring-1 ring-inset ring-neutral-200 bg-neutral-50 cursor-not-allowed">
+                    <i data-lucide="chevron-left" class="h-5 w-5"></i>
+                </span>
+                {% endif %}
+
+                <!-- Page Numbers -->
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=1) %}
+                {% if page_num %}
+                {% if page_num == pagination.page %}
+                <span
+                    class="relative z-10 inline-flex items-center bg-neutral-900 px-4 py-2 text-sm font-semibold text-white focus:z-20">
+                    {{ page_num }}
+                </span>
+                {% else %}
+                <a href="{{ url_for(request.endpoint, page=page_num) }}"
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-neutral-900 ring-1 ring-inset ring-neutral-300 hover:bg-neutral-50 focus:z-20">
+                    {{ page_num }}
+                </a>
+                {% endif %}
+                {% else %}
+                <span
+                    class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-neutral-700 ring-1 ring-inset ring-neutral-300">
+                    ...
+                </span>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Next Button -->
+                {% if pagination.has_next %}
+                <a href="{{ url_for(request.endpoint, page=pagination.next_num) }}"
+                    class="relative inline-flex items-center rounded-r-lg px-2 py-2 text-neutral-400 ring-1 ring-inset ring-neutral-300 hover:bg-neutral-50 focus:z-20">
+                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                </a>
+                {% else %}
+                <span
+                    class="relative inline-flex items-center rounded-r-lg px-2 py-2 text-neutral-300 ring-1 ring-inset ring-neutral-200 bg-neutral-50 cursor-not-allowed">
+                    <i data-lucide="chevron-right" class="h-5 w-5"></i>
+                </span>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+{% endif %}

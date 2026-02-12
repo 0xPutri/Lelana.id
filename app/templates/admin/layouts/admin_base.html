@@ -1,281 +1,86 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="h-full bg-neutral-50">
 
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Admin Dashboard untuk Lelana.id">
-    <title>{% block title %}Admin Dashboard{% endblock %} - Lelana.id</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} · Lelana.id</title>
+
+    <!-- Meta Tags -->
+    <meta name="description" content="Dashboard Admin Lelana.id">
+    <meta name="author" content="Tim Lelana.id">
 
     <!-- Favicon -->
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
 
-    <!-- Custom Fonts -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet"
-        type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+    <!-- Typography (Inter Font) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind CSS -->
+    <!-- Core UI Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-    <!-- Flowbite CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.css" rel="stylesheet" />
-
-    <style>
-        /* Custom Tailwind Configuration */
-        @layer base {
-            body {
-                font-family: 'Nunito', -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
             }
         }
+    </script>
 
-        /* Custom Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
-        }
+    <!-- Admin Global Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/admin.css') }}">
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #d6d6d6;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b1b1b1;
-        }
-
-        /* Sidebar active state */
-        .sidebar-active {
-            background-color: rgba(255, 255, 255, 0.1);
-            border-right: 3px solid white;
-        }
-    </style>
     {% block styles %}{% endblock %}
 </head>
 
-<body class="bg-gray-100">
-    <!-- Page Wrapper -->
-    <div class="flex h-screen overflow-hidden">
+<body class="h-full bg-neutral-50 text-neutral-900 font-sans antialiased" x-data="{ sidebarOpen: false }">
 
-        <!-- Sidebar -->
-        <aside id="logo-sidebar"
-            class="fixed top-0 left-0 z-40 w-64 h-screen transition-transform -translate-x-full sm:translate-x-0 bg-gradient-to-b from-blue-600 to-blue-800 shadow-lg"
-            aria-label="Sidebar">
-            <div class="h-full px-3 py-4 overflow-y-auto">
+    <!-- Global Layout Wrapper -->
+    <div class="min-h-screen flex">
 
-                <!-- Sidebar Brand -->
-                <a href="{{ url_for('admin.dashboard') }}"
-                    class="flex items-center justify-center mb-5 pb-4 border-b border-blue-500">
-                    <div class="flex items-center space-x-3">
-                        <img src="{{ url_for('static', filename='icons/favicon.ico') }}" alt="Logo"
-                            class="w-8 h-8 rounded-full bg-white p-1">
-                        <span class="text-xl font-bold text-white">Lelana.id Admin</span>
-                    </div>
-                </a>
+        <!-- Sidebar Navigation -->
+        {% include 'admin/includes/_sidebar.html' %}
 
-                <!-- Navigation Menu -->
-                <ul class="space-y-2 font-medium">
-                    <!-- Dashboard -->
-                    <li>
-                        <a href="{{ url_for('admin.dashboard') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group {% if request.endpoint == 'admin.dashboard' %}sidebar-active{% endif %}">
-                            <i class="fas fa-tachometer-alt w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Dashboard</span>
-                        </a>
-                    </li>
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col lg:pl-64">
 
-                    <!-- Divider -->
-                    <li class="pt-4 mt-4 border-t border-blue-500">
-                        <span class="text-xs font-semibold text-blue-200 uppercase tracking-wider px-2">
-                            Manajemen Konten
-                        </span>
-                    </li>
+            <!-- Top Navigation Bar -->
+            {% include 'admin/includes/_header.html' %}
 
-                    <!-- Kelola Wisata -->
-                    <li>
-                        <a href="{{ url_for('admin.manage_wisata') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group {% if 'wisata' in request.endpoint %}sidebar-active{% endif %}">
-                            <i class="fas fa-map-marked-alt w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Kelola Wisata</span>
-                        </a>
-                    </li>
+            <!-- Page Content -->
+            <main class="flex-1 p-8">
+                <!-- Flash/Toast Messages -->
+                {% include 'admin/includes/_flash_messages.html' %}
 
-                    <!-- Kelola Event -->
-                    <li>
-                        <a href="{{ url_for('admin.manage_event') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group {% if 'event' in request.endpoint %}sidebar-active{% endif %}">
-                            <i class="fas fa-calendar-alt w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Kelola Event</span>
-                        </a>
-                    </li>
-
-                    <!-- Kelola Paket Wisata -->
-                    <li>
-                        <a href="{{ url_for('admin.manage_paket_wisata') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group {% if 'paket' in request.endpoint %}sidebar-active{% endif %}">
-                            <i class="fas fa-box-open w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Kelola Paket Wisata</span>
-                        </a>
-                    </li>
-
-                    <!-- Divider -->
-                    <li class="pt-4 mt-4 border-t border-blue-500">
-                        <span class="text-xs font-semibold text-blue-200 uppercase tracking-wider px-2">
-                            Manajemen Sistem
-                        </span>
-                    </li>
-
-                    <!-- Kelola Pengguna -->
-                    <li>
-                        <a href="{{ url_for('admin.manage_users') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group {% if 'user' in request.endpoint %}sidebar-active{% endif %}">
-                            <i class="fas fa-users w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Kelola Pengguna</span>
-                        </a>
-                    </li>
-
-                    <!-- Divider -->
-                    <li class="pt-4 mt-4 border-t border-blue-500">
-                    </li>
-
-                    <!-- Kembali ke Situs -->
-                    <li>
-                        <a href="{{ url_for('main.index') }}"
-                            class="flex items-center p-2 text-white rounded-lg hover:bg-white/10 transition-colors group">
-                            <i class="fas fa-arrow-left w-5 h-5 text-white/80 group-hover:text-white"></i>
-                            <span class="ml-3">Kembali ke Situs</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </aside>
-        <!-- End of Sidebar -->
-
-        <!-- Content Wrapper -->
-        <div class="flex-1 flex flex-col sm:ml-64">
-
-            <!-- Topbar -->
-            <nav class="bg-white border-b border-gray-200 shadow-sm">
-                <div class="px-3 py-3 lg:px-5 lg:pl-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center justify-start">
-                            <!-- Mobile Menu Toggle -->
-                            <button data-drawer-target="logo-sidebar" data-drawer-toggle="logo-sidebar"
-                                aria-controls="logo-sidebar" type="button"
-                                class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200">
-                                <span class="sr-only">Open sidebar</span>
-                                <i class="fas fa-bars w-6 h-6"></i>
-                            </button>
-                        </div>
-
-                        <!-- User Dropdown -->
-                        <div class="flex items-center">
-                            <div class="flex items-center ml-3">
-                                <button type="button"
-                                    class="flex items-center text-sm bg-gray-100 rounded-lg hover:bg-gray-200 focus:ring-4 focus:ring-gray-300 px-3 py-2 transition-colors"
-                                    id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
-                                    data-dropdown-placement="bottom">
-                                    <span class="sr-only">Open user menu</span>
-                                    <span class="text-sm font-medium text-gray-700 mr-2 hidden sm:block">{{
-                                        current_user.username }}</span>
-                                    <i class="fas fa-user-circle text-gray-500 text-xl"></i>
-                                </button>
-
-                                <!-- Dropdown menu -->
-                                <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-lg"
-                                    id="user-dropdown">
-                                    <ul class="py-2" role="none">
-                                        <li>
-                                            <a href="{{ url_for('main.profile') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                                                role="menuitem">
-                                                <i class="fas fa-user fa-sm mr-2 text-gray-400"></i>
-                                                Profil
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="{{ url_for('auth.logout') }}"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                                                role="menuitem">
-                                                <i class="fas fa-sign-out-alt fa-sm mr-2 text-gray-400"></i>
-                                                Keluar
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-            <!-- End of Topbar -->
-
-            <!-- Main Content -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-                <div class="container mx-auto px-6 py-8">
-
-                    <!-- Flash Messages -->
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                    {% for category, message in messages %}
-                    <div id="alert-{{ loop.index }}"
-                        class="flex items-center p-4 mb-4 rounded-lg {% if category == 'success' %}text-green-800 bg-green-50 border border-green-300{% elif category == 'danger' or category == 'error' %}text-red-800 bg-red-50 border border-red-300{% elif category == 'warning' %}text-yellow-800 bg-yellow-50 border border-yellow-300{% else %}text-blue-800 bg-blue-50 border border-blue-300{% endif %}"
-                        role="alert">
-                        <i
-                            class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'danger' or category == 'error' %}fa-exclamation-circle{% elif category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %} mr-3"></i>
-                        <span class="sr-only">{{ category.title() }}</span>
-                        <div class="ml-3 text-sm font-medium">
-                            {{ message }}
-                        </div>
-                        <button type="button"
-                            class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 p-1.5 inline-flex items-center justify-center h-8 w-8 {% if category == 'success' %}text-green-500 hover:bg-green-200 focus:ring-green-400{% elif category == 'danger' or category == 'error' %}text-red-500 hover:bg-red-200 focus:ring-red-400{% elif category == 'warning' %}text-yellow-500 hover:bg-yellow-200 focus:ring-yellow-400{% else %}text-blue-500 hover:bg-blue-200 focus:ring-blue-400{% endif %}"
-                            data-dismiss-target="#alert-{{ loop.index }}" aria-label="Close">
-                            <span class="sr-only">Close</span>
-                            <i class="fas fa-times w-3 h-3"></i>
-                        </button>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    {% endwith %}
-
-                    <!-- Page Content -->
-                    {% block content %}{% endblock %}
-                </div>
+                <!-- Dynamic Page Content -->
+                {% block content %}{% endblock %}
             </main>
-            <!-- End of Main Content -->
 
             <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200">
-                <div class="container mx-auto px-6 py-4">
-                    <div class="text-center text-sm text-gray-600">
-                        <span>Hak Cipta &copy; Lelana.id {{ now.year }}</span>
-                    </div>
-                </div>
+            <footer class="p-4 border-t border-neutral-200 bg-white">
+                <p class="text-xs text-neutral-500 text-center">
+                    &copy; {{ now.year if now else '2024' }} Lelana.id - Sistem Manajemen Perjalanan Profesional
+                </p>
             </footer>
-            <!-- End of Footer -->
-
         </div>
-        <!-- End of Content Wrapper -->
-
     </div>
-    <!-- End of Page Wrapper -->
 
-    <!-- jQuery (required for legacy compatibility) -->
+    <!-- Core Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-    <!-- Flowbite JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.4.1/dist/flowbite.min.js"></script>
+    <!-- Admin Core Script -->
+    <script src="{{ url_for('static', filename='admin/js/admin.js') }}"></script>
 
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
-
+    <!-- Page Specific Scripts -->
     {% block scripts %}{% endblock %}
 </body>
 

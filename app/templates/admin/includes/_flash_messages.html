@@ -1,0 +1,23 @@
+<!-- Flash Messages Toast System -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="fixed top-20 left-4 right-4 z-50 flex flex-col gap-3 md:w-96 md:left-auto md:right-8">
+    {% for category, message in messages %}
+    <div class="flash-message flex items-start gap-3 p-4 rounded-lg shadow-md border animate-in fade-in slide-in-from-top-4 duration-300
+                {% if category == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-900
+                {% elif category == 'error' or category == 'danger' %}bg-red-50 border-red-200 text-red-900
+                {% else %}bg-blue-50 border-blue-200 text-blue-900{% endif %}">
+        <i data-lucide="{% if category == 'success' %}check-circle{% elif category == 'error' or category == 'danger' %}alert-circle{% else %}info{% endif %}"
+            class="w-5 h-5 mt-0.5 shrink-0"></i>
+        <div class="flex-1">
+            <p class="text-sm font-semibold mb-1">{{ category|capitalize }}</p>
+            <p class="text-sm opacity-90">{{ message }}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-neutral-400 hover:text-neutral-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}

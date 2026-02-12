@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, render_template, abort, flash, redirect, url_for
+from flask import Blueprint, render_template, abort, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from app.utils.decorators import admin_required
 from app import db, limiter
@@ -52,13 +52,13 @@ def dashboard():
             func.count(PaketWisata.id).label('count')
         ).filter(PaketWisata.tanggal_dibuat >= thirty_days_ago).group_by('date').all()
 
-    # Menggabungkan data dari semua tipe konten
+    # Menggabungkan dan mengagregasi data aktivitas dari semua jenis konten.
     content_activity = {}
     for row in wisata_by_day + event_by_day + paket_by_day:
         date_str = row.date
         content_activity[date_str] = content_activity.get(date_str, 0) + row.count
 
-    # Mengisi hari-hari tanpa aktivitas dengan nilai 0
+    # Memformat data untuk Chart.js dan mengisi hari tanpa aktivitas dengan nilai 0.
     sorted_dates = sorted(content_activity.keys())
     chart_labels = []
     chart_data = []
@@ -91,17 +91,26 @@ def manage_users():
     """Menampilkan halaman untuk mengelola semua pengguna terdaftar.
 
     Mengambil semua data pengguna dari database dan menampilkannya dalam
-    sebuah tabel.
+    sebuah tabel dengan pagination.
 
     Returns:
-        Response: Render template manajemen pengguna dengan data semua pengguna.
+        Response: Render template manajemen pengguna dengan data pengguna (paginated).
     """
-    # Mengambil semua pengguna, diurutkan berdasarkan ID
-    users = User.query.order_by(User.id).all()
+    # Mendapatkan nomor halaman dari parameter kueri, defaultnya adalah 1.
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Limit to 5 items per page
+    
+    # Paginasi kueri pengguna
+    pagination = User.query.order_by(User.id).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
-    # Membuat instance form kosong untuk proteksi CSRF pada tombol hapus
+    # Membuat form kosong hanya untuk mendapatkan token CSRF untuk tombol hapus.
     delete_form = FlaskForm()
-    return render_template('admin/manage_users.html', users=users, delete_form=delete_form)
+    return render_template('admin/manage_users.html', 
+                         users=pagination.items, 
+                         pagination=pagination,
+                         delete_form=delete_form)
 
 @admin.route('/admin/users/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -126,7 +135,7 @@ def edit_user(id):
 
     # Memproses form jika metode adalah POST dan validasi berhasil
     if form.validate_on_submit():
-        # Mencegah admin mengubah perannya sendiri menjadi bukan admin
+        # Validasi keamanan: Mencegah admin mengubah perannya sendiri.
         if user_to_edit.id == current_user.id and form.role.data != 'admin':
             flash('Anda tidak mengubah peran (role) akun Anda sendiri.', 'danger')
             return redirect(url_for('admin.edit_user', id=id))
@@ -140,7 +149,7 @@ def edit_user(id):
         flash(f'Data pengguna {user_to_edit.username} berhasil diperbarui.', 'success')
         return redirect(url_for('admin.manage_users'))
     
-    # Mengisi form dengan data pengguna yang ada saat metode adalah GET
+    # Mengisi field form dengan data pengguna saat ini (untuk metode GET).
     form.username.data = user_to_edit.username
     form.email.data = user_to_edit.email
     form.role.data = user_to_edit.role
@@ -167,17 +176,17 @@ def hapus_user(id):
     user_to_delete = db.session.get(User, id)
     if user_to_delete is None:
         abort(404)
-    # Membuat instance form kosong untuk validasi CSRF
+    # Inisialisasi form kosong untuk validasi token CSRF.
     form = FlaskForm()
 
     # Memvalidasi token CSRF dari form yang disubmit
     if form.validate_on_submit():
-        # Mencegah admin menghapus akunnya sendiri
+        # Validasi keamanan: Admin tidak bisa menghapus akunnya sendiri.
         if user_to_delete.id == current_user.id:
             flash('Anda tidak dapat menghapus akun Anda sendiri.', 'danger')
             return redirect(url_for('admin.manage_users'))
         
-        # Logika untuk mencegah penghapusan admin terakhir
+        # Validasi keamanan: Mencegah penghapusan admin terakhir.
         if user_to_delete.role == 'admin':
             admin_count = User.query.filter_by(role='admin').count()
             if admin_count <= 1:
@@ -190,7 +199,7 @@ def hapus_user(id):
         
         flash(f'Pengguna {user_to_delete.username} telah berhasil dihapus.', 'info')
     else:
-        # Gagal jika token CSRF tidak valid
+        # Gagal jika token CSRF tidak valid atau hilang.
         flash('Gagal menghapus pengguna: Token keamanan tidak valid atau kedaluwarsa.', 'danger')
 
     return redirect(url_for('admin.manage_users'))
@@ -202,15 +211,21 @@ def manage_wisata():
     """Menampilkan halaman untuk mengelola semua data tempat wisata.
 
     Returns:
-        Response: Render template manajemen wisata dengan data semua tempat wisata.
+        Response: Render template manajemen wisata dengan data tempat wisata (paginated).
     """
-    # Mengambil semua data wisata, diurutkan berdasarkan nama
-    semua_wisata = Wisata.query.order_by(Wisata.nama).all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    
+    pagination = Wisata.query.order_by(Wisata.nama).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
-    # Form kosong untuk proteksi CSRF pada tombol hapus
+    # Membuat form kosong untuk proteksi CSRF pada tombol hapus di template.
     delete_form = FlaskForm()
-
-    return render_template('admin/manage_wisata.html', daftar_wisata=semua_wisata, delete_form=delete_form)
+    return render_template('admin/manage_wisata.html', 
+                         daftar_wisata=pagination.items, 
+                         pagination=pagination,
+                         delete_form=delete_form)
 
 @admin.route('/admin/event')
 @login_required
@@ -219,15 +234,21 @@ def manage_event():
     """Menampilkan halaman untuk mengelola semua data acara (event).
 
     Returns:
-        Response: Render template manajemen event dengan data semua acara.
+        Response: Render template manajemen event dengan data acara (paginated).
     """
-    # Mengambil semua data event, diurutkan berdasarkan tanggal terbaru
-    semua_event = Event.query.order_by(Event.tanggal.desc()).all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+    
+    pagination = Event.query.order_by(Event.tanggal.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
 
-    # Form kosong untuk proteksi CSRF pada tombol hapus
+    # Membuat form kosong untuk proteksi CSRF pada tombol hapus di template.
     delete_form = FlaskForm()
-
-    return render_template('admin/manage_event.html', daftar_event=semua_event, delete_form=delete_form)
+    return render_template('admin/manage_event.html', 
+                         daftar_event=pagination.items, 
+                         pagination=pagination,
+                         delete_form=delete_form)
 
 @admin.route('/admin/paket-wisata')
 @login_required
@@ -236,12 +257,18 @@ def manage_paket_wisata():
     """Menampilkan halaman untuk mengelola semua data paket wisata.
 
     Returns:
-        Response: Render template manajemen paket wisata dengan data semua paket.
+        Response: Render template manajemen paket wisata dengan data paket (paginated).
     """
-    # Mengambil semua data paket wisata, diurutkan berdasarkan nama
-    semua_paket = PaketWisata.query.order_by(PaketWisata.nama).all()
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
     
-    # Form kosong untuk proteksi CSRF pada tombol hapus
+    pagination = PaketWisata.query.order_by(PaketWisata.nama).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    # Membuat form kosong untuk proteksi CSRF pada tombol hapus di template.
     delete_form = FlaskForm()
-
-    return render_template('admin/manage_paket_wisata.html', daftar_paket=semua_paket, delete_form=delete_form)
+    return render_template('admin/manage_paket_wisata.html', 
+                         daftar_paket=pagination.items, 
+                         pagination=pagination,
+                         delete_form=delete_form)

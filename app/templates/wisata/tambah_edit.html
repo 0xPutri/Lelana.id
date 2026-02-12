@@ -3,37 +3,35 @@
 {% block title %}{{ judul_halaman }}{% endblock %}
 
 {% block content %}
-
-<!-- Page Heading -->
+<!-- Back Button -->
 <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">{{ judul_halaman }}</h1>
+    <a href="{{ url_for('admin.manage_wisata') }}"
+        class="inline-flex items-center gap-2 text-sm text-neutral-600 hover:text-neutral-900 transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Kembali ke Daftar Destinasi
+    </a>
 </div>
 
-<div class="bg-white rounded-lg shadow-md overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-        <h6 class="text-lg font-semibold text-blue-600">Formulir Wisata</h6>
-        <a href="{{ url_for('admin.manage_wisata') }}"
-            class="text-sm text-gray-600 hover:text-blue-600 flex items-center transition-colors">
-            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Daftar
-        </a>
-    </div>
-    <div class="p-6">
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-900">{{ judul_halaman }}</h1>
+    <p class="mt-1 text-sm text-neutral-500">Lengkapi informasi destinasi wisata di bawah ini</p>
+</div>
+
+<!-- Form -->
+<div class="max-w-4xl">
+    <div class="bg-white rounded-lg border border-neutral-200 p-6">
         <form method="POST" action="" novalidate class="space-y-6">
             {{ form.hidden_tag() }}
 
             <!-- Nama -->
             <div>
-                {{ form.nama.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                {% set nama_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                {% if form.nama.errors %}
-                {% set nama_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg focus:ring-red-500
-                focus:border-red-500 block w-full p-2.5" %}
-                {% endif %}
-                {{ form.nama(class=nama_class, placeholder="Cth: Curug Bayan") }}
+                {{ form.nama.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                {{ form.nama(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm transition-colors" +
+                (" border-red-300 bg-red-50" if form.nama.errors else ""), placeholder="Contoh: Curug Bayan") }}
                 {% if form.nama.errors %}
                 {% for error in form.nama.errors %}
-                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                 {% endfor %}
                 {% endif %}
             </div>
@@ -41,34 +39,26 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Kategori -->
                 <div>
-                    {{ form.kategori.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                    {% set kategori_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                    {% if form.kategori.errors %}
-                    {% set kategori_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                    {% endif %}
-                    {{ form.kategori(class=kategori_class, placeholder="Cth: Alam, Budaya, Kuliner") }}
+                    {{ form.kategori.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                    {{ form.kategori(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                    transition-colors" + (" border-red-300 bg-red-50" if form.kategori.errors else ""),
+                    placeholder="Contoh: Alam, Budaya") }}
                     {% if form.kategori.errors %}
                     {% for error in form.kategori.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
 
                 <!-- Lokasi -->
                 <div>
-                    {{ form.lokasi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                    {% set lokasi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                    {% if form.lokasi.errors %}
-                    {% set lokasi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                    {% endif %}
-                    {{ form.lokasi(class=lokasi_class, placeholder="Cth: Baturraden, Banyumas") }}
+                    {{ form.lokasi.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                    {{ form.lokasi(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                    transition-colors" + (" border-red-300 bg-red-50" if form.lokasi.errors else ""),
+                    placeholder="Contoh: Baturraden, Banyumas") }}
                     {% if form.lokasi.errors %}
                     {% for error in form.lokasi.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
@@ -76,36 +66,27 @@
 
             <!-- Deskripsi -->
             <div>
-                {{ form.deskripsi.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                {% set deskripsi_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                {% if form.deskripsi.errors %}
-                {% set deskripsi_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                {% endif %}
-                {{ form.deskripsi(class=deskripsi_class, rows=6, placeholder="Ceritakan tentang destinasi wisata
-                ini...") }}
+                {{ form.deskripsi.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                {{ form.deskripsi(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                transition-colors" + (" border-red-300 bg-red-50" if form.deskripsi.errors else ""), rows=6,
+                placeholder="Deskripsikan destinasi wisata...") }}
                 {% if form.deskripsi.errors %}
                 {% for error in form.deskripsi.errors %}
-                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                 {% endfor %}
                 {% endif %}
             </div>
 
             <!-- Gambar URL -->
             <div>
-                {{ form.gambar_url.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                {% set gambar_url_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                {% if form.gambar_url.errors %}
-                {% set gambar_url_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                {% endif %}
-                {{ form.gambar_url(class=gambar_url_class, placeholder="https://contoh.com/gambar.jpg") }}
-                <p class="mt-1 text-sm text-gray-500">Tempelkan URL gambar yang valid (opsional).</p>
+                {{ form.gambar_url.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                {{ form.gambar_url(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                transition-colors" + (" border-red-300 bg-red-50" if form.gambar_url.errors else ""),
+                placeholder="https://example.com/image.jpg") }}
+                <p class="mt-1 text-xs text-neutral-500">Tempel URL gambar yang valid (opsional)</p>
                 {% if form.gambar_url.errors %}
                 {% for error in form.gambar_url.errors %}
-                <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                 {% endfor %}
                 {% endif %}
             </div>
@@ -113,51 +94,49 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Latitude -->
                 <div>
-                    {{ form.latitude.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                    {% set latitude_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                    {% if form.latitude.errors %}
-                    {% set latitude_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                    {% endif %}
-                    {{ form.latitude(class=latitude_class, type='number', step='any', placeholder="-7.4313") }}
-                    <p class="mt-1 text-sm text-gray-500">Koordinat Lintang (opsional).</p>
+                    {{ form.latitude.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                    {{ form.latitude(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                    transition-colors" + (" border-red-300 bg-red-50" if form.latitude.errors else ""), type='number',
+                    step='any', placeholder="-7.4313") }}
+                    <p class="mt-1 text-xs text-neutral-500">Koordinat lintang (opsional)</p>
                     {% if form.latitude.errors %}
                     {% for error in form.latitude.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
 
                 <!-- Longitude -->
                 <div>
-                    {{ form.longitude.label(class="block mb-2 text-sm font-medium text-gray-900") }}
-                    {% set longitude_class = "bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg
-                    focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" %}
-                    {% if form.longitude.errors %}
-                    {% set longitude_class = "bg-red-50 border border-red-500 text-red-900 text-sm rounded-lg
-                    focus:ring-red-500 focus:border-red-500 block w-full p-2.5" %}
-                    {% endif %}
-                    {{ form.longitude(class=longitude_class, type='number', step='any', placeholder="109.2443") }}
-                    <p class="mt-1 text-sm text-gray-500">Koordinat Bujur (opsional).</p>
+                    {{ form.longitude.label(class="block text-sm font-medium text-neutral-900 mb-2") }}
+                    {{ form.longitude(class="w-full px-3 py-2 border border-neutral-300 rounded-md text-sm
+                    transition-colors" + (" border-red-300 bg-red-50" if form.longitude.errors else ""), type='number',
+                    step='any', placeholder="109.2443") }}
+                    <p class="mt-1 text-xs text-neutral-500">Koordinat bujur (opsional)</p>
                     {% if form.longitude.errors %}
                     {% for error in form.longitude.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ error }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                 </div>
             </div>
 
-            <div class="flex items-center justify-end pt-4 border-t border-gray-200 gap-3 mt-6">
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-neutral-200">
                 <a href="{{ url_for('admin.manage_wisata') }}"
-                    class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                    class="px-4 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 transition-colors">
                     Batal
                 </a>
-                {{ form.submit(class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300
-                font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none") }}
+                {{ form.submit(class="px-4 py-2 bg-neutral-900 text-white text-sm font-medium rounded-md
+                hover:bg-neutral-800 transition-colors") }}
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script>
+    lucide.createIcons();
+</script>
 {% endblock %}

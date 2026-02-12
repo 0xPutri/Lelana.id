@@ -1,0 +1,73 @@
+<!-- Mobile Overlay -->
+<div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 bg-neutral-900/50 z-30 lg:hidden"
+    x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
+    x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300"
+    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+</div>
+
+<!-- Sidebar Navigation -->
+<aside
+    class="fixed inset-y-0 left-0 w-64 bg-white border-r border-neutral-200 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0"
+    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+    <div class="flex flex-col h-full">
+        <!-- Logo Section -->
+        <div class="h-16 flex items-center px-6 border-b border-neutral-200">
+            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 bg-neutral-900 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                    L
+                </div>
+                <span class="font-semibold text-neutral-900">Admin Lelana</span>
+            </a>
+        </div>
+
+        <!-- Main Navigation -->
+        <nav class="flex-1 px-3 py-4 overflow-y-auto">
+            <div class="space-y-1">
+                <a href="{{ url_for('admin.dashboard') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                   {% if request.endpoint == 'admin.dashboard' %}bg-neutral-900 text-white{% else %}text-neutral-700 hover:bg-neutral-100{% endif %}">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dasbor Utama</span>
+                </a>
+
+                <a href="{{ url_for('admin.manage_wisata') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                   {% if 'wisata' in request.endpoint %}bg-neutral-900 text-white{% else %}text-neutral-700 hover:bg-neutral-100{% endif %}">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i>
+                    <span>Destinasi</span>
+                </a>
+
+                <a href="{{ url_for('admin.manage_event') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                   {% if 'event' in request.endpoint %}bg-neutral-900 text-white{% else %}text-neutral-700 hover:bg-neutral-100{% endif %}">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span>Acara</span>
+                </a>
+
+                <a href="{{ url_for('admin.manage_paket_wisata') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                   {% if 'paket' in request.endpoint %}bg-neutral-900 text-white{% else %}text-neutral-700 hover:bg-neutral-100{% endif %}">
+                    <i data-lucide="package" class="w-5 h-5"></i>
+                    <span>Paket Wisata</span>
+                </a>
+
+                <a href="{{ url_for('admin.manage_users') }}" @click="sidebarOpen = false"
+                    class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors
+                   {% if 'user' in request.endpoint %}bg-neutral-900 text-white{% else %}text-neutral-700 hover:bg-neutral-100{% endif %}">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Pengguna</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-neutral-200">
+            <a href="{{ url_for('main.index') }}" target="_blank"
+                class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-neutral-700 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+                <span>Lihat Situs</span>
+            </a>
+        </div>
+    </div>
+</aside>
